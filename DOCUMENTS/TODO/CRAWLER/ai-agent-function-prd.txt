@@ -1,0 +1,38 @@
+﻿
+AI 에이전트를 활용한 웹사이트 자동화 매크로 생성 기능 PRD – REFACTORING-PRD-1
+1. 개요 (Introduction)
+    • 문서 버전: 1.0
+    • 작성일: 2025년 9월 11일
+    • 작성자: Gemini
+    • 프로젝트명: AI 기반 Watch 설정 자동화 (Project: AI-Powered Watch Configuration)
+본 문서는 ChangeDetection.io에 AI 에이전트 기술을 통합하여, 사용자가 자연어 명령을 통해 복잡한 웹사이트 모니터링 작업을 자동화하는 '매크로(macro)' 또는 '브라우저 자동화 스텝(browser steps)'을 생성할 수 있는 신규 기능에 대한 요구사항을 정의합니다. 현재 API의 browser_steps 파라미터는 강력하지만, 사용자가 직접 CSS 선택자(selector)나 XPath를 사용하여 수동으로 작성해야 하는 기술적 장벽이 존재합니다. 본 기능은 이 과정을 자동화하여 사용 편의성을 극대화하는 것을 목표로 합니다.
+2. 문제 정의 (Problem Statement)
+로그인이 필요하거나, 여러 단계를 거쳐야 특정 콘텐츠에 도달할 수 있는 동적 웹사이트를 모니터링하는 것은 매우 복잡합니다. 사용자는 ChangeDetection.io의 browser_steps 기능을 사용하여 "ID 입력", "비밀번호 입력", "로그인 버튼 클릭", "특정 메뉴로 이동" 등의 작업을 정의할 수 있지만, 이는 다음과 같은 문제를 야기합니다.
+    • 높은 기술적 장벽: HTML, CSS 선택자에 대한 지식이 없는 일반 사용자는 browser_steps를 작성하기 어렵습니다.
+    • 시간 소모 및 비효율성: 개발자라 할지라도, 정확한 선택자를 찾고 여러 단계를 테스트하며 스크립트를 작성하는 과정은 번거롭고 시간이 많이 소요됩니다.
+    • 유지보수의 어려움: 웹사이트의 구조가 변경되면 기존에 작성한 browser_steps가 동작하지 않게 되며, 이를 수정하는 것은 또 다른 부담입니다.
+3. 목표 (Goals)
+    • 주요 목표: 사용자가 자연어(예: "user@example.com으로 로그인하고 대시보드로 이동해 줘")를 입력하면, AI 에이전트가 이를 해석하여 ChangeDetection.io의 browser_steps 형식에 맞는 JSON 객체를 자동으로 생성해주는 기능을 제공한다.
+    • 세부 목표:
+        1. 사용자 경험 혁신: 비개발자도 단 몇 분 안에 복잡한 웹사이트 모니터링 설정을 완료할 수 있도록 한다.
+        2. 설정 시간 단축: browser_steps 수동 작성 대비 설정 시간을 90% 이상 단축한다.
+        3. 기능 활용도 증대: html_webdriver 백엔드와 browser_steps 기능의 전체적인 사용률을 높인다.
+4. 사용자 페르소나 및 시나리오 (User Personas & Scenarios)
+    1. 마케터 (Non-Technical User):
+        ◦ 페르소나: 경쟁사 웹사이트의 회원 전용 가격 페이지를 모니터링하고 싶지만, 코딩 지식은 없다.
+        ◦ 시나리오: "AI 매크로 생성" 기능에 접속하여 모니터링할 URL과 함께 "ID 필드에 'marketing' 입력, 비밀번호 필드에 'pass123!' 입력 후 로그인 버튼 클릭, 그리고 '가격 정책' 메뉴 클릭" 이라고 입력한다. 시스템은 이 지시를 바탕으로 browser_steps를 생성해주고, 마케터는 이를 바로 Watch 설정에 적용한다.
+    2. 데이터 분석가 (Semi-Technical User):
+        ◦ 페르소나: 사내 BI 툴(웹 기반)의 특정 대시보드 위젯 변화를 주기적으로 확인해야 한다.
+        ◦ 시나리오: 여러 번의 클릭과 필터 적용이 필요한 작업 순서를 자연어로 설명한다. AI 에이전트가 생성한 browser_steps 초안을 확인하고, 필요한 경우 일부 선택자(selector) 값만 미세 조정하여 Watch를 생성한다.
+    3. 개발자 (Technical User):
+        ◦ 페르소나: 다수의 동적 사이트 모니터링을 빠르게 설정해야 한다.
+        ◦ 시나리오: 반복적인 로그인 및 탐색 스크립트 작성을 AI에게 맡겨 시간을 절약한다. 생성된 JSON을 기반으로 더 복잡한 로직을 추가하거나 수정하여 생산성을 높인다.
+5. 기능 요구사항 (Functional Requirements)
+5.1. 신규 API 엔드포인트: AI 매크로 생성
+기존 ChangeDetection.io API에 AI 에이전트를 호출하는 새로운 엔드포인트를 추가해야 합니다.
+    • Endpoint: POST /api/v1/agent/generate-steps
+    • Description: 주어진 URL과 자연어 프롬프트를 기반으로 웹사이트 자동화 스텝(browser_steps)을 생성합니다.
+    • Authentication: ApiKeyAuth (기존 인증 방식과 동일)
+    • Request Body (application/json):
+      JSON
+
