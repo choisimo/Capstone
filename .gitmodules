@@ -1,0 +1,3 @@
+[submodule "CHANGEDETECTION/changedetection.io"]
+	path = CHANGEDETECTION/changedetection.io
+	url = git@github.com:dgtlmoon/changedetection.io.git
