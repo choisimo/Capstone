@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 248 250 252;
+    --foreground: 225 29% 13%;
+
+    /* Card system */
+    --card: 0 0% 100%;
+    --card-foreground: 225 29% 13%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 29% 13%;
+
+    /* Government blue primary */
+    --primary: 214 84% 39%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 214 84% 55%;
+
+    /* Neutral secondary */
+    --secondary: 210 14% 93%;
+    --secondary-foreground: 225 29% 13%;
+
+    /* Muted backgrounds */
+    --muted: 210 14% 96%;
+    --muted-foreground: 215 25% 46%;
+
+    /* Accent */
+    --accent: 210 14% 93%;
+    --accent-foreground: 225 29% 13%;
+
+    /* Destructive */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Sentiment colors */
+    --sentiment-positive: 142 76% 36%;
+    --sentiment-positive-light: 142 69% 92%;
+    --sentiment-negative: 0 72% 51%;
+    --sentiment-negative-light: 0 70% 96%;
+    --sentiment-neutral: 215 25% 46%;
+    --sentiment-neutral-light: 210 14% 96%;
+
+    /* Status colors */
+    --success: 142 76% 36%;
+    --warning: 45 93% 47%;
+    --info: 214 84% 55%;
+
+    /* Borders and inputs */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 214 84% 39%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-sentiment: linear-gradient(90deg, hsl(var(--sentiment-positive)), hsl(var(--sentiment-neutral)), hsl(var(--sentiment-negative)));
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    --gradient-surface: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted)));
+
+    /* Enhanced shadows */
+    --shadow-card: 0 1px 3px 0 hsl(214 27% 13% / 0.1), 0 1px 2px -1px hsl(214 27% 13% / 0.1);
+    --shadow-elevated: 0 10px 15px -3px hsl(214 27% 13% / 0.1), 0 4px 6px -4px hsl(214 27% 13% / 0.1);
+    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Base colors */
+    --background: 225 15% 6%;
+    --foreground: 0 0% 95%;
+
+    /* Card system */
+    --card: 225 15% 9%;
+    --card-foreground: 0 0% 95%;
+
+    /* Popover */
+    --popover: 225 15% 9%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Government blue primary (lighter in dark) */
+    --primary: 214 84% 55%;
+    --primary-foreground: 225 15% 6%;
+    --primary-glow: 214 84% 70%;
+
+    /* Dark secondary */
+    --secondary: 225 15% 12%;
+    --secondary-foreground: 0 0% 95%;
+
+    /* Dark muted */
+    --muted: 225 15% 12%;
+    --muted-foreground: 215 15% 65%;
+
+    /* Dark accent */
+    --accent: 225 15% 12%;
+    --accent-foreground: 0 0% 95%;
+
+    /* Dark destructive */
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 95%;
+
+    /* Dark sentiment colors */
+    --sentiment-positive: 142 76% 45%;
+    --sentiment-positive-light: 142 76% 12%;
+    --sentiment-negative: 0 72% 55%;
+    --sentiment-negative-light: 0 72% 12%;
+    --sentiment-neutral: 215 15% 65%;
+    --sentiment-neutral-light: 225 15% 12%;
+
+    /* Dark borders */
+    --border: 225 15% 15%;
+    --input: 225 15% 15%;
+    --ring: 214 84% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
