@@ -22,6 +22,16 @@
 ## 의존성
 - 외부: changedetection.io, Kafka/Redpanda 또는 Pub/Sub
 
+## 빠른 시작
+- 의존성 설치: `pip install requests` (Kafka 사용 시 `confluent-kafka` 또는 `kafka-python` 중 하나, Pub/Sub 사용 시 `google-cloud-pubsub`)
+- 환경변수 설정:
+  - 필수: `CHANGEDETECTION_BASE_URL`, `CHANGEDETECTION_API_KEY`
+  - 버스 선택: `MESSAGE_BUS=stdout|kafka|pubsub`
+    - Kafka: `KAFKA_BROKERS=localhost:9092`, `RAW_TOPIC=raw.posts.v1`(기본)
+    - Pub/Sub: `PUBSUB_PROJECT=my-gcp-project`, `RAW_TOPIC=raw-posts`(기본)
+  - 옵션: `POLL_INTERVAL_SEC=60`, `INCLUDE_HTML=0|1`, `WATCH_TAG=태그명`, `SOURCE=web`, `CHANNEL=changedetection`, `PLATFORM_PROFILE=public-web`
+- 상태 저장: `.collector_state.json`(기본, 위치 변경은 `COLLECTOR_STATE_PATH`)
+
 ## 로컬 실행
 - changedetection: `BACKEND-WEB-CRAWLER/docker-compose.yml`
 - 브릿지 워커: `python -m collector.bridge`

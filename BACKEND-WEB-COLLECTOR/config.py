@@ -1,0 +1,65 @@
+import os
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class ChangeDetectionConfig:
+    base_url: str
+    api_key: str
+
+    @staticmethod
+    def from_env() -> "ChangeDetectionConfig":
+        base = os.getenv("CHANGEDETECTION_BASE_URL", "http://localhost:5000/api/v1")
+        key = os.getenv("CHANGEDETECTION_API_KEY", "")
+        return ChangeDetectionConfig(base_url=base.rstrip("/"), api_key=key)
+
+
+@dataclass
+class BusConfig:
+    bus: str  # "kafka" | "pubsub" | "stdout"
+    raw_topic: str
+    kafka_brokers: Optional[str] = None
+    pubsub_project: Optional[str] = None
+
+    @staticmethod
+    def from_env() -> "BusConfig":
+        bus = os.getenv("MESSAGE_BUS", "stdout").lower()
+        kafka_brokers = os.getenv("KAFKA_BROKERS")
+        pubsub_project = os.getenv("PUBSUB_PROJECT")
+        # Topic mapping default
+        if bus == "kafka":
+            topic = os.getenv("RAW_TOPIC", "raw.posts.v1")
+        elif bus == "pubsub":
+            topic = os.getenv("RAW_TOPIC", "raw-posts")
+        else:
+            topic = os.getenv("RAW_TOPIC", "raw.posts.v1")
+        return BusConfig(
+            bus=bus,
+            raw_topic=topic,
+            kafka_brokers=kafka_brokers,
+            pubsub_project=pubsub_project,
+        )
+
+
+@dataclass
+class BridgeConfig:
+    poll_interval_sec: int = 60
+    include_html: bool = False
+    watch_tag: Optional[str] = None  # name (not uuid)
+    source: str = "web"
+    channel: str = "changedetection"
+    platform_profile: str = "public-web"
+    state_path: str = os.getenv("COLLECTOR_STATE_PATH", ".collector_state.json")
+
+    @staticmethod
+    def from_env() -> "BridgeConfig":
+        return BridgeConfig(
+            poll_interval_sec=int(os.getenv("POLL_INTERVAL_SEC", "60")),
+            include_html=os.getenv("INCLUDE_HTML", "0") in ("1", "true", "True"),
+            watch_tag=os.getenv("WATCH_TAG"),
+            source=os.getenv("SOURCE", "web"),
+            channel=os.getenv("CHANNEL", "changedetection"),
+            platform_profile=os.getenv("PLATFORM_PROFILE", "public-web"),
+            state_path=os.getenv("COLLECTOR_STATE_PATH", ".collector_state.json"),
+        )
