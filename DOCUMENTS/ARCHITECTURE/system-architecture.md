@@ -73,3 +73,239 @@
 - 브릿징: GCP(Pub/Sub)↔Linux(Kafka)는 커넥터/브릿지(Confluent/Striim/Dataflow)로 미러링. 헤더→Attributes 매핑.
 - 컨슈머 그룹: `service-name.env` 표준. 오프셋 커밋은 at-least-once 기준으로 처리.
 - 관측성: Lag 모니터, 오프셋/스루풋/에러율 대시보드, OTel로 trace 상관관계.
+
+## 워크플로 다이어그램 (환경 공통)
+아래 다이어그램은 환경(GCP/Linux)에 구애받지 않는 서비스 간 데이터 흐름입니다.
+
+```mermaid
+flowchart TD
+  subgraph Ingestion
+    COL[collector-service]
+    RAW[[raw.posts.v1]]
+  end
+
+  subgraph Processing
+    DEDUP[dedup-anonymizer]
+    CLEAN[[clean.posts.v1]]
+    NLP[nlp-preprocess]
+    SENT[sentiment-service]
+    S_SCORES[[scores.sentiment.v1]]
+    ABSA[absa-service]
+    A_SCORES[[scores.absa.v1]]
+    TOPIC[topic-modeler]
+    T_SCORES[[analytics.topic.v1]]
+  end
+
+  subgraph Serving
+    API[api-gateway]
+    DASH[dashboard-web]
+    ALERT[alert-service]
+    OPS[[ops.alerts.v1]]
+    SUM[summarizer-rag]
+  end
+
+  subgraph Storage
+    LAKE[(Data Lake)]
+    WARE[(DW/BigQuery|ClickHouse)]
+    SEARCH[(ES/OpenSearch)]
+    VDB[(Vector DB)]
+  end
+
+  COL --> RAW
+  RAW --> DEDUP
+  DEDUP --> CLEAN
+  CLEAN --> NLP
+  NLP --> SENT
+  NLP --> ABSA
+  NLP --> TOPIC
+  SENT --> S_SCORES
+  ABSA --> A_SCORES
+  TOPIC --> T_SCORES
+  S_SCORES --> WARE
+  A_SCORES --> WARE
+  T_SCORES --> WARE
+  WARE --> API
+  API --> DASH
+  T_SCORES --> ALERT
+  ALERT --> OPS
+  API -.-> SUM
+  SUM --> API
+  RAW --> LAKE
+  CLEAN --> LAKE
+```
+
+## 환경별 워크플로 다이어그램
+
+### GCP 환경(Pub/Sub, GCS, BigQuery, Vertex)
+```mermaid
+graph TD
+  subgraph Messaging[Pub/Sub]
+    RP[raw-posts]
+    CP[clean-posts]
+    SS[scores-sentiment]
+    SA[scores-absa]
+    AT[analytics-topic]
+    OA[ops-alerts]
+  end
+
+  subgraph Compute[Cloud Run / GKE / Vertex]
+    CR[collector-service (Cloud Run)]
+    DA[dedup-anonymizer (GKE/Composer)]
+    NP[nlp-preprocess (GKE)]
+    SE[sentiment-service (Vertex/Ray)]
+    AB[absa-service (Vertex/Ray)]
+    TM[topic-modeler (GKE)]
+    AGW[api-gateway (Cloud Run)]
+    ALS[alert-service (Cloud Run)]
+    SUM[summarizer-rag (Cloud Run)]
+  end
+
+  subgraph Storage[GCP Storage]
+    GCS[(GCS Data Lake)]
+    BQ[(BigQuery DW)]
+    ES[(Elastic Cloud/Search)]
+    VDB[(AlloyDB/CloudSQL + pgvector)]
+  end
+
+  CR --> RP
+  RP --> DA
+  DA --> CP
+  CP --> NP
+  NP --> SE
+  NP --> AB
+  NP --> TM
+  SE --> SS
+  AB --> SA
+  TM --> AT
+  SS --> BQ
+  SA --> BQ
+  AT --> BQ
+  BQ --> AGW
+  ES --> AGW
+  VDB --> AGW
+  AGW -->|/v1/*| SUM
+  AT --> ALS
+  ALS --> OA
+  RP --> GCS
+  CP --> GCS
+```
+
+### Linux 서버 환경(Kafka/Redpanda, MinIO, ClickHouse)
+```mermaid
+graph TD
+  subgraph Messaging[Kafka/Redpanda]
+    RAW[[raw.posts.v1]]
+    CLN[[clean.posts.v1]]
+    SSV[[scores.sentiment.v1]]
+    SAV[[scores.absa.v1]]
+    ATV[[analytics.topic.v1]]
+    OAV[[ops.alerts.v1]]
+  end
+
+  subgraph Compute[Docker/K8s]
+    CLC[collector-service]
+    DED[dedup-anonymizer]
+    NLP[nlp-preprocess]
+    SEN[sentiment-service (TorchServe/Ray)]
+    ABS[absa-service (TorchServe/Ray)]
+    TOP[topic-modeler (Spark/Flink)]
+    GW[api-gateway (FastAPI)]
+    ALT[alert-service]
+    SUM[summarizer-rag]
+  end
+
+  subgraph Storage[On-prem Storage]
+    MIO[(MinIO/S3)]
+    CH[(ClickHouse DW)]
+    OSE[(OpenSearch/ES)]
+    PGV[(Postgres + pgvector)]
+  end
+
+  CLC --> RAW
+  RAW --> DED
+  DED --> CLN
+  CLN --> NLP
+  NLP --> SEN
+  NLP --> ABS
+  NLP --> TOP
+  SEN --> SSV
+  ABS --> SAV
+  TOP --> ATV
+  SSV --> CH
+  SAV --> CH
+  ATV --> CH
+  CH --> GW
+  OSE --> GW
+  PGV --> GW
+  GW -->|/v1/*| SUM
+  ATV --> ALT
+  ALT --> OAV
+  RAW --> MIO
+  CLN --> MIO
+```
+
+### 하이브리드(브릿지) 환경 (Kafka ↔ Pub/Sub)
+```mermaid
+graph LR
+  subgraph OnPrem[On-prem / Linux]
+    subgraph KMsg[Kafka/Redpanda]
+      K_RAW[[raw.posts.v1]]
+      K_CLN[[clean.posts.v1]]
+      K_SSV[[scores.sentiment.v1]]
+      K_SAV[[scores.absa.v1]]
+      K_ATV[[analytics.topic.v1]]
+      K_OAV[[ops.alerts.v1]]
+    end
+    K_COL[collector]
+    K_DED[dedup]
+    K_NLP[nlp]
+    K_SEN[sentiment]
+    K_ABS[absa]
+    K_TOP[topic]
+    K_ALT[alert]
+    K_COL --> K_RAW
+    K_RAW --> K_DED --> K_CLN
+    K_CLN --> K_NLP
+    K_NLP --> K_SEN --> K_SSV
+    K_NLP --> K_ABS --> K_SAV
+    K_NLP --> K_TOP --> K_ATV
+    K_ATV --> K_ALT --> K_OAV
+  end
+
+  subgraph Bridge[Bridging]
+    MM2[MirrorMaker2/Replicator]
+    DF[Dataflow Connector]
+  end
+
+  subgraph GCP[GCP]
+    subgraph PMsg[Pub/Sub]
+      P_RAW[raw-posts]
+      P_CLN[clean-posts]
+      P_SSV[scores-sentiment]
+      P_SAV[scores-absa]
+      P_ATV[analytics-topic]
+      P_OAV[ops-alerts]
+    end
+    P_SE[sentiment]
+    P_AB[absa]
+    P_TM[topic]
+    P_AL[alert]
+  end
+
+  K_RAW -- mirror --> MM2 -- publish --> P_RAW
+  K_CLN -- mirror --> MM2 -- publish --> P_CLN
+  K_SSV -- mirror --> MM2 -- publish --> P_SSV
+  K_SAV -- mirror --> MM2 -- publish --> P_SAV
+  K_ATV -- mirror --> MM2 -- publish --> P_ATV
+  K_OAV -- mirror --> MM2 -- publish --> P_OAV
+
+  P_RAW -- optional backfill --> DF -- write --> K_RAW
+  P_CLN -- optional backfill --> DF -- write --> K_CLN
+```
+
+## 다이어그램 표기 규칙
+- 대괄호 `[]`: 서비스/컴퓨팅 노드
+- 이중 대괄호 `[[ ]]`: 메시징 토픽/채널
+- 둥근 괄호 `()` : 저장소
+- 점선 화살표 `-.->`: 비동기/옵션 경로
+- `|/v1/*|` 라벨: REST 엔드포인트 호출
