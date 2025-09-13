@@ -1,6 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  Home,
   BarChart3,
   Search,
   TrendingUp,
@@ -25,7 +24,11 @@ import {
 } from "@/components/ui/sidebar";
 
 const navigationItems = [
-  { title: "홈 대시보드", url: "/", icon: Home },
+  { 
+    title: "홈 대시보드", 
+    url: "/", 
+    icon: () => <img src="/nps-preview-favicon.png" alt="Home" className="h-4 w-4" />
+  },
   { title: "분석 대시보드", url: "/analytics", icon: BarChart3 },
   { title: "이슈 탐색", url: "/explore", icon: Search },
   { title: "이벤트 분석", url: "/events", icon: TrendingUp },
