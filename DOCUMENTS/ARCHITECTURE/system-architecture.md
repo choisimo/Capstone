@@ -55,3 +55,21 @@
 
 ## 관측성
 - 각 서비스에 요청·지연·오류 메트릭, 파이프라인 SLA 모니터, 모델 드리프트 대시보드.
+
+## Kafka 기반 서비스 간 통신 표준
+- 토픽 명명: Kafka `dot.case.version` 예) `raw.posts.v1`, Pub/Sub `hyphen-case` 예) `raw-posts`.
+- 파티션: 기본 6–12, 트래픽에 따라 확장. 키는 순서를 보장할 엔터티 기반으로 설정.
+- 파티션 키 권장:
+  - `raw.posts.v1`: `hash(source + url_norm)`
+  - `clean.posts.v1`: `dedup_key`
+  - `scores.sentiment.v1`/`scores.absa.v1`/`analytics.topic.v1`: `post_id`
+  - `ops.alerts.v1`: `issue`
+- 전달 보장: At-least-once. 중복은 idempotent 소비 로직으로 처리(`dedup_key`, `post_id`).
+- 순서: 파티션 키 단위 순서 보장. 크로스-키 순서 비보장.
+- 재시도/백오프: 지수 백오프. 실패는 `.dlq` 토픽으로 라우팅(예: `raw.posts.dlq`).
+- 스키마/레지스트리: Protobuf/Avro + Schema Registry. 호환성 규칙 `BACKWARD` 권장. `schema_version` 헤더 포함.
+- 헤더(Attributes): `trace_id`, `span_id`, `schema_version`, `source`, `channel`, `content_type`, `platform_profile`.
+- 시큐리티: mTLS + ACL(Kafka), SASL/SCRAM(옵션). Pub/Sub는 IAM 역할 기반. 토픽별 최소권한.
+- 브릿징: GCP(Pub/Sub)↔Linux(Kafka)는 커넥터/브릿지(Confluent/Striim/Dataflow)로 미러링. 헤더→Attributes 매핑.
+- 컨슈머 그룹: `service-name.env` 표준. 오프셋 커밋은 at-least-once 기준으로 처리.
+- 관측성: Lag 모니터, 오프셋/스루풋/에러율 대시보드, OTel로 trace 상관관계.

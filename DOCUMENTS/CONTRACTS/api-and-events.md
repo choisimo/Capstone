@@ -32,6 +32,21 @@
 ## WebSocket
 - `/ws/alerts`: 조기경보 스트림 `{ ts, issue, severity, reason, samples[] }`
 
+## Messaging Standards (Kafka/PubSub)
+- Partition keys (Kafka):
+  - `raw.posts.v1`: `hash(source + url_norm)`
+  - `clean.posts.v1`: `dedup_key`
+  - `scores.sentiment.v1`, `scores.absa.v1`, `analytics.topic.v1`: `post_id`
+  - `ops.alerts.v1`: `issue`
+- Pub/Sub mapping: Kafka `raw.posts.v1` ↔ Pub/Sub `raw-posts` (이하 동일 패턴)
+- Headers/Attributes:
+  - `trace_id`, `span_id`, `schema_version`, `source`, `channel`, `content_type`, `platform_profile`, (선택) `model_ver`
+- Delivery semantics:
+  - At-least-once. 컨슈머는 idempotent 처리(`dedup_key`, `post_id`, `model_ver`) 권장.
+  - DLQ 네이밍: `<topic>.dlq` 예: `raw.posts.dlq`, `clean.posts.dlq`, `scores.sentiment.dlq`.
+- Schema registry:
+  - Avro/Protobuf + BACKWARD 호환 규칙. 메시지 헤더에 `schema_version` 포함.
+
 ## Event Schemas (Kafka/Protobuf, Pub/Sub 호환)
 
 ### raw.posts.v1
