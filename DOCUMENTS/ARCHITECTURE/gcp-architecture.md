@@ -38,6 +38,19 @@
 5) 알림: BQ/ES 트리거 잡 → Pub/Sub → Cloud Functions → Slack/메일
    - Linux: ClickHouse/ES 배치 → Kafka → FastAPI Worker/Functions → Slack/메일
 
+## Kafka↔Pub/Sub 브릿징 전략
+- 목적: 멀티 환경(dev/stage/prod, GCP↔Linux) 간 이벤트 파이프라인 일관성 유지.
+- 방안:
+  - Confluent Replicator, MirrorMaker2, Dataflow 커넥터 등으로 단방향/양방향 미러링.
+  - Kafka 토픽(`raw.posts.v1`) ↔ Pub/Sub 토픽(`raw-posts`)로 1:1 매핑.
+  - 헤더/Attributes 매핑: `trace_id`, `schema_version`, `source`, `channel`, `content_type`, `platform_profile`.
+  - 전달 보장: At-least-once, DLQ: `*.dlq` 토픽 병행 운영.
+  - 스키마: Schema Registry(Avro/Protobuf) 버전 규칙 BACKWARD, GCP는 Schema Registry 호환 계층 또는 스키마 내장 방식.
+- 보안:
+  - Kafka: mTLS + ACL, SASL/SCRAM(옵션)
+  - Pub/Sub: 서비스 계정 + IAM 역할 최소권한, VPC-SC(옵션)
+- 관측성: 브릿지 lag/에러율 대시보드, 재처리(리플레이) 플레이북 준비.
+
 ## 운영/관측성
 - Cloud Monitoring 대시보드: 파이프라인 SLA, 모델 지연, 비용 지표
 - 로깅: OTel Collector → Cloud Logging; 추적: Cloud Trace; 에러: Error Reporting
