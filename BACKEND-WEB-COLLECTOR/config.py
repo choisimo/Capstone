@@ -16,6 +16,22 @@ class ChangeDetectionConfig:
 
 
 @dataclass
+class PerplexityConfig:
+    base_url: str
+    api_key: str
+    model: str = "pplx-70b-online"
+    timeout_sec: int = 30
+
+    @staticmethod
+    def from_env() -> "PerplexityConfig":
+        base = os.getenv("PPLX_BASE_URL", "https://api.perplexity.ai")
+        key = os.getenv("PPLX_API_KEY", "")
+        model = os.getenv("PPLX_MODEL", "pplx-70b-online")
+        timeout = int(os.getenv("PPLX_TIMEOUT_SEC", "30"))
+        return PerplexityConfig(base_url=base.rstrip("/"), api_key=key, model=model, timeout_sec=timeout)
+
+
+@dataclass
 class BusConfig:
     bus: str  # "kafka" | "pubsub" | "stdout"
     raw_topic: str

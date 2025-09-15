@@ -19,6 +19,12 @@
 - `KAFKA_BROKERS` or `PUBSUB_PROJECT`
 - `RAW_TOPIC=raw.posts.v1`
 
+### Perplexity AI (선택)
+- `PPLX_API_KEY` (필수: Perplexity 사용 시)
+- `PPLX_BASE_URL` (기본: `https://api.perplexity.ai`)
+- `PPLX_MODEL` (기본: `pplx-70b-online`)
+- `PPLX_TIMEOUT_SEC` (기본: `30`)
+
 ## 의존성
 - 외부: changedetection.io, Kafka/Redpanda 또는 Pub/Sub
 
@@ -30,6 +36,7 @@
     - Kafka: `KAFKA_BROKERS=localhost:9092`, `RAW_TOPIC=raw.posts.v1`(기본)
     - Pub/Sub: `PUBSUB_PROJECT=my-gcp-project`, `RAW_TOPIC=raw-posts`(기본)
   - 옵션: `POLL_INTERVAL_SEC=60`, `INCLUDE_HTML=0|1`, `WATCH_TAG=태그명`, `SOURCE=web`, `CHANNEL=changedetection`, `PLATFORM_PROFILE=public-web`
+  - Perplexity 사용 시: `PPLX_API_KEY=...`(필수), `PPLX_MODEL`(옵션)
 - 상태 저장: `.collector_state.json`(기본, 위치 변경은 `COLLECTOR_STATE_PATH`)
 
 ## 로컬 실행
@@ -58,3 +65,44 @@
 
 ## 백로그
 - `DOCUMENTS/TODO/CRAWLER/ai-agent-function-prd.txt`의 AI 스텝 생성 API 연계
+
+## 검색 엔진 통합 (Perplexity + changedetection)
+
+프록시/크롤링 외에 빠른 이슈 검색을 위해 Perplexity AI API를 통합했습니다. 변경 감지 검색(changedetection)과 Perplexity 기반 웹 검색 중 선택하거나, Perplexity 미설정/오류 시 자동으로 changedetection으로 폴백합니다.
+
+### REST API
+- `GET /api/v1/agent/search`
+  - 쿼리 파라미터
+    - `q` (필수): 검색 질의어
+    - `engine` (기본 `cd`): `cd`(changedetection) | `pplx`(Perplexity)
+    - `top_k` (기본 10, 1~50): 결과 개수 제한 (Perplexity)
+    - `partial` (기본 false): 부분 일치 (changedetection 전용)
+    - `tag` (옵션): 태그 필터 (changedetection 전용)
+  - 응답 (정규화된 공통 포맷)
+    ```json
+    {
+      "engine": "pplx|cd",
+      "results": [
+        {
+          "title": "...",
+          "url": "https://...",
+          "snippet": "...",
+          "score": 0.92,
+          "source": "perplexity|changedetection",
+          "uuid": "... (cd 전용)"
+        }
+      ],
+      "warning": "Perplexity not available, fell back to changedetection.",
+      "reason": "... (옵션)"
+    }
+    ```
+
+### 사용 예시
+- Perplexity로 5건 검색
+  ```bash
+  curl "http://localhost:8001/api/v1/agent/search?q=연금+개편+논쟁&engine=pplx&top_k=5"
+  ```
+- changedetection에서 태그로 필터 후 검색
+  ```bash
+  curl "http://localhost:8001/api/v1/agent/search?q=example.com&engine=cd&tag=News"
+  ```

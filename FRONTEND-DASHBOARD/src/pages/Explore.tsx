@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { searchAgent, type AgentResult } from "@/lib/agent";
 import { Search, Sparkles, BookOpen, MessageSquare, ThumbsUp, ThumbsDown, Clock, ExternalLink, Save, Share2 } from "lucide-react";
 
 const searchResults = [
@@ -50,15 +52,26 @@ export default function Explore() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [summary, setSummary] = useState("");
+  const [engine, setEngine] = useState<"pplx" | "cd">("pplx");
+  const [results, setResults] = useState<AgentResult[]>([]);
+  const [warning, setWarning] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-    
     setIsSearching(true);
-    // Simulate search delay
-    setTimeout(() => {
+    setError(undefined);
+    setWarning(undefined);
+    try {
+      const res = await searchAgent({ q: searchQuery, engine });
+      setResults(res.results || []);
+      if (res.warning) setWarning(res.warning);
+      else setWarning(undefined);
+    } catch (e: any) {
+      setError(e?.message || String(e));
+    } finally {
       setIsSearching(false);
-    }, 2000);
+    }
   };
 
   const generateSummary = (result: any) => {
@@ -113,6 +126,15 @@ ${result.evidence.map((e: any, i: number) => `${i + 1}. ${e.text} (출처: ${e.s
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 className="flex-1"
               />
+              <Select value={engine} onValueChange={(v) => setEngine(v as any)}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="엔진" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pplx">Perplexity</SelectItem>
+                  <SelectItem value="cd">ChangeDet</SelectItem>
+                </SelectContent>
+              </Select>
               <Button onClick={handleSearch} disabled={isSearching}>
                 {isSearching ? (
                   <>
@@ -150,76 +172,50 @@ ${result.evidence.map((e: any, i: number) => `${i + 1}. ${e.text} (출처: ${e.s
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">검색 결과</h3>
-              <span className="text-sm text-muted-foreground">{searchResults.length}개 결과 발견</span>
+              <span className="text-sm text-muted-foreground">{results.length}개 결과 • 엔진: {engine.toUpperCase()}</span>
             </div>
 
-            {searchResults.map((result) => (
-              <GlassCard key={result.id} className="hover:shadow-elevated transition-all duration-300">
+            {error && (
+              <div className="text-sm text-destructive">검색 실패: {error}</div>
+            )}
+            {warning && (
+              <div className="text-xs text-amber-600 border border-amber-200 bg-amber-50 rounded p-2">{warning}</div>
+            )}
+            {isSearching && (
+              <div className="text-sm text-muted-foreground">검색 중...</div>
+            )}
+
+            {!isSearching && results.map((r, idx) => (
+              <GlassCard key={idx} className="hover:shadow-elevated transition-all duration-300">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-2">
-                      <CardTitle className="text-lg">{result.topic}</CardTitle>
+                      <CardTitle className="text-lg">
+                        <a href={r.url} target="_blank" rel="noreferrer" className="hover:underline">
+                          {r.title || r.url}
+                        </a>
+                      </CardTitle>
                       <div className="flex items-center gap-2">
-                        {getSentimentBadge(result.sentiment)}
-                        <Badge variant="outline" className="text-xs">
-                          관련성 {result.relevance}%
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs">
-                          {result.mentions} 언급
-                        </Badge>
+                        <Badge variant="outline" className="text-xs">{r.source}</Badge>
+                        {typeof r.score === "number" && (
+                          <Badge variant="secondary" className="text-xs">유사도 {Math.round(r.score * 100)}%</Badge>
+                        )}
+                        {r.uuid && (
+                          <Badge variant="outline" className="text-xs">UUID {r.uuid.slice(0, 8)}</Badge>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => generateSummary(result)}>
-                        <Sparkles className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Save className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Share2 className="h-4 w-4" />
+                      <Button asChild variant="ghost" size="sm">
+                        <a href={r.url} target="_blank" rel="noreferrer">
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm leading-relaxed">{result.summary}</p>
-                  
-                  <div className="flex flex-wrap gap-1">
-                    <span className="text-xs text-muted-foreground mr-2">주요 키워드:</span>
-                    {result.keywords.map((keyword) => (
-                      <Badge key={keyword} variant="outline" className="text-xs">
-                        {keyword}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4" />
-                      주요 근거
-                    </h4>
-                    {result.evidence.slice(0, 2).map((evidence, index) => (
-                      <div key={index} className="p-3 rounded-lg bg-muted/20 text-sm">
-                        <div className="flex items-start justify-between mb-1">
-                          <span className="text-xs text-muted-foreground">{evidence.source}</span>
-                          <div className="flex items-center gap-1">
-                            {evidence.sentiment === "positive" ? (
-                              <ThumbsUp className="h-3 w-3 text-sentiment-positive" />
-                            ) : evidence.sentiment === "negative" ? (
-                              <ThumbsDown className="h-3 w-3 text-sentiment-negative" />
-                            ) : null}
-                          </div>
-                        </div>
-                        <p className="leading-relaxed">"{evidence.text}"</p>
-                      </div>
-                    ))}
-                    {result.evidence.length > 2 && (
-                      <Button variant="ghost" size="sm" className="text-xs">
-                        추가 근거 {result.evidence.length - 2}개 보기
-                      </Button>
-                    )}
-                  </div>
+                <CardContent className="space-y-2">
+                  {r.snippet && <p className="text-sm leading-relaxed">{r.snippet}</p>}
                 </CardContent>
               </GlassCard>
             ))}

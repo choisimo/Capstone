@@ -17,6 +17,7 @@ import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
 import Services from "./pages/Services";
+import Mesh from "./pages/Mesh";
 
 const queryClient = new QueryClient();
 
@@ -40,10 +41,11 @@ const App = () => (
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/help" element={<Help />} />
-                <Route path="/services" element={<Services />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
+                 <Route path="/help" element={<Help />} />
+                 <Route path="/services" element={<Services />} />
+                 <Route path="/mesh" element={<Mesh />} />
+                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
           </div>

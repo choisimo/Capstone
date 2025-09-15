@@ -11,13 +11,15 @@ from fastapi.responses import HTMLResponse, PlainTextResponse
 
 # Support running as script or as package
 try:
-    from .config import ChangeDetectionConfig, AgentConfig
+    from .config import ChangeDetectionConfig, AgentConfig, PerplexityConfig
     from .cdio_client import ChangeDetectionClient
+    from .perplexity_client import PerplexityClient
 except Exception:
     import sys
     sys.path.append(os.path.dirname(__file__))
-    from config import ChangeDetectionConfig, AgentConfig  # type: ignore
+    from config import ChangeDetectionConfig, AgentConfig, PerplexityConfig  # type: ignore
     from cdio_client import ChangeDetectionClient  # type: ignore
+    from perplexity_client import PerplexityClient  # type: ignore
 
 
 # Allowed browser step operations from changedetection.io
@@ -382,6 +384,68 @@ def ui_import(urls: str = Query(..., description="Line separated URLs"), tag: Op
         return client.import_urls(text=urls, tag=tag)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/v1/agent/search")
+def agent_search(
+    q: str = Query(..., description="Search query"),
+    engine: str = Query("cd", pattern=r"^(cd|pplx)$", description="Search engine: 'cd' (changedetection) or 'pplx' (Perplexity)"),
+    top_k: int = Query(10, ge=1, le=50),
+    partial: bool = Query(False, description="Partial match for changedetection search"),
+    tag: Optional[str] = Query(None, description="Tag filter for changedetection"),
+):
+    """
+    Unified search endpoint.
+
+    - engine=cd: Use changedetection.io watch search.
+    - engine=pplx: Use Perplexity AI API (requires PPLX_API_KEY configured).
+
+    Returns normalized list under key 'results'.
+    """
+    results: List[Dict[str, Any]] = []
+    chosen_engine = engine
+
+    if engine == "pplx":
+        cfg = PerplexityConfig.from_env()
+        if not cfg.api_key:
+            # Fallback to changedetection if Perplexity is not configured
+            chosen_engine = "cd"
+        else:
+            try:
+                pplx = PerplexityClient(cfg.base_url, cfg.api_key, model=cfg.model, timeout=cfg.timeout_sec)
+                results = pplx.search(q=q, top_k=top_k)
+                return {"engine": "pplx", "results": results}
+            except Exception as e:
+                # Fallback to cd on error as well
+                chosen_engine = "cd"
+                fallback_reason = str(e)
+    else:
+        fallback_reason = None
+
+    # changedetection fallback or primary path
+    client, _ = get_clients()
+    try:
+        cd_res = client.search(q=q, partial=partial, tag=tag)
+        watches = (cd_res or {}).get("watches", {})
+        for uuid, w in (watches or {}).items():
+            if not isinstance(w, dict):
+                continue
+            results.append({
+                "title": str(w.get("title") or ""),
+                "url": str(w.get("url") or ""),
+                "snippet": "",
+                "score": 1.0,
+                "source": "changedetection",
+                "uuid": uuid,
+            })
+        payload: Dict[str, Any] = {"engine": "cd", "results": results}
+        if engine == "pplx":
+            payload["warning"] = "Perplexity not available, fell back to changedetection."
+            if fallback_reason:
+                payload["reason"] = fallback_reason
+        return payload
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Search failed: {e}")
 
 
 if __name__ == "__main__":
