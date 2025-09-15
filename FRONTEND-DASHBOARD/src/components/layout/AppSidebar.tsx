@@ -7,8 +7,10 @@ import {
   Settings,
   HelpCircle,
   Users,
-  Activity
-} from "lucide-react";
+  Activity,
+  Layers
+ } from "lucide-react";
+
 
 import {
   Sidebar,
@@ -33,6 +35,7 @@ const navigationItems = [
   { title: "이슈 탐색", url: "/explore", icon: Search },
   { title: "이벤트 분석", url: "/events", icon: TrendingUp },
   { title: "실시간 모니터링", url: "/monitoring", icon: Activity },
+  { title: "서비스", url: "/services", icon: Layers },
 ];
 
 const managementItems = [

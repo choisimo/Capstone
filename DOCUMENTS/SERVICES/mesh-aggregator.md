@@ -1,0 +1,57 @@
+# mesh-aggregator
+
+## 개요
+- 목적: 감정-페르소나-경험-키워드 상호 연관 메쉬(노드/링크) 계산과 캐시 관리.
+- 담당 범위: 필터/윈도우 기반 공동출현/연관성 지표 산출(PMI/NGMI/Jaccard) 및 축약.
+- 운영 프로파일: `PLATFORM_PROFILE=gcp|linux-server`
+
+## 인터페이스
+- 내부 RPC/잡 트리거
+  - `RebuildMesh(scope: global|article, window: {from,to,agg}, filters)` → `mesh_cache` upsert
+  - `WarmupCaches(windows[])`
+- REST: 없음(analysis-service가 읽기)
+- 스키마: `analysis-service`의 `mesh_cache` 문서 구조 사용
+
+## 데이터/스토리지
+- 입력: MongoDB `documents`(태그/키워드), `articles`
+- 출력: MongoDB `mesh_cache`
+- 보관/TTL/인덱싱 정책: `mesh_cache.expires_at` TTL, `scope+window+filters_hash` 유니크 인덱스
+
+## 알고리즘
+- 노드: {emotion, persona, experience, keyword, source/channel(옵션)}
+- 엣지 가중치: 동시 발생 카운트→PMI/NGMI 산출, 최소 지지도/리프트 필터
+- 축약: 커뮤니티 감지(louvain, leiden 옵션), 상위 k 노드/엣지 선택
+- 안정성: 샘플링 기반 추정(대량 데이터), 랩탑 환경 가속(PyTorch sparse/NumPy)
+
+## 설정(ENV)
+- 필수: `MONGO_URI`, `MONGO_DB`
+- 선택: `MESH_CACHE_TTL_SEC`, `AGG_MIN_SUPPORT`, `MAX_NODES`, `MAX_LINKS`, `COMMUNITY_METHOD`
+
+## 의존성
+- 내부 서비스: ingest-worker, tagging-service, analysis-service
+- 외부 서비스/OSS: MongoDB, networkx/igraph, numpy/scipy, OpenTelemetry
+
+## 로컬 실행(예시)
+- 주기적 빌드: `python jobs/mesh_rebuilder.py --window day --ttl 6h`
+
+## 관측성
+- Metrics: `mesh_build_latency_ms`, `edges_count`, `nodes_count`, `cache_hit`
+- Traces: 집계 단계별 span(쿼리→공출→지표→축약→쓰기)
+- Logs: 윈도우/필터/상한/커뮤니티 방식 요약
+
+## 보안
+- 인증/인가: 내부 네트워크 제한
+- 비밀/키 관리: DB 크리덴셜 비밀관리
+
+## SLO/성능
+- 지연: 글로벌 메쉬 P95 < 2m(10M 문서 기준 배치)
+- 증분: 변경량 기반 증분 갱신 옵션
+
+## 운영/장애 대응
+- 실패 시 이전 캐시 유지 서빙, 실패율 알람
+
+## 통신 프로토콜 (Kafka/Pub/Sub)
+- 기본 사용 안 함. 필요 시 리빌드 요청 이벤트 `ops.mesh.rebuild.v1` 도입 검토
+
+## 백로그
+- 2.5D 좌표 선계산/캐시, 레이아웃 안정화 메타 저장

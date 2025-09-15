@@ -16,6 +16,7 @@ import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
+import Services from "./pages/Services";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
                 <Route path="/users" element={<Users />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/help" element={<Help />} />
+                <Route path="/services" element={<Services />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
