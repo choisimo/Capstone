@@ -29,6 +29,7 @@ def create_app() -> FastAPI:
     async def _shutdown() -> None:
         await close_db()
 
+    app.include_router(analysis.router, prefix="/api/v1")
     app.include_router(analysis.router, prefix="/api")
 
     return app

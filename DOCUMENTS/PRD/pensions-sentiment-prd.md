@@ -52,12 +52,12 @@
   - PUT /api/v1/agent/update-watch/{uuid}: 워치 업데이트
   - GET /api/v1/ui/*: CDIO 프락시(정보/검색/스냅샷/태그/수정)
 - 신규(분석/RAG 서비스):
-  - GET /api/mesh-data: 전체 메쉬망(노드/링크, 집계 기준 포함)
-  - GET /api/articles: 뉴스 목록/검색(키워드·기간·출처)
-  - GET /api/articles/{article_id}/mesh-data: 기사 중심 메쉬망
-  - GET /api/documents: 필터링된 원문 목록(페이지네이션)
-  - POST /api/generate-report: 선택 노드 조합→RAG 보고서
-  - POST /api/chat: 의도 인식→검색/RAG/요약 대화 응답
+  - GET /api/v1/mesh-data: 전체 메쉬망(노드/링크, 집계 기준 포함)
+  - GET /api/v1/articles: 뉴스 목록/검색(키워드·기간·출처)
+  - GET /api/v1/articles/{article_id}/mesh-data: 기사 중심 메쉬망
+  - GET /api/v1/documents: 필터링된 원문 목록(페이지네이션)
+  - POST /api/v1/generate-report: 선택 노드 조합→RAG 보고서
+  - POST /api/v1/chat: 의도 인식→검색/RAG/요약 대화 응답
 - 이벤트 인테그레이션:
   - 스키마: CONTRACTS/api-and-events.md, raw.posts.v1에 정합
   - 브리지 설정: MESSAGE_BUS, RAW_TOPIC, KAFKA_BROKERS/PUBSUB_PROJECT
@@ -86,7 +86,7 @@ AI 분석 엔진
   - ChatAgent: 대화형 질의/응답 UI
   - NewsAnalysis: 기사 선택 UI + 기사 중심 메쉬망
 - 연동 계획:
-  - 현 Analytics 더미 데이터 → /api/mesh-data, /api/documents 실연동
+  - 현 Analytics 더미 데이터 → /api/v1/mesh-data, /api/v1/documents 실연동
   - 라우팅: 전체 여론, 뉴스 분석, 심층 보고서, AI 에이전트 탭 구성
 
 환경 변수/운영
@@ -99,13 +99,13 @@ AI 분석 엔진
 - 1단계(1–4주) 기반/수집
   - ChangeDetection/Agent/Bridge 통합 운영
   - Ingest 워커(정제/중복/언어감지) 및 Mongo/Vector 쓰기
-  - /api/articles, /api/documents 베이식 구현
+  - /api/v1/articles, /api/v1/documents 베이식 구현
 - 2단계(5–8주) 태깅/시각화
   - Gemini 태깅 파이프라인(배치→준실시간)
-  - /api/mesh-data 1차(집계 중심) + MeshVisualization 기본
+  - /api/v1/mesh-data 1차(집계 중심) + MeshVisualization 기본
 - 3단계(9–12주) 뉴스/RAG/대화
-  - 기사 중심 메쉬망(/api/articles/{id}/mesh-data)
-  - 드래그앤드롭 RAG(/api/generate-report), ChatAgent MVP
+  - 기사 중심 메쉬망(/api/v1/articles/{id}/mesh-data)
+  - 드래그앤드롭 RAG(/api/v1/generate-report), ChatAgent MVP
 - 4단계(13–16주) 통합/품질
   - 필터 전면 연동, E2E 테스트, 성능/비용 최적화
   - 발표·문서화(아키/운영/보안/사용가이드)

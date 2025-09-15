@@ -3,7 +3,7 @@
 Analysis microservice for Pension Sentiment ("연금 나침반").
 
 Provides:
-- FastAPI endpoint stubs: /api/mesh-data, /api/articles, /api/articles/{id}/mesh-data, /api/documents, /api/generate-report, /api/chat
+- FastAPI endpoint stubs: /api/v1/mesh-data, /api/v1/articles, /api/v1/articles/{id}/mesh-data, /api/v1/documents, /api/v1/generate-report, /api/v1/chat (compat: /api/* deprecated)
 - Pydantic schemas: articles, documents, mesh, report
 - DB connectors (stubs): MongoDB, VectorDB
 - Ingest worker: consumes raw.posts.v1 and writes to Mongo/Vector (stub)

@@ -6,23 +6,24 @@
 - 운영 프로파일: `PLATFORM_PROFILE=gcp|linux-server`
 
 ## 인터페이스
+- 기본 경로: `/api/v1` (구 `/api/*`는 호환용으로 일시 유지 — deprecated)
 - REST
-  - `GET /api/mesh-data`
+  - `GET /api/v1/mesh-data`
     - query: `from`, `to`, `source[]`, `channel[]`, `lang[]`, `keywords[]`, `persona[]`, `emotion[]`, `experience[]`, `agg=hour|day|week`, `min_weight`, `max_nodes`, `scope=global|article`, `article_id?`
     - resp: `{ nodes: [{id, type, label, weight}], links: [{source, target, weight, pmi}], meta: {window, filters, computed_at} }`
-  - `GET /api/articles`
+  - `GET /api/v1/articles`
     - query: `q`, `source[]`, `from`, `to`, `page=1`, `size=20`, `sort=recency|popularity`
     - resp: `{ total, items: [{id, title, url, published_at, source, keywords[]}], agg: {by_source:[], by_time:[]} }`
-  - `GET /api/articles/{id}/mesh-data`
+  - `GET /api/v1/articles/{id}/mesh-data`
     - query: `min_weight`, `max_nodes`
     - resp: 기사 스코프 메쉬 노드/엣지
-  - `GET /api/documents`
+  - `GET /api/v1/documents`
     - query: `q`, `article_id`, `from`, `to`, `lang[]`, `persona[]`, `emotion[]`, `experience[]`, `keywords[]`, `page`, `size`
     - resp: `{ total, items: [{id, ts, source, channel, article_id, text, meta:{sentiment, persona[], experience[], keywords[], lang}}] }`
-  - `POST /api/generate-report`
+  - `POST /api/v1/generate-report`
     - body: `{ nodes: [{type, id|label}], template?: id, options?: {style, length, audience} }`
     - resp: `{ report_id, markdown, citations: [{doc_id, span}], meta }`
-  - `POST /api/chat`
+  - `POST /api/v1/chat`
     - body: `{ message, context?: {nodes?, filters?, k?} }`
     - resp: RAG/요약/검색 경로 선택 응답 `{ reply, sources:[], route }`
 - WebSocket/SSE (옵션)
@@ -63,8 +64,8 @@
 
 ## SLO/성능
 - 지연/처리량/오류율 목표
-  - `GET /api/mesh-data`(캐시 적중) P95 < 600ms, 미적중 < 1.5s(50k 노드 이하)
-  - `POST /api/generate-report` P95 < 5s(RAG 토큰 한도 내)
+  - `GET /api/v1/mesh-data`(캐시 적중) P95 < 600ms, 미적중 < 1.5s(50k 노드 이하)
+  - `POST /api/v1/generate-report` P95 < 5s(RAG 토큰 한도 내)
   - 오류율 < 0.5%/주
 
 ## 운영/장애 대응
