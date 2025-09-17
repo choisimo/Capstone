@@ -8,3 +8,6 @@ requests
 chromadb
 numpy
 tqdm
+confluent-kafka
+prometheus-client
+sentry-sdk

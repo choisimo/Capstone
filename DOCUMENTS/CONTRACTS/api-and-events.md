@@ -52,6 +52,45 @@
 ### raw.posts.v1
 - topics: Kafka(`raw.posts.v1`), Pub/Sub(`raw-posts`)
 - fields: id(string), source(enum), channel(string), url, author_hash, text, lang, created_at, meta(map)
+  
+  권장 optional meta 필드(분석·시각화·페르소나 추정을 위해 추가 수집):
+  - url_norm(string): 정규화된 URL (중복 제거 및 키 생성에 사용)
+  - platform_profile(string): 수집 프로파일 (예: `public-web`)
+  - seed_url(string): 시드 뉴스 URL (연관 데이터 추적용)
+  - seed_id(string): 시드 이벤트 ID
+  - seed_title(string): 시드 뉴스 제목
+  - article_title(string): 본문형 데이터의 기사 제목(가능 시)
+  - comment_provider(string): 댓글 제공자 구분 (예: `daum`, `youtube`)
+  - likes(number): 공감/좋아요 수
+  - dislikes(number): 비공감/싫어요 수
+  - sentiment(string): `positive` | `neutral` | `negative` (모델에 따라 값 상이 가능)
+  - sentiment_score(number): 0~1 확률/신뢰도 점수
+  - keywords(array[string]): 본문/댓글에서 추출된 핵심 키워드(상위 N개)
+  - video_id(string), video_title(string): 유튜브 비디오 메타 (채널이 youtube인 경우)
+  - author(string): 작성자 표시명(가능 시). 개인정보 이슈 방지를 위해 `author` 대신 상단 `author_hash` 사용 권장
+  
+  author_hash 필드:
+  - 작성자 식별자(표시명 등)를 `(platform + ':' + author)`로 해시(SHA-256)하여 32-hex prefix 저장
+  - 동일 플랫폼 내 동일 작성자의 행위 집계/페르소나 추정에 활용
+  - 원문 작성자 표시명은 저장하지 않거나 `meta.author`에 선택 저장(기본 권장: 비저장)
+
+### seed.news.v1
+- topics: Kafka(`seed.news.v1`) (기본), Pub/Sub(`seed-news`) (권장 매핑)
+- fields:
+  - id(string): seed 이벤트 고유 ID (UUID)
+  - source(enum): `news`
+  - channel(string): `naver` | `daum` (뉴스 소스 구분)
+  - url(string): 뉴스 원문 URL
+  - author_hash(string): 빈 값 (원문 작성자 미상)
+  - text(string): 뉴스 제목 또는 요약 텍스트
+  - lang(string): 언어 코드 (미설정 시 빈 값)
+  - created_at(string, ISO8601): 생성 시각 (UTC)
+  - meta(map):
+    - url_norm(string): 정규화된 URL
+    - platform_profile(string): 수집 프로파일 (예: `public-web`)
+    - title(string): 뉴스 제목
+    - keyword(string): 트리거 키워드 (예: `국민연금`)
+    - tags(array[string]): `seed` 태그 등
 
 ### clean.posts.v1
 - topics: Kafka(`clean.posts.v1`), Pub/Sub(`clean-posts`)

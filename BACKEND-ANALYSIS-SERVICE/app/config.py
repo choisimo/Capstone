@@ -8,6 +8,12 @@ class Settings(BaseSettings):
     mongo_db: str = Field(default="analysis", alias="MONGO_DB")
 
     vector_db_url: str | None = Field(default=None, alias="VECTOR_DB_URL")
+    # Optional granular settings to build VECTOR_DB_URL when not provided
+    vector_db_host: str = Field(default="localhost", alias="VECTOR_DB_HOST")
+    vector_db_port: int = Field(default=5432, alias="VECTOR_DB_PORT")
+    vector_db_user: str = Field(default="postgres", alias="VECTOR_DB_USER")
+    vector_db_password: str = Field(default="postgres", alias="VECTOR_DB_PASSWORD")
+    vector_db_database: str = Field(default="vectors", alias="VECTOR_DB_DATABASE")
 
     gemini_api_key: str | None = Field(default=None, alias="GEMINI_API_KEY")
 
@@ -25,4 +31,8 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    return Settings()
+    s = Settings()
+    # Build vector DB URL if not explicitly set
+    if not s.vector_db_url:
+        s.vector_db_url = f"postgresql://{s.vector_db_user}:{s.vector_db_password}@{s.vector_db_host}:{s.vector_db_port}/{s.vector_db_database}"
+    return s

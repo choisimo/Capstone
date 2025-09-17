@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .db import init_db, close_db
 from .routers import analysis
+from .routers import persona
 
 
 def create_app() -> FastAPI:
@@ -31,6 +32,8 @@ def create_app() -> FastAPI:
 
     app.include_router(analysis.router, prefix="/api/v1")
     app.include_router(analysis.router, prefix="/api")
+    app.include_router(persona.router, prefix="/api/v1")
+    app.include_router(persona.router, prefix="/api")
 
     return app
 

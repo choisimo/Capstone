@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -9,7 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { searchAgent, type AgentResult } from "@/lib/agent";
-import { Search, Sparkles, BookOpen, MessageSquare, ThumbsUp, ThumbsDown, Clock, ExternalLink, Save, Share2 } from "lucide-react";
+import { Search, Sparkles, BookOpen, MessageSquare, ThumbsUp, ThumbsDown, Clock, ExternalLink, Save, Share2, LineChart as LineChartIcon, BarChart2 } from "lucide-react";
+import { fetchSentimentTrend, fetchTopKeywords, fetchMesh, type SentimentPoint, type TopKeyword } from "@/lib/api";
+import type { MeshNode, MeshLink } from "@/types/mesh";
+import SeedGraph from "@/components/graphs/SeedGraph";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+} from "recharts";
 
 const searchResults = [
   {
@@ -56,6 +71,11 @@ export default function Explore() {
   const [results, setResults] = useState<AgentResult[]>([]);
   const [warning, setWarning] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [trend, setTrend] = useState<SentimentPoint[]>([]);
+  const [kwItems, setKwItems] = useState<TopKeyword[]>([]);
+  const [loadingCharts, setLoadingCharts] = useState(false);
+  const [meshNodes, setMeshNodes] = useState<MeshNode[]>([]);
+  const [meshLinks, setMeshLinks] = useState<MeshLink[]>([]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -73,6 +93,31 @@ export default function Explore() {
       setIsSearching(false);
     }
   };
+
+  // Fetch analytics on mount
+  useEffect(() => {
+    const load = async () => {
+      setLoadingCharts(true);
+      try {
+        const to = new Date();
+        const from = new Date(to.getTime() - 7 * 24 * 3600 * 1000);
+        const [trendRes, kwRes, meshRes] = await Promise.all([
+          fetchSentimentTrend({ from: from.toISOString(), to: to.toISOString(), agg: "day" }),
+          fetchTopKeywords({ from: from.toISOString(), to: to.toISOString(), size: 20 }),
+          fetchMesh({ from: from.toISOString(), to: to.toISOString(), agg: "day", max_nodes: 200 }),
+        ]);
+        setTrend(trendRes.series);
+        setKwItems(kwRes.items || []);
+        setMeshNodes(meshRes.nodes || []);
+        setMeshLinks(meshRes.links || []);
+      } catch (e) {
+        // swallow chart errors to avoid blocking page
+      } finally {
+        setLoadingCharts(false);
+      }
+    };
+    load();
+  }, []);
 
   const generateSummary = (result: any) => {
     setSummary(`${result.topic}에 대한 종합 분석:
@@ -149,6 +194,99 @@ ${result.evidence.map((e: any, i: number) => `${i + 1}. ${e.text} (출처: ${e.s
                 )}
               </Button>
             </div>
+
+        {/* Analytics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Sentiment Trend */}
+          <GlassCard className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <LineChartIcon className="h-4 w-4" />
+                감성 추이 (7일)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-[280px]">
+              {loadingCharts ? (
+                <div className="text-sm text-muted-foreground">차트 로딩 중...</div>
+              ) : trend.length === 0 ? (
+                <div className="text-sm text-muted-foreground">표시할 데이터가 없습니다</div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={trend} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+                    <defs>
+                      <linearGradient id="colorPos" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#16a34a" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#16a34a" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorNeg" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#dc2626" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#dc2626" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorNeu" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6b7280" stopOpacity={0.35}/>
+                        <stop offset="95%" stopColor="#6b7280" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-40" />
+                    <XAxis dataKey="ts" tick={{ fontSize: 12 }} hide={false} />
+                    <YAxis tick={{ fontSize: 12 }} width={36} />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="pos" name="긍정" stroke="#16a34a" fillOpacity={1} fill="url(#colorPos)" />
+                    <Area type="monotone" dataKey="neg" name="부정" stroke="#dc2626" fillOpacity={1} fill="url(#colorNeg)" />
+                    <Area type="monotone" dataKey="neu" name="중립" stroke="#6b7280" fillOpacity={1} fill="url(#colorNeu)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </GlassCard>
+
+          {/* Top Keywords */}
+          <GlassCard>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BarChart2 className="h-4 w-4" />
+                상위 키워드
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-[280px]">
+              {loadingCharts ? (
+                <div className="text-sm text-muted-foreground">차트 로딩 중...</div>
+              ) : kwItems.length === 0 ? (
+                <div className="text-sm text-muted-foreground">표시할 데이터가 없습니다</div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={kwItems} layout="vertical" margin={{ left: 12, right: 16, top: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-40" />
+                    <XAxis type="number" hide={false} />
+                    <YAxis type="category" dataKey="keyword" width={120} tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#0ea5e9" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </GlassCard>
+          {/* Seed Graph */}
+          <GlassCard className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                시드 그래프
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-[380px]">
+              {loadingCharts ? (
+                <div className="text-sm text-muted-foreground">그래프 로딩 중...</div>
+              ) : meshNodes.length === 0 ? (
+                <div className="text-sm text-muted-foreground">표시할 데이터가 없습니다</div>
+              ) : (
+                <div className="w-full h-full">
+                  <SeedGraph nodes={meshNodes} links={meshLinks} />
+                </div>
+              )}
+            </CardContent>
+          </GlassCard>
+        </div>
             
             <div className="flex flex-wrap gap-2">
               <span className="text-sm text-muted-foreground">추천 검색어:</span>

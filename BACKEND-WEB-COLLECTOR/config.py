@@ -2,6 +2,15 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
+# Load .env for local development (best-effort)
+try:
+    from dotenv import load_dotenv  # type: ignore
+    # Load from current working directory and module directory as fallback
+    load_dotenv()
+    load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+except Exception:
+    pass
+
 
 @dataclass
 class ChangeDetectionConfig:
@@ -40,16 +49,30 @@ class BusConfig:
 
     @staticmethod
     def from_env() -> "BusConfig":
-        bus = os.getenv("MESSAGE_BUS", "stdout").lower()
+        bus_env = os.getenv("MESSAGE_BUS")
         kafka_brokers = os.getenv("KAFKA_BROKERS")
         pubsub_project = os.getenv("PUBSUB_PROJECT")
-        # Topic mapping default
-        if bus == "kafka":
-            topic = os.getenv("RAW_TOPIC", "raw.posts.v1")
-        elif bus == "pubsub":
+
+        if not bus_env or bus_env.lower() == "auto":
+            if kafka_brokers:
+                bus = "kafka"
+            elif pubsub_project:
+                bus = "pubsub"
+            else:
+                bus = "stdout"
+        else:
+            bus = bus_env.lower()
+
+        # Ensure defaults for connection
+        if bus == "kafka" and not kafka_brokers:
+            kafka_brokers = "localhost:19092"
+
+        # Topic mapping default by bus type
+        if bus == "pubsub":
             topic = os.getenv("RAW_TOPIC", "raw-posts")
         else:
             topic = os.getenv("RAW_TOPIC", "raw.posts.v1")
+
         return BusConfig(
             bus=bus,
             raw_topic=topic,
