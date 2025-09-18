@@ -27,8 +27,14 @@
   - 원시 스냅샷 저장 여부는 수집기 설정에 따름, `documents.ts` 범위 인덱스
 
 ## 설정(ENV)
-- 필수: `MONGO_URI`, `MONGO_DB`
-- 선택: `VECTOR_DB_URL`, `EMBED_MODEL`, `BATCH_SIZE`(기본 100), `MAX_CONCURRENCY`(기본 4)
+- 필수: `MONGO_URI`, `MONGO_DB`, `KAFKA_BROKERS`
+- 컨슈머 그룹: `INGEST_GROUP`(기본 `analysis-ingest`)
+- 토픽: `RAW_TOPIC`(기본 `raw.posts.v1`), `SEED_TOPIC`(기본 `seed.news.v1`)
+- 발행(옵션): `CLEAN_TOPIC`(기본 `clean.posts.v1`), `SCORES_TOPIC`(기본 `scores.sentiment.v1`)
+- 관측(옵션): `INGEST_METRICS_PORT`(Prometheus, 0 또는 미설정 시 비활성)
+- 안정성(옵션): `SENTRY_DSN`
+
+참고: 현재 버전은 MongoDB upsert 및 Kafka 발행 중심이며 VectorDB 임베딩은 미구현(추후 추가 예정)입니다.
 
 ## 의존성
 - 내부 서비스: collector-service/bridge(이벤트 소스)

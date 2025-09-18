@@ -33,7 +33,7 @@
 - 환경변수 설정:
   - 필수: `CHANGEDETECTION_BASE_URL`, `CHANGEDETECTION_API_KEY`
   - 버스 선택: `MESSAGE_BUS=stdout|kafka|pubsub`
-    - Kafka: `KAFKA_BROKERS=localhost:9092`, `RAW_TOPIC=raw.posts.v1`(기본)
+    - Kafka: `KAFKA_BROKERS=localhost:19092`, `RAW_TOPIC=raw.posts.v1`(기본)
     - Pub/Sub: `PUBSUB_PROJECT=my-gcp-project`, `RAW_TOPIC=raw-posts`(기본)
   - 옵션: `POLL_INTERVAL_SEC=60`, `INCLUDE_HTML=0|1`, `WATCH_TAG=태그명`, `SOURCE=web`, `CHANNEL=changedetection`, `PLATFORM_PROFILE=public-web`
   - Perplexity 사용 시: `PPLX_API_KEY=...`(필수), `PPLX_MODEL`(옵션)

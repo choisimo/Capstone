@@ -25,7 +25,7 @@ docker compose -f DOCKER/docker-compose.yml --env-file DOCKER/.env up -d
 - `MONGO_URI=mongodb://localhost:27017`
 - `MONGO_DB=analysis`
 - `VECTOR_DB_URL=postgresql://postgres:postgres@localhost:5432/vectors`
-- `KAFKA_BROKERS=localhost:9092`
+- `KAFKA_BROKERS=localhost:19092`
 - `MESSAGE_BUS=kafka`
 
 If you run services inside Docker on the same compose network, use:
@@ -44,7 +44,7 @@ If you run services inside Docker on the same compose network, use:
 ## Integration notes
 
 - `BACKEND-ANALYSIS-SERVICE` reads `.env` in its working directory via Pydantic. Create `BACKEND-ANALYSIS-SERVICE/.env` and copy values from above, or export them in your shell.
-- `BACKEND-WEB-COLLECTOR` reads environment variables at runtime. Export `MESSAGE_BUS=kafka` and `KAFKA_BROKERS=localhost:9092` to publish events to Kafka.
+- `BACKEND-WEB-COLLECTOR` reads environment variables at runtime. Export `MESSAGE_BUS=kafka` and `KAFKA_BROKERS=localhost:19092` to publish events to Kafka.
 - The `workers/ingest_worker.py` uses `MONGO_URI`, `MONGO_DB`, and Kafka envs; it will connect automatically when those are set.
 
 ## Postgres pgvector init

@@ -10,8 +10,12 @@ Provides:
 
 Environment variables:
 - MONGO_URI, MONGO_DB
-- VECTOR_DB_URL
-- GEMINI_API_KEY
+- VECTOR_DB_URL or granular: VECTOR_DB_HOST, VECTOR_DB_PORT, VECTOR_DB_USER, VECTOR_DB_PASSWORD, VECTOR_DB_DATABASE
+- GEMINI_API_KEY (optional)
+- MESH_CACHE_TTL_SEC, MAX_MESH_NODES, MAX_MESH_LINKS, AGG_MIN_SUPPORT, RAG_MAX_TOKENS
+
+Notes:
+- Reads .env in this directory via Pydantic BaseSettings.
 
 Run dev:
 - uvicorn app.main:app --reload --port 8010
