@@ -74,6 +74,44 @@
   - 동일 플랫폼 내 동일 작성자의 행위 집계/페르소나 추정에 활용
   - 원문 작성자 표시명은 저장하지 않거나 `meta.author`에 선택 저장(기본 권장: 비저장)
 
+### summary.events.v1
+- topics: Kafka(`summary.events.v1`), Pub/Sub(`summary-events`)
+- emitted by: collector news_watcher after raw.posts.v1 publish when SUMMARY_ENABLED=1
+- fields:
+  - id(string): summary event ID (UUID)
+  - raw_id(string): 원본 raw.posts.v1 이벤트 id (관계 링크)
+  - created_at(string, ISO8601): 생성 시각 UTC
+  - summary(string): 본문 요약 (최대 400자 기본)
+  - key_points(array[string]): 핵심 문장 최대 5개 (환경변수 SUMMARY_KEYPOINTS_MAX)
+  - facts(map): 추출 규칙 기반 엔티티 집합
+    - amounts(array[string])
+    - ratios(array[string])
+    - dates(array[string])
+    - orgs(array[string])
+  - meta(map):
+    - model(string): `heuristic` 또는 LLM 모델명
+    - input_chars(number): 입력 본문 길이
+    - lang(string): 추정/전달 언어 (기본 ko)
+    - seed_url(string|nullable)
+    - url_norm(string)
+    - topic(string): 키워드/토픽 (NEWS_KEYWORD 또는 SUMMARY_TOPIC)
+    - source(string): 원본 source (예: news|web|youtube)
+    - channel(string): 원본 channel (article|search|video|comment 등)
+
+환경 변수:
+- SUMMARY_ENABLED (기본 1)
+- SUMMARY_LLM_ENABLED (기본 0)
+- SUMMARY_MAX_CHARS (기본 400)
+- SUMMARY_KEYPOINTS_MAX (기본 5)
+
+헤더/Attributes:
+- trace_id, schema_version=summary.events.v1, source, channel, content_type=application/json, platform_profile, raw_id
+
+소비자 가이드:
+- raw_id로 raw.posts.v1 조인하여 원문/요약 결합
+- topic+created_at 윈도 기반 최신 요약 선택 가능
+- facts.* 필드들은 정규화/집계 시 선택적 사용
+
 ### seed.news.v1
 - topics: Kafka(`seed.news.v1`) (기본), Pub/Sub(`seed-news`) (권장 매핑)
 - fields:

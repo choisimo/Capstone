@@ -44,6 +44,7 @@ class PerplexityConfig:
 class BusConfig:
     bus: str  # "kafka" | "pubsub" | "stdout"
     raw_topic: str
+    summary_topic: str
     kafka_brokers: Optional[str] = None
     pubsub_project: Optional[str] = None
 
@@ -67,15 +68,18 @@ class BusConfig:
         if bus == "kafka" and not kafka_brokers:
             kafka_brokers = "localhost:19092"
 
-        # Topic mapping default by bus type
+        # Topic mapping defaults by bus type
         if bus == "pubsub":
-            topic = os.getenv("RAW_TOPIC", "raw-posts")
+            raw_topic = os.getenv("RAW_TOPIC", "raw-posts")
+            summary_topic = os.getenv("SUMMARY_TOPIC", "summary-events")
         else:
-            topic = os.getenv("RAW_TOPIC", "raw.posts.v1")
+            raw_topic = os.getenv("RAW_TOPIC", "raw.posts.v1")
+            summary_topic = os.getenv("SUMMARY_TOPIC", "summary.events.v1")
 
         return BusConfig(
             bus=bus,
-            raw_topic=topic,
+            raw_topic=raw_topic,
+            summary_topic=summary_topic,
             kafka_brokers=kafka_brokers,
             pubsub_project=pubsub_project,
         )

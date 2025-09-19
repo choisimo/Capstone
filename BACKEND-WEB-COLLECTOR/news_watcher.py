@@ -229,6 +229,8 @@ _C_REQ = None
 _H_REQ_LAT = None
 _C_PUB = None
 _C_ERR = None
+_C_SUM = None  # summaries counter
+_H_SUM_LAT = None  # summary latency histogram
 
 
 def request_get(sess: requests.Session, url: str, *, timeout: int = 20, headers: Optional[Dict[str, str]] = None, params: Optional[Dict[str, Any]] = None) -> requests.Response:
@@ -475,6 +477,63 @@ def build_raw_event(url: str, text: str, source: str, channel: str, br_cfg: Brid
 
 # ------------------------ Expansion ------------------------
 
+# Summarization import (lazy, optional)
+try:
+    from .summarizer import build_summary_event  # type: ignore
+except Exception:
+    try:
+        from summarizer import build_summary_event  # type: ignore
+    except Exception:
+        build_summary_event = None  # type: ignore
+
+
+def _maybe_publish_summary(raw_evt: Dict[str, Any], publisher, bus_cfg: BusConfig):
+    """Build and publish a summary event for a just-published raw event.
+    Guarded by summarizer feature flags inside build_summary_event.
+    """
+    if not build_summary_event:
+        return
+    try:
+        import time as _t
+        start = _t.time()
+        summary_evt = build_summary_event(raw_evt)
+        if not summary_evt:
+            return
+        headers = {
+            "trace_id": str(uuid.uuid4()),
+            "schema_version": "summary.events.v1",
+            "source": raw_evt.get("source"),
+            "channel": raw_evt.get("channel"),
+            "content_type": "application/json",
+            "platform_profile": raw_evt.get("meta", {}).get("platform_profile"),
+            "raw_id": raw_evt.get("id"),
+        }
+        key = hash_key(f"summary:{raw_evt.get('id')}")
+        data = json.dumps(summary_evt, ensure_ascii=False).encode("utf-8")
+        publisher.publish(bus_cfg.summary_topic, key=key, value=data, headers=headers)
+        if _C_PUB:
+            try:
+                _C_PUB.labels(topic=bus_cfg.summary_topic).inc()
+            except Exception:
+                pass
+        if _C_SUM:
+            try:
+                _C_SUM.labels(topic=bus_cfg.summary_topic).inc()
+            except Exception:
+                pass
+        if _H_SUM_LAT:
+            try:
+                _H_SUM_LAT.observe(max(0.0, _t.time() - start))
+            except Exception:
+                pass
+    except Exception:
+        if _C_ERR:
+            try:
+                _C_ERR.labels(type="summary").inc()
+            except Exception:
+                pass
+        pass
+
 def youtube_search_and_comments(api_key: str, query: str, max_videos: int = 5, max_comments: int = 50) -> List[Tuple[str, str, List[Dict[str, Any]]]]:
     """Return list of (video_id, title, comments[{author, text, likes}])."""
     sess = _ua_session()
@@ -565,6 +624,7 @@ def expand_seed(seed_evt: Dict[str, Any], bus_cfg: BusConfig, br_cfg: BridgeConf
                 key = hash_key(f"{evt['source']}:{evt['meta']['url_norm']}")
                 data = json.dumps(evt, ensure_ascii=False).encode("utf-8")
                 publisher.publish(bus_cfg.raw_topic, key=key, value=data, headers=headers)
+                _maybe_publish_summary(evt, publisher, bus_cfg)
                 if watcher_cfg.create_watch_related and cd_client:
                     try:
                         cd_client.import_urls(text=url, tag=os.getenv("WATCH_TAG"))
@@ -599,7 +659,7 @@ def expand_seed(seed_evt: Dict[str, Any], bus_cfg: BusConfig, br_cfg: BridgeConf
                 key_v = hash_key(f"{evt_video['source']}:{evt_video['meta']['url_norm']}")
                 data_v = json.dumps(evt_video, ensure_ascii=False).encode("utf-8")
                 publisher.publish(bus_cfg.raw_topic, key=key_v, value=data_v, headers=headers_video)
-
+                _maybe_publish_summary(evt_video, publisher, bus_cfg)
                 for c in comments:
                     ctext = c.get("text") or ""
                     if not ctext:
@@ -685,6 +745,8 @@ if __name__ == "__main__":
             _H_REQ_LAT = Histogram("newswatcher_http_request_seconds", "HTTP request latency seconds")  # type: ignore
             _C_PUB = Counter("newswatcher_events_published_total", "Published events", ["topic"])  # type: ignore
             _C_ERR = Counter("newswatcher_errors_total", "Errors", ["type"])  # type: ignore
+            _C_SUM = Counter("newswatcher_summaries_total", "Summary events published", ["topic"])  # type: ignore
+            _H_SUM_LAT = Histogram("newswatcher_summary_latency_seconds", "Summary build+publish latency seconds")  # type: ignore
             if watcher_cfg.metrics_port:
                 start_http_server(int(watcher_cfg.metrics_port))  # type: ignore
         except Exception:
@@ -769,6 +831,7 @@ if __name__ == "__main__":
                                 key_a = hash_key(f"{evt_article['source']}:{evt_article['meta']['url_norm']}:article")
                                 data_a = json.dumps(evt_article, ensure_ascii=False).encode("utf-8")
                                 publisher.publish(bus_cfg.raw_topic, key=key_a, value=data_a, headers=headers_article)
+                                _maybe_publish_summary(evt_article, publisher, bus_cfg)
                                 if _C_PUB:
                                     try:
                                         _C_PUB.labels(topic=bus_cfg.raw_topic).inc()
@@ -866,6 +929,8 @@ if __name__ == "__main__":
                                     key_c = hash_key(f"{evt_c['source']}:{evt_c['meta']['url_norm']}:{hash(ctext)}")
                                     data_c = json.dumps(evt_c, ensure_ascii=False).encode("utf-8")
                                     publisher.publish(bus_cfg.raw_topic, key=key_c, value=data_c, headers=headers_c)
+                            except Exception:
+                                pass
                     except Exception:
                         pass
 
