@@ -1,30 +1,28 @@
 from __future__ import annotations
 """
-news_watcher.py
+뉴스 워처 모듈
 
-Watches Naver/Daum news search results for a configured keyword (default: '국민연금').
-When a new article is detected, publishes a seed event ('seed.news.v1') and expands the
-seed by collecting related content from YouTube (via API if configured) and the web
-(via Perplexity if configured) and publishes those as 'raw.posts.v1'. Optionally creates
-ChangeDetection.io watches for discovered URLs.
+네이버/다음 뉴스 검색 결과를 모니터링하고 새로운 기사를 감지합니다.
+기본 키워드는 '국민연금'이며, 새 기사 감지 시 'seed.news.v1' 이벤트를 발행합니다.
+관련 컨텐츠를 YouTube 및 Perplexity를 통해 수집하고 'raw.posts.v1' 이벤트로 발행합니다.
 
-ENV configuration:
-- NEWS_KEYWORD (default: 국민연금)
-- NEWS_POLL_SEC (default: 120)
-- NEWS_SOURCES (csv: naver,daum)
-- CREATE_WATCH_FOR_NEWS (0|1, default 1)
-- CREATE_WATCH_FOR_RELATED (0|1, default 0)
-- RELATED_TOP_K (default: 5) - number of related results per engine
-- YOUTUBE_API_KEY (optional) - if set, fetch comments for discovered videos
-- PPLX_API_KEY (optional) - if set, use Perplexity to find related web pages
-- WATCH_TAG (optional) - reused from BridgeConfig for ChangeDetection tagging (name)
+환경 변수 설정:
+- NEWS_KEYWORD (기본: 국민연금): 검색 키워드
+- NEWS_POLL_SEC (기본: 120): 폴링 주기(초)
+- NEWS_SOURCES (csv: naver,daum): 뉴스 소스
+- CREATE_WATCH_FOR_NEWS (0|1, 기본 1): 뉴스 URL 변경 감지 생성
+- CREATE_WATCH_FOR_RELATED (0|1, 기본 0): 관련 URL 변경 감지 생성
+- RELATED_TOP_K (기본: 5): 엔진당 관련 결과 수
+- YOUTUBE_API_KEY (선택): 설정 시 비디오 댓글 수집
+- PPLX_API_KEY (선택): 설정 시 Perplexity로 관련 웹 페이지 검색
+- WATCH_TAG (선택): ChangeDetection.io 태그 이름
 
-Message bus reuses BusConfig/BridgeConfig from config.py
+메시지 버스 설정 (config.py 재사용):
 - MESSAGE_BUS: stdout|kafka|pubsub
-- RAW_TOPIC: topic name for raw posts (default per bus)
-- SEED_TOPIC: topic name for seed events (default: seed.news.v1)
+- RAW_TOPIC: raw posts 토픽명 (기본값 존재)
+- SEED_TOPIC: seed 이벤트 토픽명 (기본: seed.news.v1)
 
-Run:
+실행:
   python BACKEND-WEB-COLLECTOR/news_watcher.py
 """
 
@@ -77,27 +75,41 @@ except Exception:
 
 @dataclass
 class NewsWatcherConfig:
-    keyword: str = os.getenv("NEWS_KEYWORD", "국민연금")
-    poll_sec: int = int(os.getenv("NEWS_POLL_SEC", "120"))
-    sources: List[str] = tuple(map(str.strip, os.getenv("NEWS_SOURCES", "naver,daum").split(",")))  # type: ignore
-    create_watch_news: bool = os.getenv("CREATE_WATCH_FOR_NEWS", "1") in ("1", "true", "True")
-    create_watch_related: bool = os.getenv("CREATE_WATCH_FOR_RELATED", "0") in ("1", "true", "True")
-    related_top_k: int = int(os.getenv("RELATED_TOP_K", "5"))
-    seed_topic: str = os.getenv("SEED_TOPIC", "seed.news.v1")
-    # Enrichment features
-    enable_article_body: bool = os.getenv("ENABLE_ARTICLE_BODY", "1") in ("1", "true", "True")
-    enable_comments: bool = os.getenv("ENABLE_COMMENTS", "0") in ("1", "true", "True")
-    enable_naver_comments: bool = os.getenv("ENABLE_NAVER_COMMENTS", "0") in ("1", "true", "True")
-    enable_inline_nlp: bool = os.getenv("ENABLE_INLINE_NLP", "0") in ("1", "true", "True")
-    enable_dynamic_keywords: bool = os.getenv("ENABLE_DYNAMIC_KEYWORDS", "0") in ("1", "true", "True")
-    dynamic_keywords_limit: int = int(os.getenv("DYNAMIC_KEYWORDS_LIMIT", "3"))
-    # Hugging Face Inference API for sentiment (optional)
-    hf_sentiment_model: str = os.getenv("HF_SENTIMENT_MODEL", "")
-    hf_api_url: Optional[str] = os.getenv("HF_SENTIMENT_API_URL", "") or None
-    hf_api_key: Optional[str] = os.getenv("HF_API_KEY", "") or None
-    # Robots and rate limiting
-    enable_robots_check: bool = os.getenv("ENABLE_ROBOTS_CHECK", "1") in ("1", "true", "True")
-    global_max_rps: float = float(os.getenv("GLOBAL_MAX_RPS", "1.0"))
+    """
+    뉴스 워처 설정 클래스
+    
+    뉴스 모니터링 및 수집에 필요한 모든 설정을 관리합니다.
+    환경 변수에서 값을 읽어오며, 기본값을 제공합니다.
+    """
+    # 기본 검색 설정
+    keyword: str = os.getenv("NEWS_KEYWORD", "국민연금")  # 검색 키워드
+    poll_sec: int = int(os.getenv("NEWS_POLL_SEC", "120"))  # 폴링 주기(초)
+    sources: List[str] = tuple(map(str.strip, os.getenv("NEWS_SOURCES", "naver,daum").split(",")))  # 뉴스 소스 리스트
+    
+    # ChangeDetection.io 연동 설정
+    create_watch_news: bool = os.getenv("CREATE_WATCH_FOR_NEWS", "1") in ("1", "true", "True")  # 뉴스 URL 변경 감지
+    create_watch_related: bool = os.getenv("CREATE_WATCH_FOR_RELATED", "0") in ("1", "true", "True")  # 관련 URL 변경 감지
+    
+    # 관련 컨텐츠 설정
+    related_top_k: int = int(os.getenv("RELATED_TOP_K", "5"))  # 엔진당 최대 결과 수
+    seed_topic: str = os.getenv("SEED_TOPIC", "seed.news.v1")  # Seed 이벤트 토픽명
+    
+    # 컨텐츠 보강 기능
+    enable_article_body: bool = os.getenv("ENABLE_ARTICLE_BODY", "1") in ("1", "true", "True")  # 기사 본문 수집
+    enable_comments: bool = os.getenv("ENABLE_COMMENTS", "0") in ("1", "true", "True")  # 댓글 수집
+    enable_naver_comments: bool = os.getenv("ENABLE_NAVER_COMMENTS", "0") in ("1", "true", "True")  # 네이버 댓글 수집
+    enable_inline_nlp: bool = os.getenv("ENABLE_INLINE_NLP", "0") in ("1", "true", "True")  # 인라인 NLP 처리
+    enable_dynamic_keywords: bool = os.getenv("ENABLE_DYNAMIC_KEYWORDS", "0") in ("1", "true", "True")  # 동적 키워드 추출
+    dynamic_keywords_limit: int = int(os.getenv("DYNAMIC_KEYWORDS_LIMIT", "3"))  # 동적 키워드 최대 개수
+    
+    # Hugging Face 감성 분석 API 설정 (선택)
+    hf_sentiment_model: str = os.getenv("HF_SENTIMENT_MODEL", "")  # 감성 분석 모델
+    hf_api_url: Optional[str] = os.getenv("HF_SENTIMENT_API_URL", "") or None  # HF API URL
+    hf_api_key: Optional[str] = os.getenv("HF_API_KEY", "") or None  # HF API 키
+    
+    # 로봇 및 요청 제한 설정
+    enable_robots_check: bool = os.getenv("ENABLE_ROBOTS_CHECK", "1") in ("1", "true", "True")  # robots.txt 확인
+    global_max_rps: float = float(os.getenv("GLOBAL_MAX_RPS", "1.0"))  # 초당 최대 요청 수
     # Metrics & Sentry
     metrics_port: Optional[int] = int(os.getenv("METRICS_PORT", "0")) or None
     sentry_dsn: Optional[str] = os.getenv("SENTRY_DSN", "") or None
@@ -980,61 +992,95 @@ if __name__ == "__main__":
 
 
 def fetch_naver_comments_playwright(url: str, limit: int = 200, headless: bool = True) -> List[Dict[str, Any]]:
-    comments: List[Dict[str, Any]] = []
+    """
+    네이버 뉴스 댓글 수집 함수 (Playwright 사용)
+    
+    Playwright를 사용하여 네이버 뉴스 댓글을 동적으로 로드하고 수집합니다.
+    
+    Args:
+        url: 네이버 뉴스 URL
+        limit: 수집할 최대 댓글 수 (기본: 200)
+        headless: 헤드리스 브라우저 사용 여부 (기본: True)
+        
+    Returns:
+        List[Dict]: 댓글 리스트 (author, text, likes, dislikes)
+    """
+    comments: List[Dict[str, Any]] = []  # 댓글 저장 리스트
+    
+    # Playwright 임포트 시도
     try:
         from playwright.sync_api import sync_playwright  # type: ignore
     except Exception:
-        return comments
+        return comments  # Playwright 없으면 빈 리스트 반환
+    
     try:
         with sync_playwright() as p:
+            # 브라우저 실행 및 페이지 생성
             browser = p.chromium.launch(headless=headless)
             context = browser.new_context()
             page = context.new_page()
-            page.set_default_timeout(10000)
-            page.goto(url)
-            # Wait for naver comment module
-            sel_module = "#cbox_module, .u_cbox"
+            page.set_default_timeout(10000)  # 기본 타임아웃 10초
+            page.goto(url)  # 페이지 로드
+            
+            # 네이버 댓글 모듈 대기
+            sel_module = "#cbox_module, .u_cbox"  # 댓글 모듈 선택자
             try:
                 page.wait_for_selector(sel_module, timeout=15000)
             except Exception:
                 browser.close()
-                return comments
-            # Click more buttons until enough
+                return comments  # 댓글 모듈 없으면 종료
+            
+            # 더보기 버튼 클릭하여 충분한 댓글 로드
             load_more_selectors = [
-                ".u_cbox_btn_more",
-                ".u_cbox_btn_view_more",
+                ".u_cbox_btn_more",  # 더보기 버튼 선택자 1
+                ".u_cbox_btn_view_more",  # 더보기 버튼 선택자 2
             ]
-            loaded = 0
+            loaded = 0  # 로드된 댓글 수
+            
+            # 최대 30번 더보기 클릭 시도
             for _ in range(30):
                 if loaded >= limit:
-                    break
+                    break  # 충분한 댓글 로드됨
+                
                 clicked = False
+                # 더보기 버튼 찾아서 클릭
                 for sel in load_more_selectors:
                     btns = page.query_selector_all(sel)
                     if btns:
                         try:
-                            btns[0].click()
+                            btns[0].click()  # 첫 번째 버튼 클릭
                             clicked = True
-                            page.wait_for_timeout(800)
+                            page.wait_for_timeout(800)  # 로딩 대기
                             break
                         except Exception:
                             pass
+                
                 if not clicked:
-                    break
-                # update loaded count heuristically
+                    break  # 더 이상 클릭할 버튼 없음
+                
+                # 로드된 댓글 수 업데이트
                 loaded = len(page.query_selector_all(".u_cbox_comment"))
-            # Extract comments
-            items = page.query_selector_all(".u_cbox_comment")
+            
+            # 댓글 추출
+            items = page.query_selector_all(".u_cbox_comment")  # 모든 댓글 요소
             for it in items[:limit]:
+                # 작성자 추출
                 try:
                     author = (it.query_selector(".u_cbox_nick") or it.query_selector(".u_cbox_name")).inner_text().strip()  # type: ignore
                 except Exception:
                     author = ""
+                
+                # 댓글 내용 추출
                 try:
                     text = (it.query_selector(".u_cbox_contents") or it.query_selector(".u_cbox_text_wrap")).inner_text().strip()  # type: ignore
                 except Exception:
                     text = ""
+                
+                # 좋아요/싫어요 수 추출 함수
                 def _num(sel: str) -> int:
+                    """
+                    선택자로 숫자 추출
+                    """
                     try:
                         el = it.query_selector(sel)
                         if not el:
@@ -1043,13 +1089,19 @@ def fetch_naver_comments_playwright(url: str, limit: int = 200, headless: bool =
                         return int(re.findall(r"\d+", t)[0]) if re.findall(r"\d+", t) else 0
                     except Exception:
                         return 0
-                likes = _num(".u_cbox_cnt_recomm")
-                dislikes = _num(".u_cbox_cnt_unrecomm")
+                
+                # 좋아요/싫어요 수 추출
+                likes = _num(".u_cbox_cnt_recomm")  # 추천 수
+                dislikes = _num(".u_cbox_cnt_unrecomm")  # 비추천 수
+                
+                # 유효한 댓글만 추가
                 if text:
                     comments.append({"author": author, "text": text, "likes": likes, "dislikes": dislikes})
-            browser.close()
+            
+            browser.close()  # 브라우저 종료
     except Exception:
-        pass
+        pass  # 오류 무시
+    
     return comments
 
 
