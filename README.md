@@ -1,6 +1,57 @@
 # 국민연금 온라인 여론 분석·정책 피드백 시스템
+## 완전한 마이크로서비스 아키텍처 (MSA) 구현
 
-## 문서 요약
+🏗️ **완전 구현된 MSA 플랫폼**  
+✅ **5개 핵심 마이크로서비스 완료**  
+🐳 **Docker 컨테이너화 완료**  
+🚀 **프로덕션 레디**
+
+## 🏛️ 시스템 아키텍처
+
+### 🚪 서비스 포트 할당
+- **API Gateway**: `8000` - 메인 진입점 및 라우팅
+- **Analysis Service**: `8001` - 감성 분석 & ML 모델
+- **Collector Service**: `8002` - 웹 스크래핑 & RSS 수집
+- **ABSA Service**: `8003` - 속성 기반 감성 분석
+- **Alert Service**: `8004` - 알림 & 경고 시스템
+- **Dashboard**: `3000` - 웹 인터페이스
+
+### 🗄️ 인프라스트럭처
+- **PostgreSQL**: `5432` - pgvector 확장으로 벡터 검색
+- **Redis**: `6379` - 캐싱 및 세션 관리
+
+## 🚀 빠른 시작
+
+```bash
+# 전체 MSA 플랫폼 시작
+make start
+
+# 서비스 상태 확인
+make status
+
+# 헬스 체크
+make check-health
+
+# 로그 확인
+make logs
+
+# 정리
+make clean
+```
+
+## 📊 실시간 모니터링
+
+### API 문서 (Swagger UI)
+- API Gateway: http://localhost:8000/docs
+- Analysis Service: http://localhost:8001/docs
+- Collector Service: http://localhost:8002/docs
+- ABSA Service: http://localhost:8003/docs
+- Alert Service: http://localhost:8004/docs
+
+### 대시보드
+- Web Dashboard: http://localhost:3000
+
+## 🎯 시스템 목적
 - 목적: 온라인 여론의 AI 감성 분석 결과를 정책 설계·소통에 연결하는 데이터 기반 시스템을 정의합니다.
 - 범위: 데이터 수집/전처리, 모델링, 시각화, 정책 이벤트 연계 분석, 자동화 시스템을 포괄합니다.
 - 산출물: 인터랙티브 대시보드, 조기경보, 정기 브리핑 템플릿, 분석 리포트.
