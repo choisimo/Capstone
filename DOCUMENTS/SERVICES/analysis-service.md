@@ -18,8 +18,8 @@
     - query: `min_weight`, `max_nodes`
     - resp: 기사 스코프 메쉬 노드/엣지
   - `GET /api/v1/documents`
-    - query: `q`, `article_id`, `from`, `to`, `lang[]`, `persona[]`, `emotion[]`, `experience[]`, `keywords[]`, `page`, `size`
-    - resp: `{ total, items: [{id, ts, source, channel, article_id, text, meta:{sentiment, persona[], experience[], keywords[], lang}, vector_id}] }`
+    - query: `q`, `article_id`, `from`, `to`, `lang[]`, `persona[]`, `emotion[]`, `experience[]`, `keywords[]`, `page`, `size`, `sort=recency|relevance`
+    - resp: `{ total, items: [{id, ts, source, channel, article_id, text, meta:{sentiment, persona[], experience[], keywords[], lang}, vector_id}], agg: {by_source:[], by_time:[]} }`
   - `POST /api/v1/generate-report`
     - body: `{ nodes: [{type, id|label}], template?: id, options?: {style, length, audience} }`
     - resp: `{ report_id, markdown, citations: [{doc_id, span}], meta }`
