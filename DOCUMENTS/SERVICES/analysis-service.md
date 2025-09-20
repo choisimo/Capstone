@@ -19,7 +19,7 @@
     - resp: 기사 스코프 메쉬 노드/엣지
   - `GET /api/v1/documents`
     - query: `q`, `article_id`, `from`, `to`, `lang[]`, `persona[]`, `emotion[]`, `experience[]`, `keywords[]`, `page`, `size`
-    - resp: `{ total, items: [{id, ts, source, channel, article_id, text, meta:{sentiment, persona[], experience[], keywords[], lang}}] }`
+    - resp: `{ total, items: [{id, ts, source, channel, article_id, text, meta:{sentiment, persona[], experience[], keywords[], lang}, vector_id}] }`
   - `POST /api/v1/generate-report`
     - body: `{ nodes: [{type, id|label}], template?: id, options?: {style, length, audience} }`
     - resp: `{ report_id, markdown, citations: [{doc_id, span}], meta }`
@@ -81,3 +81,21 @@
 - GraphQL/Graph streaming(SSE) 지원 검토
 - 보고서 템플릿/워크플로우 편집기, 다중 페르소나 비교 뷰
 - PMI/NGMI 등 엣지 가중치 선택, 클러스터링 결과 캐시
+
+## 실행 작업 매핑 (Execution Task Mapping)
+Analysis 관련 작업 AN1–AN9 및 연계.
+
+핵심 매핑:
+- AN1 Query DSL 정의: 필터/집계 표현 기반 (articles/documents)
+- AN2 집계 연산자: count/avg/distinct 구현 + 확장 포인트
+- AN3 타임 윈도우 함수: hour/day/week bucket + gap fill 로직
+- AN4 캐시 계층: mesh_cache & hot query 결과 TTL 관리
+- AN5 AuthZ 필터 통합: 사용자/org 역할 기반 필터 삽입
+- AN6 쿼리 플래너 비용 메트릭: 실행 플랜 시간/rows 추적
+- AN7 머티리얼라이즈드 뷰: 빈번 heavy 패턴 사전 계산
+- AN8 멀티테넌트 쿼터: org별 rate / resource limits
+- AN9 쿼리 트레이싱/샘플링: 오버헤드 제한된 세부 span 기록
+
+교차 의존성: Mesh-aggregator(M1–M3), NLP 임베딩(N6–N7), Gateway(G1–G5)
+
+추적: PR 태그 `[AN2][AN4]`, 캐시 히트율 ≥ 목표 후 확장(AN7)

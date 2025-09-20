@@ -56,3 +56,19 @@
 
 ## 백로그
 - 사용자 피드백 기반 태그 수정 루프, 라벨셋 버저닝/온톨로지 문서화
+
+## 실행 작업 매핑 (Execution Task Mapping)
+Tagging 관련 Detailed Task Breakdown 태그(T1–T7)와의 연결.
+
+핵심 매핑:
+- T1 규칙 기반 부트스트랩: 휴리스틱/키워드 스캐폴드
+- T2 다중 라벨 분류 베이스라인: 초기 ML/LLM Hybrid
+- T3 임계값 최적화: Precision/Recall 조정 스크립트
+- T4 계층적 태그 그룹 구성: ontology/parent-child 매핑
+- T5 피드백 엔드포인트: 승인/거절 API 저장 후 재학습 큐
+- T6 재학습 스케줄러: 주기/성능 조건 기반 트리거
+- T7 Zero-shot 확장 실험: 임시 태그 확장 벤치마크
+
+교차 의존성: N6 임베딩(키워드 벡터), S1/S3 감성 점수(입력 메타), Analysis-service 소비
+
+추적: PR 태그 `[T2][T3]`, 메트릭 대시보드 `tags/sec`/`llm_latency_ms`

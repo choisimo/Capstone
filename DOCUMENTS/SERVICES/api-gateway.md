@@ -63,3 +63,27 @@
 
 ## 백로그
 - SSE 지원 옵션, GraphQL 게이트 추가 검토
+
+## 실행 작업 매핑 (Execution Task Mapping)
+Gateway 기능을 G1–G10 작업 ID로 표준화하여 구현/추적.
+
+핵심 매핑:
+- G1 인증 미들웨어: OAuth2/OIDC JWT 검증 + 키 캐시(JWKS) ("보안" 섹션 기반)
+- G2 레이트 제한·쿼터: 사용자/Org/IP 단위 버킷 ("보안"/레이트 제한 언급 강화)
+- G3 요청 검증: 파라미터/바디 스키마(pydantic/zod) 및 입력 정규화
+- G4 응답 캐시 계층: Redis 키=쿼리 파라미터 해시 ("데이터/스토리지" 캐시)
+- G5 팬인/Aggregation: 내부 서비스 호출 Fan-in + 오류/지연 병합
+- G6 WebSocket Alerts 브릿지: `ops.alerts.v1` 구독 → `/ws/alerts` fan-out
+- G7 에러 규약 통합: `{code,message,trace_id}` 포맷 표준화 및 매핑
+- G8 관측성 계측: 지연/캐시히트율/오류율 + 업스트림 트레이스 연계
+- G9 서킷브레이커/타임아웃/재시도: 하위 서비스 보호 (패턴/백로그 연결)
+- G10 라우트 버전 레지스트리: `/v1/*` 정의 및 감가(deprecation) 메타 태그
+
+교차 의존성:
+- Sentiment(S1–S*), ABSA(A*), Topic(TM*), Summarizer(R*), Event-Analysis(EA8), Alert(AL4–AL10)
+- 공통 X1(로그) X2(메트릭) X3(트레이스) X5(CI) X8(RBAC) X10(비용)
+
+추적:
+- PR 태그 예: `[G1][G4]` ; 초기 GA 기준: G1–G4 + G7 + G8 충족
+- 캐시 효과성: G4 완료 후 P95 개선율/캐시히트율 대시보드화
+- 안정화 단계에서 G9 활성 (에러율/타임아웃 임계 도달 시)

@@ -34,3 +34,20 @@
 
 ## 백로그
 - 동적 토픽 병합/분할, 최신성 가중치
+
+## 실행 작업 매핑 (Execution Task Mapping)
+Topic 모델러 관련 작업 TM1–TM8 매핑.
+
+핵심 매핑:
+- TM1 코퍼스 샘플링/클리닝: 초기 전처리 파이프라인(Stopwords, 언어 필터) -> Embedding 준비
+- TM2 베이스라인(LDA/NMF) 평가: coherence/perplexity 산출
+- TM3 코히런스 메트릭 파이프라인: 자동 계산 + 모니터링 대시보드
+- TM4 동적 토픽 리프레시(주기적 재빌드): TTL 기반 재계산
+- TM5 토픽 라벨 생성: 상위 용어 + 휴리스틱/LLM 라벨러
+- TM6 임베딩 기반 클러스터(HDBSCAN) 실험: BERTopic 방식 비교
+- TM7 토픽 병합/분할 거버넌스: 품질 기준/관리 API 초안
+- TM8 드리프트 로그 & 알람: 토픽 분포 변화 감시
+
+교차 의존성: N6 임베딩, R3 벡터 스토어, Analysis/Explorer 시각화
+
+추적: PR 태그 `[TM2][TM3]`, 대시보드: coherence trend

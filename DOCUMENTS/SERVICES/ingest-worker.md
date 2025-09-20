@@ -74,5 +74,27 @@
 
 ## 백로그
 - 멀티파이프라인 분기(뉴스·커뮤니티·X 등 채널별 규칙)
+
+## 실행 작업 매핑 (Execution Task Mapping)
+Ingest 처리 체인 IW1–IW9.
+
+핵심 매핑:
+- IW1 컨슈머 설정/파티션 전략: 그룹·파티션 키 일관 (Kafka/PubSub 섹션)
+- IW2 정제 파이프라인: HTML/이모지/URL 정규화 + 언어감지
+- IW3 중복 제거: URL 정규화 해시 + MinHash/window idempotency
+- IW4 문서 매핑/업서트: articles/documents 스키마 반영 + vector_id placeholder
+- IW5 이벤트/메시지 발행: `clean.posts.v1` (옵션) + 후속 스코어 큐
+- IW6 임베딩 큐잉: VectorDB 비동기 파이프라인 트리거
+- IW7 관측성 계측: events_in/deduped/docs_written/latency
+- IW8 장애 복구: DLQ 재처리 & 재인게스트 스크립트
+- IW9 성능 튜닝: 배치크기/병렬/압축 최적화
+
+교차 의존성:
+- Collector(C1–C5), Tagging(T2), NLP(N3–N6), ABSA(A2), Sentiment(S2)
+- 공통 X1–X3, X5, X7, X10
+
+추적:
+- PR 태그 `[IW2][IW3]`; 초기 기능 컷: IW1–IW5 + IW7
+- 튜닝 목표: P95 지연 <3s 달성 후 IW9 최적화 단계 착수
 - 미디어 타입 확장(PDF/이미지 OCR)
 - 임베딩 비동기 워커 분리 및 캐시

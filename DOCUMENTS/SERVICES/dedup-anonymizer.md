@@ -44,3 +44,22 @@
 
 ## 백로그
 - DLP API(GCP) 통합 옵션
+
+## 실행 작업 매핑 (Execution Task Mapping)
+기능을 D1–D10 작업과 연계.
+
+핵심 매핑:
+- D1 정규화/전처리: 중복 해시 일관성 확보
+- D2 MinHash/SimHash 실험: 유사문서 군집 초기
+- D3 임계값 설정 기능: 구성 파일/ENV 스위치
+- D4 PII 정규표현식 스크러빙: 이메일/전화/NID
+- D5 ML NER 기반 PII 확장: 휴리스틱 실패 fallback
+- D6 Hash Salt/Key Rotation: 보안/프라이버시 강화
+- D7 메트릭: 중복율/클러스터 크기/PII 검출
+- D8 벤치마크: 10k 문서 배치 처리 성능 측정
+- D9 적응형 임계값: 피드백 루프(중복 false positive 감소)
+- D10 GDPR 삭제 파이프라인: 특정 hash 제거 재처리
+
+교차 의존성: C1–C5 (Collector 출력 품질), X1–X3 관측성, X4 비밀회전 정책
+
+추적: PR 제목 `[D2][D3]` 등, 메트릭 대시보드 확인 후 D9 시작

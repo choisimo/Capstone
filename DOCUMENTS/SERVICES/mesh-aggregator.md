@@ -55,3 +55,25 @@
 
 ## 백로그
 - 2.5D 좌표 선계산/캐시, 레이아웃 안정화 메타 저장
+
+## 실행 작업 매핑 (Execution Task Mapping)
+메쉬 집계 파이프라인 작업 M1–M9.
+
+핵심 매핑:
+- M1 입력 스키마 정합성: documents/articles 필드 검증 & 인덱스 확인
+- M2 필터 해시/키 정책: `scope+window+filters_hash` 유니크 (TTL 전략)
+- M3 공출현 빈도 집계: 다단계 파이프라인(쿼리→카운트)
+- M4 지표 산출 모듈: PMI/NGMI/Jaccard 전략 플러그
+- M5 커뮤니티 탐지/축약: Louvain/Leiden + 상위 k 제한
+- M6 증분 갱신(Incremental): 변경 문서 기반 부분 재계산
+- M7 캐시 저장/TTL 관리: expires_at 관리 + 히트 메트릭
+- M8 성능 최적화: Sparse 계산, 병렬/배치 튜닝
+- M9 안정성/폴백: 실패 시 이전 캐시 서빙 + 알람
+
+교차 의존성:
+- Analysis(AN4–AN7), NLP 임베딩(N6), Tagging(T3), Ingest(IW4)
+- 공통 X1–X3, X5, X7, X10
+
+추적:
+- PR 태그 `[M3][M4]` 등; 초기 기능 컷: M1–M5 + M7
+- 증분(M6) 활성 후 목표: 전체 리빌드 대비 평균 60% 시간 절감

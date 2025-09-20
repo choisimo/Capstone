@@ -138,3 +138,31 @@
   ```bash
   curl "http://localhost:8001/api/v1/agent/search?q=example.com&engine=cd&tag=News"
   ```
+
+## 실행 작업 매핑 (Execution Task Mapping)
+이 문서의 기능 요소를 `detailed-task-breakdown.md`의 표준 작업 ID와 연결하여 구현·추적을 일관화.
+
+핵심 매핑:
+- C1 스키마 정의: 상태/이벤트 필드 명세 (현재 '데이터/스토리지' 반영)
+- C2 소스 어댑터: changedetection + 향후 커스텀 커넥터 구조 (REST 관리 인터페이스 연계)
+- C3 레이트 리미터 & 백오프: 재시도/실패 처리 로직 (관측성 메트릭 실패율과 함께)
+- C4 Fingerprint 중복 해시: URL+본문 기반 해시 (중복 기초 필터링 언급 보강)
+- C5 Raw 이벤트 발행: `raw.posts.v1` 파이프라인 (Kafka/PubSub 섹션)
+- C6 헬스 & 메트릭: 수집율/실패율/지연 노출
+- C7 재시도 + DLQ: at-least-once + `raw.posts.dlq` 구성
+- C8 Secret 관리: API Key/크리덴셜 보관 (ENV + 시크릿 매니저 추상화 예정)
+- C9 배치 vs 스트리밍 토글: 추후 고부하/비용 최적화 (백로그 진입 예정)
+- C10 멀티테넌트 소스 쿼터: 소스별/테넌트별 할당량 (백로그)
+- C11 소스 구성 UI/관리 API: REST 커넥터 CRUD 확장
+- C12 히스토릭 백필: 과거 데이터 재수집 잡
+- C13 리전 페일오버: 다중 리전 전략 문서화 (백로그)
+- (요약 기능 관련) Summarizer R1-R5 (인덱스/벡터), R6-R8(비용/품질 모니터)와 연동 고려
+
+교차(공통) 의존성:
+- X1-X3 Observability(로그/메트릭/트레이스), X5 CI, X7 IaC 모듈, X8 RBAC/권한, X10 비용 모니터
+
+추적 방법:
+- 구현 PR 제목에 `[C1][C2]` 등 태그 포함
+- 배포 체크리스트: C1–C7 완료 + X1–X3 계측 통과 시 초기 E2E 가능
+
+(이 섹션은 주기적으로 Master Task List 반영하여 업데이트)

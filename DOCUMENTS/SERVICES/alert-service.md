@@ -35,3 +35,26 @@
 
 ## 백로그
 - 이상탐지(AD) 모델, 사용자별 구독 필터
+
+## 실행 작업 매핑 (Execution Task Mapping)
+경보 파이프라인 AL1–AL10.
+
+핵심 매핑:
+- AL1 룰 스키마 정의: threshold/변동성/조건 표현 DSL
+- AL2 입력 스트림 어댑터: sentiment/absa/analytics 스코어 구독
+- AL3 윈도우 통계 계산: 이동 평균·표준편차·변동성 지표
+- AL4 트리거 평가 엔진: 룰→조건→발화 여부 결정
+- AL5 서프레션/중복 억제: 같은 issue 반복 최소화(backoff)
+- AL6 다중 채널 Notifier: Slack/Email/Webhook 어댑터
+- AL7 심각도(severity) 분류: 룰 기반 + 추가 ML(백로그)
+- AL8 Observability: 경보 노이즈율/유효율/MTTA 메트릭
+- AL9 재처리/DLQ 핸들링: 실패 이벤트 재평가 로직
+- AL10 정책 버전관리: 룰 변경 히스토리/롤백
+
+교차 의존성:
+- Sentiment(S5), ABSA(A4), Event-Analysis(EA5), Gateway(G6)
+- 공통 X1–X3, X5, X7, X10
+
+추적:
+- PR 태그 `[AL4][AL5]` ; 초기 MVP: AL1–AL6 + AL8
+- 노이즈율 < 30% 달성 시 AL7 ML 확장 고려
