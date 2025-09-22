@@ -85,7 +85,7 @@ services:
       ENVIRONMENT: production
       LOG_LEVEL: INFO
     ports:
-      - "8003:8003"
+      - "8002:8002"
     depends_on:
       - osint-postgres
       - osint-redis
@@ -93,7 +93,7 @@ services:
     networks:
       - osint-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -145,7 +145,7 @@ services:
       TASK_TIMEOUT_DEFAULT: 3600
       MAX_RETRIES_DEFAULT: 3
       WORKER_HEARTBEAT_TIMEOUT: 300
-      PLANNING_SERVICE_URL: http://osint-planning:8003
+      PLANNING_SERVICE_URL: http://osint-planning:8002
       SOURCE_SERVICE_URL: http://osint-source:8004
     ports:
       - "8005:8005"
@@ -169,7 +169,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.22.0.0/16
 
 volumes:
   osint_postgres_data:

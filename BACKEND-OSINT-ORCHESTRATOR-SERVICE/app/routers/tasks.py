@@ -1,4 +1,5 @@
 from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, HTTPException
 from app.services.orchestrator_service import orchestrator
 from app.schemas import (
     TaskCreateRequest, TaskUpdateRequest, TaskResponse, 
@@ -6,29 +7,7 @@ from app.schemas import (
     WorkerRegistrationRequest, WorkerResponse, TaskAssignmentRequest, TaskAssignmentResponse
 )
 
-class APIRouter:
-    def __init__(self):
-        self.routes = []
-    
-    def post(self, path: str):
-        def decorator(func):
-            self.routes.append(("POST", path, func))
-            return func
-        return decorator
-    
-    def get(self, path: str):
-        def decorator(func):
-            self.routes.append(("GET", path, func))
-            return func
-        return decorator
-    
-    def put(self, path: str):
-        def decorator(func):
-            self.routes.append(("PUT", path, func))
-            return func
-        return decorator
-
-router = APIRouter()
+router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 
 @router.post("/")
 async def create_task(request: TaskCreateRequest) -> Dict[str, str]:
@@ -48,7 +27,7 @@ async def create_task(request: TaskCreateRequest) -> Dict[str, str]:
 @router.get("/{task_id}")
 async def get_task(task_id: str) -> TaskResponse:
     if task_id not in orchestrator.tasks:
-        raise Exception("Task not found")
+        raise HTTPException(status_code=404, detail="Task not found")
     
     task = orchestrator.tasks[task_id]
     
@@ -85,7 +64,7 @@ async def update_task(task_id: str, request: TaskUpdateRequest) -> Dict[str, str
     )
     
     if not success:
-        raise Exception("Task not found")
+        raise HTTPException(status_code=404, detail="Task not found")
     
     return {"task_id": task_id, "status": "updated"}
 
@@ -183,7 +162,7 @@ async def worker_heartbeat(worker_id: str, current_load: int = 0) -> Dict[str, s
     success = await orchestrator.worker_heartbeat(worker_id, current_load)
     
     if not success:
-        raise Exception("Worker not found")
+        raise HTTPException(status_code=404, detail="Worker not found")
     
     return {"worker_id": worker_id, "status": "heartbeat_received"}
 

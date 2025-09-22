@@ -1,13 +1,8 @@
-from typing import Optional, Dict, List
 from datetime import datetime
+from typing import Optional, List, Dict, Any
+from pydantic import BaseModel, Field
 from enum import Enum
 
-class TaskType(str, Enum):
-    KEYWORD_EXPANSION = "keyword_expansion"
-    SOURCE_DISCOVERY = "source_discovery"
-    CONTENT_COLLECTION = "content_collection"
-    SENTIMENT_ANALYSIS = "sentiment_analysis"
-    ALERT_GENERATION = "alert_generation"
 
 class TaskStatus(str, Enum):
     PENDING = "pending"
@@ -17,80 +12,129 @@ class TaskStatus(str, Enum):
     FAILED = "failed"
     CANCELLED = "cancelled"
 
+
 class TaskPriority(str, Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
     CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
 
-class OsintTask:
-    def __init__(self, id=None, task_type=TaskType.CONTENT_COLLECTION, keywords=None, 
-                 sources=None, priority=TaskPriority.MEDIUM, status=TaskStatus.PENDING,
-                 assigned_to=None, metadata=None, dependencies=None, retry_count=0,
-                 max_retries=3, timeout_seconds=3600, expected_results=0):
-        self.id = id
-        self.task_type = task_type
-        self.keywords = keywords or []
-        self.sources = sources or []
-        self.priority = priority
-        self.status = status
-        self.assigned_to = assigned_to
-        self.metadata = metadata or {}
-        self.dependencies = dependencies or []
-        self.retry_count = retry_count
-        self.max_retries = max_retries
-        self.timeout_seconds = timeout_seconds
-        self.expected_results = expected_results
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
-        self.started_at = None
-        self.completed_at = None
-        self.error_message = None
 
-class TaskResult:
-    def __init__(self, id=None, task_id=None, result_type="", data=None, 
-                 quality_score=0.0, confidence_score=0.0):
-        self.id = id
-        self.task_id = task_id
-        self.result_type = result_type
-        self.data = data or {}
-        self.quality_score = quality_score
-        self.confidence_score = confidence_score
-        self.created_at = datetime.utcnow()
+class TaskType(str, Enum):
+    NEWS_COLLECTION = "news_collection"
+    SOCIAL_MONITORING = "social_monitoring"
+    WEB_SCRAPING = "web_scraping"
+    API_COLLECTION = "api_collection"
+    SENTIMENT_ANALYSIS = "sentiment_analysis"
+    TREND_ANALYSIS = "trend_analysis"
 
-class TaskQueue:
-    def __init__(self, id=None, name="", queue_type="priority", max_workers=5,
-                 status="active", metadata=None):
-        self.id = id
-        self.name = name
-        self.queue_type = queue_type
-        self.max_workers = max_workers
-        self.status = status
-        self.metadata = metadata or {}
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
 
-class TaskDependency:
-    def __init__(self, id=None, task_id=None, depends_on_task_id=None, 
-                 dependency_type="completion"):
-        self.id = id
-        self.task_id = task_id
-        self.depends_on_task_id = depends_on_task_id
-        self.dependency_type = dependency_type
-        self.created_at = datetime.utcnow()
+class SourceType(str, Enum):
+    NEWS = "news"
+    SOCIAL = "social"
+    BLOG = "blog"
+    FORUM = "forum"
+    ACADEMIC = "academic"
+    GOVERNMENT = "government"
+    CUSTOM = "custom"
 
-class WorkerNode:
-    def __init__(self, id=None, node_id="", node_type="", capabilities=None,
-                 max_concurrent_tasks=5, current_load=0, status="active",
-                 last_heartbeat=None, metadata=None):
-        self.id = id
-        self.node_id = node_id
-        self.node_type = node_type
-        self.capabilities = capabilities or []
-        self.max_concurrent_tasks = max_concurrent_tasks
-        self.current_load = current_load
-        self.status = status
-        self.last_heartbeat = last_heartbeat
-        self.metadata = metadata or {}
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+
+class OsintTask(BaseModel):
+    id: str = Field(description="Unique task identifier")
+    task_type: TaskType = Field(description="Type of OSINT task")
+    keywords: List[str] = Field(description="Keywords for collection")
+    sources: List[str] = Field(description="List of sources to collect from")
+    priority: TaskPriority = Field(default=TaskPriority.MEDIUM)
+    status: TaskStatus = Field(default=TaskStatus.PENDING)
+    dependencies: List[str] = Field(default_factory=list, description="Task dependencies")
+    assigned_to: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    timeout_seconds: int = Field(default=3600)
+    retry_count: int = Field(default=0)
+    max_retries: int = Field(default=3)
+    expected_results: int = Field(default=0)
+    error_message: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class TaskResult(BaseModel):
+    id: str = Field(description="Unique result identifier")
+    task_id: str = Field(description="Associated task ID")
+    result_type: str = Field(description="Type of result")
+    data: Dict[str, Any] = Field(description="Result data")
+    quality_score: float = Field(default=0.0, description="Data quality score")
+    confidence_score: float = Field(default=0.0, description="Result confidence")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class TaskQueue(BaseModel):
+    queue_id: str = Field(description="Queue identifier")
+    name: str = Field(description="Queue name")
+    description: Optional[str] = None
+    max_size: int = Field(default=1000)
+    current_size: int = Field(default=0)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class TaskDependency(BaseModel):
+    id: str = Field(description="Dependency identifier")
+    task_id: str = Field(description="Dependent task ID")
+    depends_on: str = Field(description="Task this depends on")
+    dependency_type: str = Field(default="completion")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class WorkerNode(BaseModel):
+    id: str = Field(description="Worker identifier")
+    node_id: str = Field(description="Physical node identifier")
+    node_type: str = Field(description="Type of worker node")
+    capabilities: List[str] = Field(description="Worker capabilities")
+    status: str = Field(default="active")
+    max_concurrent_tasks: int = Field(default=5)
+    current_load: int = Field(default=0)
+    last_heartbeat: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class CollectionPlan(BaseModel):
+    plan_id: str = Field(description="Unique plan identifier")
+    query: str = Field(description="Search query or topic")
+    objectives: List[str] = Field(description="Collection objectives")
+    sources: List[Dict[str, Any]] = Field(description="Planned sources with configs")
+    strategies: List[str] = Field(description="Collection strategies")
+    keywords: List[str] = Field(description="Keywords for collection")
+    filters: Dict[str, Any] = Field(default_factory=dict)
+    schedule: Optional[Dict[str, Any]] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class SourceConfig(BaseModel):
+    source_id: str = Field(description="Unique source identifier")
+    source_type: SourceType
+    name: str = Field(description="Source name")
+    url: Optional[str] = None
+    api_endpoint: Optional[str] = None
+    credentials: Optional[Dict[str, Any]] = None
+    rate_limit: Optional[int] = Field(default=10, description="Requests per minute")
+    priority: int = Field(default=5)
+    is_active: bool = Field(default=True)
+    capabilities: List[str] = Field(default_factory=list)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class WorkflowStatus(BaseModel):
+    workflow_id: str = Field(description="Workflow identifier")
+    tasks: List[OsintTask] = Field(description="Tasks in workflow")
+    status: TaskStatus
+    progress: float = Field(default=0.0, description="Progress percentage")
+    started_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: Optional[datetime] = None
+    results_summary: Dict[str, Any] = Field(default_factory=dict)
