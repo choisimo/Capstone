@@ -153,8 +153,8 @@ class AlertHistory(Base):
     # Timing
     performed_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Metadata
-    metadata = Column(JSON)
+    # Additional metadata
+    action_metadata = Column(JSON)
 
 class AlertSubscription(Base):
     __tablename__ = "alert_subscriptions"

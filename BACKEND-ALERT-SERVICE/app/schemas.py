@@ -160,8 +160,8 @@ class AlertSubscriptionBase(BaseModel):
     keywords: List[str] = []
     sources: List[str] = []
     is_active: bool = True
-    quiet_hours_start: Optional[str] = Field(None, regex="^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
-    quiet_hours_end: Optional[str] = Field(None, regex="^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
+    quiet_hours_start: Optional[str] = Field(None, pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
+    quiet_hours_end: Optional[str] = Field(None, pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
     timezone: str = "UTC"
 
 class AlertSubscriptionCreate(AlertSubscriptionBase):
@@ -174,8 +174,8 @@ class AlertSubscriptionUpdate(BaseModel):
     keywords: Optional[List[str]] = None
     sources: Optional[List[str]] = None
     is_active: Optional[bool] = None
-    quiet_hours_start: Optional[str] = Field(None, regex="^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
-    quiet_hours_end: Optional[str] = Field(None, regex="^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
+    quiet_hours_start: Optional[str] = Field(None, pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
+    quiet_hours_end: Optional[str] = Field(None, pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
     timezone: Optional[str] = None
 
 class AlertSubscription(AlertSubscriptionBase):

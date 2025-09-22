@@ -1,0 +1,231 @@
+# 연금 감성 분석 플랫폼 - 실제 MSA 구조
+# 실제 BACKEND-* 디렉토리를 사용하는 통합 설정
+# Services:
+# - PostgreSQL with pgvector extension
+# - Redis for caching
+# - 5 microservices: API Gateway, Analysis, ABSA, Alert, Collector
+
+services:
+  # ========== Infrastructure Services ==========
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: pension-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-pension_sentiment}
+      # pgvector 확장 자동 생성
+      POSTGRES_EXTENSIONS: "pgvector"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - pension-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: pension-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - pension-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== Core Microservices ==========
+  
+  # API Gateway - 모든 요청의 진입점
+  api-gateway:
+    build: 
+      context: ./BACKEND-API-GATEWAY
+      dockerfile: Dockerfile
+    container_name: pension-api-gateway
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - REDIS_URL=redis://redis:6379
+      - ANALYSIS_SERVICE_URL=http://analysis-service:8001
+      - COLLECTOR_SERVICE_URL=http://collector-service:8002
+      - ABSA_SERVICE_URL=http://absa-service:8003
+      - ALERT_SERVICE_URL=http://alert-service:8004
+      - LOG_LEVEL=INFO
+      - CORS_ORIGINS=*
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - pension-network
+
+  # Analysis Service - 감성 분석 및 트렌드 분석
+  analysis-service:
+    build: 
+      context: ./BACKEND-ANALYSIS-SERVICE-NEW
+      dockerfile: Dockerfile
+    container_name: pension-analysis-service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - REDIS_URL=redis://redis:6379
+      - API_GATEWAY_URL=http://api-gateway:8000
+      - ML_MODEL_PATH=/app/models
+      - LOG_LEVEL=INFO
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ml-models:/app/models
+      - ./BACKEND-ANALYSIS-SERVICE-NEW/models:/app/models:ro
+    networks:
+      - pension-network
+
+  # ABSA Service - 속성 기반 감성 분석
+  absa-service:
+    build: 
+      context: ./BACKEND-ABSA-SERVICE
+      dockerfile: Dockerfile
+    container_name: pension-absa-service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - REDIS_URL=redis://redis:6379
+      - ANALYSIS_SERVICE_URL=http://analysis-service:8001
+      - MODEL_CACHE_SIZE=100
+      - LOG_LEVEL=INFO
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - absa-models:/app/models
+    networks:
+      - pension-network
+
+  # Alert Service - 알림 및 경보
+  alert-service:
+    build: 
+      context: ./BACKEND-ALERT-SERVICE
+      dockerfile: Dockerfile
+    container_name: pension-alert-service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - REDIS_URL=redis://redis:6379
+      - ANALYSIS_SERVICE_URL=http://analysis-service:8001
+      - SMTP_SERVER=${SMTP_SERVER:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - LOG_LEVEL=INFO
+    ports:
+      - "8004:8004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - pension-network
+
+  # Collector Service - 데이터 수집
+  collector-service:
+    build: 
+      context: ./BACKEND-COLLECTOR-SERVICE
+      dockerfile: Dockerfile
+    container_name: pension-collector-service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - REDIS_URL=redis://redis:6379
+      - ANALYSIS_SERVICE_URL=http://analysis-service:8001
+      - CRAWL_INTERVAL=${CRAWL_INTERVAL:-300}
+      - LOG_LEVEL=INFO
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - collector-data:/app/data
+    networks:
+      - pension-network
+
+  # Web Collector - 뉴스 및 웹 데이터 수집 (선택적)
+  web-collector:
+    build: 
+      context: ./BACKEND-WEB-COLLECTOR
+      dockerfile: Dockerfile
+    container_name: pension-web-collector
+    restart: unless-stopped
+    environment:
+      - MESSAGE_BUS=stdout
+      - NEWS_KEYWORD=국민연금
+      - NEWS_POLL_SEC=120
+      - NEWS_SOURCES=naver,daum
+      - ENABLE_ARTICLE_BODY=1
+      - LOG_LEVEL=INFO
+    volumes:
+      - web-collector-data:/app/data
+    networks:
+      - pension-network
+    profiles:
+      - full  # --profile full 옵션으로만 실행
+
+  # Frontend Dashboard
+  dashboard:
+    build: 
+      context: ./FRONTEND-DASHBOARD
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+    container_name: pension-dashboard
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - pension-network
+
+networks:
+  pension-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  postgres-data:
+  redis-data:
+  ml-models:
+  absa-models:
+  collector-data:
+  web-collector-data:
