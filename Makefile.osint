@@ -1,0 +1,151 @@
+# OSINT MSA Services Management Makefile
+
+.PHONY: help osint-up osint-down osint-build osint-logs osint-clean osint-test osint-status
+
+# Default target
+help:
+	@echo "OSINT MSA Services Management"
+	@echo "============================="
+	@echo ""
+	@echo "Available commands:"
+	@echo "  osint-up      - Start all OSINT services"
+	@echo "  osint-down    - Stop all OSINT services"
+	@echo "  osint-build   - Build all OSINT service images"
+	@echo "  osint-rebuild - Force rebuild all OSINT service images"
+	@echo "  osint-logs    - Show logs for all OSINT services"
+	@echo "  osint-status  - Check status of all OSINT services"
+	@echo "  osint-clean   - Clean up OSINT containers and volumes"
+	@echo "  osint-test    - Run integration tests for OSINT services"
+	@echo "  osint-db-init - Initialize OSINT database"
+	@echo "  osint-health  - Check health of all OSINT services"
+
+# Start all OSINT services
+osint-up:
+	@echo "🚀 Starting OSINT MSA services..."
+	docker-compose -f docker-compose.osint.yml up -d
+	@echo "✅ OSINT services started!"
+	@echo "📊 Services are available at:"
+	@echo "   - Planning Service: http://localhost:8003"
+	@echo "   - Source Registry: http://localhost:8004"
+	@echo "   - Task Orchestrator: http://localhost:8005"
+	@echo "   - PostgreSQL: localhost:5433"
+	@echo "   - Redis: localhost:6380"
+	@echo "   - Kafka: localhost:9093"
+
+# Stop all OSINT services
+osint-down:
+	@echo "🛑 Stopping OSINT MSA services..."
+	docker-compose -f docker-compose.osint.yml down
+	@echo "✅ OSINT services stopped!"
+
+# Build all OSINT service images
+osint-build:
+	@echo "🔨 Building OSINT service images..."
+	docker-compose -f docker-compose.osint.yml build
+
+# Force rebuild all OSINT service images
+osint-rebuild:
+	@echo "🔨 Force rebuilding OSINT service images..."
+	docker-compose -f docker-compose.osint.yml build --no-cache
+
+# Show logs for all OSINT services
+osint-logs:
+	@echo "📋 Showing OSINT service logs..."
+	docker-compose -f docker-compose.osint.yml logs -f
+
+# Show logs for specific service
+osint-logs-%:
+	@echo "📋 Showing logs for $*..."
+	docker-compose -f docker-compose.osint.yml logs -f $*
+
+# Check status of all OSINT services
+osint-status:
+	@echo "📊 OSINT Services Status:"
+	@echo "========================"
+	docker-compose -f docker-compose.osint.yml ps
+
+# Clean up OSINT containers and volumes
+osint-clean:
+	@echo "🧹 Cleaning up OSINT services..."
+	docker-compose -f docker-compose.osint.yml down -v --remove-orphans
+	docker system prune -f
+	@echo "✅ OSINT cleanup completed!"
+
+# Initialize OSINT database
+osint-db-init:
+	@echo "🗄️ Initializing OSINT database..."
+	docker-compose -f docker-compose.osint.yml up -d osint-postgres
+	@sleep 10
+	docker-compose -f docker-compose.osint.yml exec osint-postgres psql -U osint_user -d osint_db -f /docker-entrypoint-initdb.d/init-osint.sql
+	@echo "✅ OSINT database initialized!"
+
+# Check health of all OSINT services
+osint-health:
+	@echo "🏥 Checking OSINT service health..."
+	@echo "=================================="
+	@echo "Planning Service:"
+	@curl -s http://localhost:8003/health | jq '.' || echo "❌ Planning Service not responding"
+	@echo ""
+	@echo "Source Registry:"
+	@curl -s http://localhost:8004/health | jq '.' || echo "❌ Source Registry not responding"
+	@echo ""
+	@echo "Task Orchestrator:"
+	@curl -s http://localhost:8005/health | jq '.' || echo "❌ Task Orchestrator not responding"
+	@echo ""
+	@echo "Task Orchestrator Metrics:"
+	@curl -s http://localhost:8005/metrics | jq '.' || echo "❌ Task Orchestrator metrics not available"
+
+# Run integration tests for OSINT services
+osint-test:
+	@echo "🧪 Running OSINT integration tests..."
+	@echo "======================================"
+	@echo "1. Testing Planning Service keyword creation..."
+	@curl -X POST http://localhost:8003/api/v1/keywords \
+		-H "Content-Type: application/json" \
+		-d '{"keyword": "연금개혁", "keyword_type": "seed", "domain": "pension"}' || echo "❌ Failed"
+	@echo ""
+	@echo "2. Testing Source Registry source registration..."
+	@curl -X POST http://localhost:8004/api/v1/sources \
+		-H "Content-Type: application/json" \
+		-d '{"url": "https://test-pension-news.com", "category": "news", "region": "KR"}' || echo "❌ Failed"
+	@echo ""
+	@echo "3. Testing Task Orchestrator task creation..."
+	@curl -X POST http://localhost:8005/api/v1/tasks \
+		-H "Content-Type: application/json" \
+		-d '{"task_type": "content_collection", "keywords": ["연금"], "priority": "high"}' || echo "❌ Failed"
+	@echo ""
+	@echo "✅ Integration tests completed!"
+
+# Restart specific service
+osint-restart-%:
+	@echo "🔄 Restarting $*..."
+	docker-compose -f docker-compose.osint.yml restart $*
+
+# Scale specific service
+osint-scale-%:
+	@echo "📈 Scaling $* to $(REPLICAS) replicas..."
+	docker-compose -f docker-compose.osint.yml up -d --scale $*=$(REPLICAS)
+
+# Development mode - start with file watching
+osint-dev:
+	@echo "🛠️ Starting OSINT services in development mode..."
+	docker-compose -f docker-compose.osint.yml -f docker-compose.osint.dev.yml up
+
+# Backup OSINT database
+osint-backup:
+	@echo "💾 Backing up OSINT database..."
+	@mkdir -p backups
+	docker-compose -f docker-compose.osint.yml exec -T osint-postgres pg_dump -U osint_user -d osint_db > backups/osint-db-$(shell date +%Y%m%d-%H%M%S).sql
+	@echo "✅ Database backup completed!"
+
+# Restore OSINT database
+osint-restore:
+	@echo "📥 Restoring OSINT database..."
+	@if [ -z "$(BACKUP_FILE)" ]; then echo "❌ Please specify BACKUP_FILE=path/to/backup.sql"; exit 1; fi
+	docker-compose -f docker-compose.osint.yml exec -T osint-postgres psql -U osint_user -d osint_db < $(BACKUP_FILE)
+	@echo "✅ Database restore completed!"
+
+# Monitor OSINT services
+osint-monitor:
+	@echo "📊 Monitoring OSINT services..."
+	watch -n 5 'make osint-status && echo "" && make osint-health'
