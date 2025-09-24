@@ -2,7 +2,11 @@ import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
+    # 서버 설정
+    port: int = int(os.getenv("PORT", 8002))
+    debug: bool = os.getenv("DEBUG", "true").lower() == "true"
     
+    # 데이터베이스 설정
     database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/pension_sentiment")
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     analysis_service_url: str = os.getenv("ANALYSIS_SERVICE_URL", "http://localhost:8001")

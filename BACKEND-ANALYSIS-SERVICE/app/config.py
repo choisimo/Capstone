@@ -1,38 +1,54 @@
-from functools import lru_cache
+"""
+Analysis Service 설정 모듈
+
+환경 변수 및 서비스 설정을 관리하는 모듈입니다.
+.env 파일에서 설정을 읽어오며, 환경 변수로 오버라이드 가능합니다.
+"""
+
+import os
+from typing import List
 from pydantic_settings import BaseSettings
-from pydantic import Field
 
 
 class Settings(BaseSettings):
-    mongo_uri: str = Field(default="mongodb://localhost:27017", alias="MONGO_URI")
-    mongo_db: str = Field(default="analysis", alias="MONGO_DB")
-
-    vector_db_url: str | None = Field(default=None, alias="VECTOR_DB_URL")
-    # Optional granular settings to build VECTOR_DB_URL when not provided
-    vector_db_host: str = Field(default="localhost", alias="VECTOR_DB_HOST")
-    vector_db_port: int = Field(default=5432, alias="VECTOR_DB_PORT")
-    vector_db_user: str = Field(default="postgres", alias="VECTOR_DB_USER")
-    vector_db_password: str = Field(default="postgres", alias="VECTOR_DB_PASSWORD")
-    vector_db_database: str = Field(default="vectors", alias="VECTOR_DB_DATABASE")
-
-    gemini_api_key: str | None = Field(default=None, alias="GEMINI_API_KEY")
-
-    mesh_cache_ttl_sec: int = Field(default=21600, alias="MESH_CACHE_TTL_SEC")
-    max_mesh_nodes: int = Field(default=500, alias="MAX_MESH_NODES")
-    max_mesh_links: int = Field(default=5000, alias="MAX_MESH_LINKS")
-    agg_min_support: int = Field(default=3, alias="AGG_MIN_SUPPORT")
-    rag_max_tokens: int = Field(default=2048, alias="RAG_MAX_TOKENS")
-
+    """
+    서비스 설정 클래스
+    
+    환경 변수에서 설정을 읽어오고 타입 검증을 수행합니다.
+    기본값은 개발 환경을 위한 설정이며, 프로덕션에서는 환경 변수로 오버라이드합니다.
+    """
+    
+    # 데이터베이스 설정
+    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/pension_sentiment"  # PostgreSQL 연결 URL
+    REDIS_URL: str = "redis://localhost:6379"  # Redis 캐시 서버 URL
+    
+    # 애플리케이션 설정
+    DEBUG: bool = True  # 디버그 모드 (개발: True, 프로덕션: False)
+    SECRET_KEY: str = "your-secret-key-here"  # JWT 및 암호화용 비밀 키
+    ALLOWED_HOSTS: List[str] = ["*"]  # CORS 허용 호스트 목록
+    
+    # 마이크로서비스 URL 설정
+    API_GATEWAY_URL: str = "http://localhost:8000"  # API Gateway URL
+    COLLECTOR_SERVICE_URL: str = "http://localhost:8002"  # 수집 서비스 URL
+    ABSA_SERVICE_URL: str = "http://localhost:8003"  # ABSA 서비스 URL
+    ALERT_SERVICE_URL: str = "http://localhost:8004"  # 알림 서비스 URL
+    
+    # ML 모델 및 캐싱 설정
+    ML_MODEL_PATH: str = "/app/models"  # ML 모델 저장 경로
+    CACHE_TTL: int = 300  # 캐시 유효 시간 (300초 = 5분)
+    
+    # 로깅 설정
+    LOG_LEVEL: str = "INFO"  # 로그 레벨 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    
     class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        populate_by_name = True
+        """
+        Pydantic 설정 클래스
+        
+        환경 변수 로드 옵션을 설정합니다.
+        """
+        env_file = ".env"  # .env 파일에서 환경 변수 로드
 
 
-@lru_cache(maxsize=1)
-def get_settings() -> Settings:
-    s = Settings()
-    # Build vector DB URL if not explicitly set
-    if not s.vector_db_url:
-        s.vector_db_url = f"postgresql://{s.vector_db_user}:{s.vector_db_password}@{s.vector_db_host}:{s.vector_db_port}/{s.vector_db_database}"
-    return s
+# 설정 싱글톤 인스턴스 생성
+# 애플리케이션 전체에서 이 인스턴스를 import하여 사용
+settings = Settings()

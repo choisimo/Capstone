@@ -76,7 +76,7 @@ services:
   # Analysis Service - 감성 분석 및 트렌드 분석
   analysis-service:
     build: 
-      context: ./BACKEND-ANALYSIS-SERVICE-NEW
+      context: ./BACKEND-ANALYSIS-SERVICE
       dockerfile: Dockerfile
     container_name: pension-analysis-service
     restart: unless-stopped
@@ -95,7 +95,7 @@ services:
         condition: service_healthy
     volumes:
       - ml-models:/app/models
-      - ./BACKEND-ANALYSIS-SERVICE-NEW/models:/app/models:ro
+      - ./BACKEND-ANALYSIS-SERVICE/models:/app/models:ro
     networks:
       - pension-network
 

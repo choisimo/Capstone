@@ -17,10 +17,13 @@ class Settings(BaseSettings):
     """
     
     # 데이터베이스 설정
-    database_url: str = "postgresql://pension_user:pension_pass@localhost:5432/pension_sentiment"  # PostgreSQL URL
+    database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:password@postgres:5432/pension_sentiment")  # PostgreSQL URL
     
     # Redis 캐시 설정
-    redis_url: str = "redis://localhost:6379"  # Redis 캐시 서버 URL
+    redis_url: str = os.getenv("REDIS_URL", "redis://redis:6379")  # Redis 캐시 서버 URL
+    
+    # 서버 설정
+    port: int = 8004  # 서버 포트
     
     # 서비스 기본 설정
     service_name: str = "alert-service"  # 서비스 이름
@@ -68,9 +71,9 @@ class Settings(BaseSettings):
     metrics_port: int = 9090  # Prometheus 메트릭 포트
     
     # 외부 서비스 URL
-    analysis_service_url: str = "http://localhost:8001"  # 분석 서비스 URL
-    collector_service_url: str = "http://localhost:8002"  # 수집 서비스 URL
-    absa_service_url: str = "http://localhost:8003"  # ABSA 서비스 URL
+    analysis_service_url: str = os.getenv("ANALYSIS_SERVICE_URL", "http://analysis-service:8001")  # 분석 서비스 URL
+    collector_service_url: str = os.getenv("COLLECTOR_SERVICE_URL", "http://collector-service:8002")  # 수집 서비스 URL
+    absa_service_url: str = os.getenv("ABSA_SERVICE_URL", "http://absa-service:8003")  # ABSA 서비스 URL
     
     # 템플릿 설정
     default_email_template: str = """  # 기본 이메일 템플릿 (HTML 형식)

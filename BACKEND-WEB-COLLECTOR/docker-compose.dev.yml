@@ -1,0 +1,57 @@
+version: '3.8'
+
+# Development override configuration
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Override for development
+  hybrid-crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: DEBUG
+      RELOAD: "true"
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+
+  # Adminer for database management
+  adminer:
+    image: adminer
+    container_name: hybrid-crawler-adminer
+    ports:
+      - "8081:8080"
+    networks:
+      - crawler-network
+    depends_on:
+      - postgres
+
+  # RedisInsight for Redis management
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: hybrid-crawler-redis-insight
+    ports:
+      - "8001:8001"
+    volumes:
+      - redis-insight:/db
+    networks:
+      - crawler-network
+    depends_on:
+      - redis
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog
+    container_name: hybrid-crawler-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - crawler-network
+
+volumes:
+  redis-insight:

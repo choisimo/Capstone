@@ -18,7 +18,7 @@ import httpx
 from contextlib import asynccontextmanager
 
 from app.config import settings
-from app.routers import analysis, collector, absa, alerts
+from app.routers import analysis, collector, absa, alerts, osint_orchestrator, osint_planning, osint_source
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -81,7 +81,10 @@ async def health_check():
         "analysis": settings.ANALYSIS_SERVICE_URL,  # 분석 서비스
         "collector": settings.COLLECTOR_SERVICE_URL,  # 수집 서비스
         "absa": settings.ABSA_SERVICE_URL,  # ABSA 서비스
-        "alert": settings.ALERT_SERVICE_URL  # 알림 서비스
+        "alert": settings.ALERT_SERVICE_URL,  # 알림 서비스
+        "osint-orchestrator": settings.OSINT_ORCHESTRATOR_SERVICE_URL,  # OSINT 오케스트레이터 서비스
+        "osint-planning": settings.OSINT_PLANNING_SERVICE_URL,  # OSINT 계획 서비스
+        "osint-source": settings.OSINT_SOURCE_SERVICE_URL  # OSINT 소스 서비스
     }
     
     # 5초 타임아웃으로 HTTP 클라이언트 생성 (헬스 체크는 빠르게 응답해야 함)
@@ -140,7 +143,10 @@ async def root():
             "analysis": "/api/v1/analysis",  # 분석 서비스
             "collector": "/api/v1/collector",  # 수집 서비스
             "absa": "/api/v1/absa",  # ABSA 서비스
-            "alerts": "/api/v1/alerts"  # 알림 서비스
+            "alerts": "/api/v1/alerts",  # 알림 서비스
+            "osint-orchestrator": "/api/v1/osint-orchestrator",  # OSINT 오케스트레이터 서비스
+            "osint-planning": "/api/v1/osint-planning",  # OSINT 계획 서비스
+            "osint-source": "/api/v1/osint-source"  # OSINT 소스 서비스
         },
         "docs": "/docs",  # Swagger UI 문서 경로
         "health": "/health"  # 헬스 체크 경로
@@ -175,6 +181,27 @@ app.include_router(
     alerts.router,
     prefix="/api/v1/alerts",  # URL 접두사
     tags=["Alert Service"]  # Swagger UI에서의 그룹 태그
+)
+
+# OSINT 오케스트레이터 서비스 라우터 등록
+app.include_router(
+    osint_orchestrator.router,
+    prefix="/api/v1/osint-orchestrator",  # URL 접두사
+    tags=["OSINT Orchestrator Service"]  # Swagger UI에서의 그룹 태그
+)
+
+# OSINT 계획 서비스 라우터 등록
+app.include_router(
+    osint_planning.router,
+    prefix="/api/v1/osint-planning",  # URL 접두사
+    tags=["OSINT Planning Service"]  # Swagger UI에서의 그룹 태그
+)
+
+# OSINT 소스 서비스 라우터 등록
+app.include_router(
+    osint_source.router,
+    prefix="/api/v1/osint-source",  # URL 접두사
+    tags=["OSINT Source Service"]  # Swagger UI에서의 그룹 태그
 )
 
 # 전역 예외 처리기

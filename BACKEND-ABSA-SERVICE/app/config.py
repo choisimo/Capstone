@@ -14,6 +14,10 @@ class Settings:
     환경 변수에서 설정을 읽어오며, 기본값을 제공합니다.
     """
     
+    # 서버 설정
+    port: int = int(os.getenv("PORT", 8003))
+    debug: bool = os.getenv("DEBUG", "true").lower() == "true"
+    
     # 데이터베이스 및 캐시 설정
     database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/pension_sentiment")  # PostgreSQL URL
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")  # Redis 캐시 URL
