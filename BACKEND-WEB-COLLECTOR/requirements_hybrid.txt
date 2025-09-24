@@ -1,0 +1,78 @@
+# Hybrid Intelligent Crawling System Requirements
+# Python 3.8+ required
+
+# === Core Dependencies ===
+
+# Web Framework
+fastapi>=0.110
+uvicorn[standard]>=0.27
+
+# Data Validation & Processing
+pydantic>=2.0.0
+orjson>=3.9.0
+jsonschema>=4.19.0
+
+# Web Scraping & HTTP
+aiohttp>=3.8.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+requests>=2.31.0
+readability-lxml>=0.8.1
+playwright>=1.44
+
+# === AI & Machine Learning ===
+
+# Gemini AI
+google-generativeai>=0.3.0
+
+# Retry & Error Handling
+tenacity>=8.2.0
+
+# NLP & Text Processing
+yake>=0.4.8
+
+# === Scheduling & Async ===
+
+# Cron Scheduling
+croniter>=1.4.0
+
+# === Data Science ===
+
+# Numerical Processing
+numpy>=1.24.0
+
+# === Monitoring & Logging ===
+
+# Metrics
+prometheus-client>=0.20
+
+# Error Tracking
+sentry-sdk>=2.0
+
+# Logging
+loguru>=0.7.0
+
+# === Message Queue ===
+
+# Kafka
+kafka-python>=2.0
+
+# === Development & Testing ===
+
+# Testing Framework
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+
+# === Configuration ===
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# === Optional for ScrapeGraphAI (if needed) ===
+# scrapegraphai>=1.0.0
+
+# === Database (for future Phase 3) ===
+# sqlalchemy>=2.0.0
+# asyncpg>=0.28.0
+# redis>=5.0.0

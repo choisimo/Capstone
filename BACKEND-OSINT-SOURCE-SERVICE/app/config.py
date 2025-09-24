@@ -3,6 +3,11 @@ from typing import Optional
 
 class Settings:
     def __init__(self):
+        # 서버 설정
+        self.port = int(os.getenv("PORT", 8007))
+        self.debug = os.getenv("DEBUG", "true").lower() == "true"
+        
+        # 데이터베이스 설정
         self.database_url = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/osint_db")
         self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
         self.secret_key = os.getenv("SECRET_KEY", "osint-source-secret-key")

@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     COLLECTOR_SERVICE_URL: str = "http://localhost:8002"  # 수집 서비스 URL
     ABSA_SERVICE_URL: str = "http://localhost:8003"  # ABSA 서비스 URL
     ALERT_SERVICE_URL: str = "http://localhost:8004"  # 알림 서비스 URL
+    OSINT_ORCHESTRATOR_SERVICE_URL: str = "http://osint-orchestrator:8005"  # OSINT 오케스트레이터 서비스 URL
+    OSINT_PLANNING_SERVICE_URL: str = "http://osint-planning:8006"  # OSINT 계획 서비스 URL
+    OSINT_SOURCE_SERVICE_URL: str = "http://osint-source:8007"  # OSINT 소스 서비스 URL
     
     # 요청 타임아웃 설정 (초 단위)
     DEFAULT_TIMEOUT: int = 30  # 일반 요청 타임아웃 (30초)

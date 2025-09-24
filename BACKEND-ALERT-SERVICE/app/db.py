@@ -4,10 +4,9 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.sql import func
 from enum import Enum
 import datetime
+from app.config import settings
 
-SQLALCHEMY_DATABASE_URL = "postgresql://pension_user:pension_pass@localhost:5432/pension_sentiment"
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
