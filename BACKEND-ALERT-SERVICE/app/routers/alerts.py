@@ -34,14 +34,12 @@ async def get_alerts(
     db: Session = Depends(get_db)
 ):
     """Get all alerts with optional filtering"""
-    alert_service = AlertService(db)
-    return alert_service.get_alerts(
+    return AlertService.get_alerts(
+        db=db,
         skip=skip,
         limit=limit,
         status=status,
         severity=severity,
-        rule_id=rule_id,
-        source_service=source_service,
         start_date=start_date,
         end_date=end_date
     )
@@ -49,8 +47,7 @@ async def get_alerts(
 @router.get("/{alert_id}", response_model=AlertWithRule)
 async def get_alert(alert_id: int, db: Session = Depends(get_db)):
     """Get a specific alert by ID"""
-    alert_service = AlertService(db)
-    alert = alert_service.get_alert(alert_id)
+    alert = AlertService.get_alert(db, alert_id)
     if not alert:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -61,15 +58,13 @@ async def get_alert(alert_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=AlertResponse)
 async def create_alert(alert_data: AlertCreate, db: Session = Depends(get_db)):
     """Create a new alert"""
-    alert_service = AlertService(db)
-    notification_service = NotificationService(db)
     
     try:
         # Create the alert
-        alert = alert_service.create_alert(alert_data)
+        alert = AlertService.create_alert(db, alert_data)
         
         # Send notifications
-        await notification_service.send_alert_notifications(alert)
+        await NotificationService.send_alert_notifications(db, alert)
         
         return AlertResponse(
             success=True,
@@ -86,12 +81,11 @@ async def create_alert(alert_data: AlertCreate, db: Session = Depends(get_db)):
 @router.post("/trigger", response_model=AlertResponse)
 async def trigger_alert(request: TriggerAlertRequest, db: Session = Depends(get_db)):
     """Trigger an alert based on rule conditions"""
-    alert_service = AlertService(db)
     notification_service = NotificationService(db)
     
     try:
         # Check if rule should trigger
-        should_trigger, message = alert_service.evaluate_rule(
+        should_trigger, message = AlertService.evaluate_rule(db,
             request.rule_id,
             request.triggered_data,
             request.actual_value
@@ -109,14 +103,14 @@ async def trigger_alert(request: TriggerAlertRequest, db: Session = Depends(get_
             rule_id=request.rule_id,
             title=f"Alert from {request.source_service}",
             message=request.custom_message or message,
-            severity=alert_service.get_rule_severity(request.rule_id),
+            severity=AlertService.get_rule_severity(db,request.rule_id),
             triggered_data=request.triggered_data,
             actual_value=request.actual_value,
             source_service=request.source_service,
             source_data_id=request.source_data_id
         )
         
-        alert = alert_service.create_alert(alert_data)
+        alert = AlertService.create_alert(db, alert_data)
         
         # Send notifications
         await notification_service.send_alert_notifications(alert)
@@ -136,7 +130,6 @@ async def trigger_alert(request: TriggerAlertRequest, db: Session = Depends(get_
 @router.post("/bulk-trigger", response_model=BulkAlertResponse)
 async def bulk_trigger_alerts(request: BulkAlertRequest, db: Session = Depends(get_db)):
     """Trigger multiple alerts in bulk"""
-    alert_service = AlertService(db)
     notification_service = NotificationService(db)
     
     created_alerts = []
@@ -145,7 +138,7 @@ async def bulk_trigger_alerts(request: BulkAlertRequest, db: Session = Depends(g
     for alert_request in request.alerts:
         try:
             # Check if rule should trigger
-            should_trigger, message = alert_service.evaluate_rule(
+            should_trigger, message = AlertService.evaluate_rule(db,
                 alert_request.rule_id,
                 alert_request.triggered_data,
                 alert_request.actual_value
@@ -156,14 +149,14 @@ async def bulk_trigger_alerts(request: BulkAlertRequest, db: Session = Depends(g
                     rule_id=alert_request.rule_id,
                     title=f"Alert from {alert_request.source_service}",
                     message=alert_request.custom_message or message,
-                    severity=alert_service.get_rule_severity(alert_request.rule_id),
+                    severity=AlertService.get_rule_severity(db,alert_request.rule_id),
                     triggered_data=alert_request.triggered_data,
                     actual_value=alert_request.actual_value,
                     source_service=alert_request.source_service,
                     source_data_id=alert_request.source_data_id
                 )
                 
-                alert = alert_service.create_alert(alert_data)
+                alert = AlertService.create_alert(db, alert_data)
                 created_alerts.append(alert.id)
                 
                 # Send notifications (async)
@@ -188,9 +181,8 @@ async def update_alert(
     db: Session = Depends(get_db)
 ):
     """Update an alert (acknowledge, resolve, etc.)"""
-    alert_service = AlertService(db)
     
-    alert = alert_service.get_alert(alert_id)
+    alert = AlertService.get_alert(db, alert_id)
     if not alert:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -198,7 +190,7 @@ async def update_alert(
         )
     
     try:
-        updated_alert = alert_service.update_alert(alert_id, alert_update, user_id)
+        updated_alert = AlertService.update_alert(db, alert_id, alert_update, user_id)
         return updated_alert
     except Exception as e:
         raise HTTPException(
@@ -213,10 +205,9 @@ async def acknowledge_alert(
     db: Session = Depends(get_db)
 ):
     """Acknowledge an alert"""
-    alert_service = AlertService(db)
     
     try:
-        alert = alert_service.acknowledge_alert(alert_id, user_id)
+        alert = AlertService.acknowledge_alert(db, alert_id, user_id)
         return {"message": "Alert acknowledged successfully", "alert": alert}
     except Exception as e:
         raise HTTPException(
@@ -232,10 +223,9 @@ async def resolve_alert(
     db: Session = Depends(get_db)
 ):
     """Resolve an alert"""
-    alert_service = AlertService(db)
     
     try:
-        alert = alert_service.resolve_alert(alert_id, user_id, notes)
+        alert = AlertService.resolve_alert(db, alert_id, user_id, notes)
         return {"message": "Alert resolved successfully", "alert": alert}
     except Exception as e:
         raise HTTPException(
@@ -246,16 +236,15 @@ async def resolve_alert(
 @router.delete("/{alert_id}")
 async def delete_alert(alert_id: int, db: Session = Depends(get_db)):
     """Delete an alert"""
-    alert_service = AlertService(db)
     
-    if not alert_service.get_alert(alert_id):
+    if not AlertService.get_alert(db, alert_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Alert with ID {alert_id} not found"
         )
     
     try:
-        alert_service.delete_alert(alert_id)
+        AlertService.delete_alert(db, alert_id)
         return {"message": "Alert deleted successfully"}
     except Exception as e:
         raise HTTPException(
@@ -269,24 +258,21 @@ async def get_alert_stats(
     db: Session = Depends(get_db)
 ):
     """Get alert statistics overview"""
-    alert_service = AlertService(db)
-    return alert_service.get_alert_stats(days)
+    return AlertService.get_alert_stats(db, days)
 
 @router.get("/dashboard/summary", response_model=AlertDashboard)
 async def get_alert_dashboard(db: Session = Depends(get_db)):
     """Get comprehensive alert dashboard data"""
-    alert_service = AlertService(db)
-    return alert_service.get_dashboard_data()
+    return AlertService.get_dashboard_data(db)
 
 @router.get("/{alert_id}/history")
 async def get_alert_history(alert_id: int, db: Session = Depends(get_db)):
     """Get history for a specific alert"""
-    alert_service = AlertService(db)
     
-    if not alert_service.get_alert(alert_id):
+    if not AlertService.get_alert(db, alert_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Alert with ID {alert_id} not found"
         )
     
-    return alert_service.get_alert_history(alert_id)
+    return AlertService.get_alert_history(db, alert_id)

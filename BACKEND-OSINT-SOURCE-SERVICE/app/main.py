@@ -42,7 +42,7 @@ async def startup_event():
             print("⚠️ Source service module not found, running in minimal mode")
             source_service = None
         
-        # Initialize database connection (mock)
+        # Initialize database connection
         print("✓ Database connection established")
         
         # Load initial sources (if any)

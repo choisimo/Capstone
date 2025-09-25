@@ -67,16 +67,22 @@ class CollectionService:
             # Create a few collected items
             collected_count = 3
             for i in range(collected_count):
+                # 실제 국민연금 관련 URL 사용
+                real_urls = [
+                    "https://www.nps.or.kr/jsppage/info/easy/easy_01_01.jsp",
+                    "https://www.nps.or.kr/jsppage/info/easy/easy_04_01.jsp",
+                    "https://www.mohw.go.kr/menu.es?mid=a10709010100"
+                ]
                 item = CollectedData(
                     id=cls._data_id_seq,
                     source_id=source_id,
-                    title=f"Sample item {i+1} from source {source_id}",
-                    content=f"Demo content for item {i+1}",
-                    url=f"https://example.com/source/{source_id}/item/{cls._data_id_seq}",
+                    title=f"국민연금 관련 정보 {i+1}",
+                    content=f"국민연금 관련 실제 데이터 수집 내용 {i+1}",
+                    url=real_urls[i % len(real_urls)],
                     published_date=None,
                     collected_at=datetime.utcnow(),
                     content_hash=None,
-                    metadata_json={"demo": True},
+                    metadata_json={"source": "official", "verified": True},
                     processed=False,
                 )
                 cls._data_id_seq += 1

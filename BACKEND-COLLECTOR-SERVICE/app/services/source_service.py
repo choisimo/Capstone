@@ -8,6 +8,7 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from datetime import datetime
 import uuid
+import hashlib
 
 
 class SourceService:
@@ -28,38 +29,105 @@ class SourceService:
         Returns:
             소스 목록
         """
-        # 데모용 하드코딩된 소스 목록
+        # 실제 국민연금 관련 소스
         sources = [
             {
-                "id": str(uuid.uuid4()),
-                "name": "네이버 뉴스",
-                "type": "web",
-                "url": "https://news.naver.com",
+                "id": 1,
+                "name": "국민연금공단 공식",
+                "source_type": "web",
+                "url": "https://www.nps.or.kr",
                 "is_active": True,
-                "created_at": datetime.now().isoformat()
+                "collection_frequency": 3600,  # 1시간마다
+                "created_at": datetime.now(),
+                "last_collected": None,
+                "updated_at": None,
+                "metadata_json": {"official": True}
             },
             {
-                "id": str(uuid.uuid4()),
-                "name": "다음 뉴스",
-                "type": "web",
-                "url": "https://news.daum.net",
+                "id": 2,
+                "name": "보건복지부",
+                "source_type": "web",
+                "url": "https://www.mohw.go.kr",
                 "is_active": True,
-                "created_at": datetime.now().isoformat()
+                "collection_frequency": 3600,
+                "created_at": datetime.now(),
+                "last_collected": None,
+                "updated_at": None,
+                "metadata_json": {"official": True}
             },
             {
-                "id": str(uuid.uuid4()),
-                "name": "연금 RSS 피드",
-                "type": "rss",
-                "url": "https://www.pensionsweek.com/rss",
+                "id": 3,
+                "name": "국민연금공단 RSS",
+                "source_type": "rss",
+                "url": "https://www.nps.or.kr/jsppage/cyber_pr/news/rss.jsp",
                 "is_active": True,
-                "created_at": datetime.now().isoformat()
+                "collection_frequency": 1800,  # 30분마다
+                "created_at": datetime.now(),
+                "last_collected": None,
+                "updated_at": None,
+                "metadata_json": {"feed_type": "rss"}
+            },
+            {
+                "id": 4,
+                "name": "보건복지부 RSS",
+                "source_type": "rss",
+                "url": "https://www.mohw.go.kr/rss/news.xml",
+                "is_active": True,
+                "collection_frequency": 1800,
+                "created_at": datetime.now(),
+                "last_collected": None,
+                "updated_at": None,
+                "metadata_json": {"feed_type": "rss"}
+            },
+            {
+                "id": 5,
+                "name": "네이버 뉴스 검색",
+                "source_type": "web",
+                "url": "https://search.naver.com/search.naver?where=news&query=국민연금",
+                "is_active": True,
+                "collection_frequency": 7200,  # 2시간마다
+                "created_at": datetime.now(),
+                "last_collected": None,
+                "updated_at": None,
+                "metadata_json": {"search_query": "국민연금"}
+            },
+            {
+                "id": 6,
+                "name": "다음 뉴스 검색",
+                "source_type": "web",
+                "url": "https://search.daum.net/search?w=news&q=국민연금",
+                "is_active": True,
+                "collection_frequency": 7200,
+                "created_at": datetime.now(),
+                "last_collected": None,
+                "updated_at": None,
+                "metadata_json": {"search_query": "국민연금"}
             }
         ]
         
         if source_type:
-            sources = [s for s in sources if s["type"] == source_type]
+            sources = [s for s in sources if s["source_type"] == source_type]
         
         return sources
+    
+    def get_sources(self, skip: int = 0, limit: int = 100, active_only: bool = None) -> List[Dict[str, Any]]:
+        """
+        데이터 소스 목록 조회 (페이징 지원)
+        
+        Args:
+            skip: 건너뛸 항목 수
+            limit: 최대 반환 항목 수
+            active_only: True면 활성 소스만
+            
+        Returns:
+            소스 목록
+        """
+        sources = self.list_sources()
+        
+        if active_only is not None:
+            sources = [s for s in sources if s["is_active"] == active_only]
+        
+        return sources[skip:skip + limit]
     
     def get_source(self, source_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -88,7 +156,7 @@ class SourceService:
             생성된 소스 정보
         """
         new_source = {
-            "id": str(uuid.uuid4()),
+            "id": source_data.get("id", str(uuid.uuid4())),
             "name": source_data.get("name"),
             "type": source_data.get("type", "web"),
             "url": source_data.get("url"),

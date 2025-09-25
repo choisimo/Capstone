@@ -38,6 +38,13 @@ app.include_router(aspects.router, prefix="/aspects", tags=["Aspect Extraction"]
 app.include_router(analysis.router, prefix="/analysis", tags=["ABSA Analysis"])  # ABSA 분석 관련 라우터
 app.include_router(models.router, prefix="/models", tags=["ABSA Models"])  # ABSA 모델 관리 라우터
 
+# 페르소나 분석 라우터 추가
+try:
+    from app.routers import personas
+    app.include_router(personas.router, prefix="/api/v1", tags=["Persona Analysis"])  # 페르소나 분석 라우터
+except ImportError:
+    pass  # 페르소나 모듈이 없는 경우 무시
+
 @app.on_event("startup")
 async def startup_event():
     """

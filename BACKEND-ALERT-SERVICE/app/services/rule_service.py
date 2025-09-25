@@ -143,12 +143,12 @@ class RuleService:
                 )
             
             # Test the conditions against sample data
-            would_trigger = RuleService._evaluate_conditions(conditions, request.sample_data)
+            would_trigger = RuleService._evaluate_conditions(conditions, request.validation_data)
             
             # Generate explanation
             explanation = RuleService._generate_test_explanation(
                 conditions, 
-                request.sample_data, 
+                request.validation_data, 
                 would_trigger
             )
             
@@ -156,7 +156,7 @@ class RuleService:
                 success=True,
                 would_trigger=would_trigger,
                 explanation=explanation,
-                matched_conditions=RuleService._get_matched_conditions(conditions, request.sample_data)
+                matched_conditions=RuleService._get_matched_conditions(conditions, request.validation_data)
             )
             
         except Exception as e:
