@@ -232,7 +232,7 @@ class NotificationStats(BaseModel):
 # Rule Testing Schemas
 class TestRuleRequest(BaseModel):
     rule_id: int
-    test_data: Dict[str, Any]
+    validation_data: Dict[str, Any]  # 실제 데이터로 규칙 검증
 
 class TestRuleResponse(BaseModel):
     would_trigger: bool

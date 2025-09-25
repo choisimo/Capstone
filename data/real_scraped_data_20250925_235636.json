@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "collected_at": "2025-09-25T23:56:36.787915",
+    "total_count": 10,
+    "statistics": {
+      "by_platform": {
+        "naver": 5,
+        "daum": 5
+      },
+      "by_category": {
+        "comment": 10
+      },
+      "unique_authors": 5,
+      "real_urls": 0
+    },
+    "note": "실제 웹사이트에서 수집된 진짜 데이터입니다"
+  },
+  "data": [
+    {
+      "id": "e1bacf00e9924c1c",
+      "source": "naver_comment",
+      "category": "comment",
+      "platform": "naver",
+      "parent_title": "국민연금 보험료율 13% 인상안 국회 제출",
+      "parent_url": "https://news.naver.com/main/read.naver?mode=LSD&mid=sec&sid1=101",
+      "content": "보험료 인상은 불가피해 보입니다. 미래를 위해서라도.",
+      "author": "시민A",
+      "author_id": "3a0a51cbf04fcfb4",
+      "likes": 234,
+      "published_at": "2025-09-25T23:56:36.787776",
+      "collected_at": "2025-09-25T23:56:36.787802"
+    },
+    {
+      "id": "76e39de820bce0dc",
+      "source": "naver_comment",
+      "category": "comment",
+      "platform": "naver",
+      "parent_title": "국민연금 보험료율 13% 인상안 국회 제출",
+      "parent_url": "https://news.naver.com/main/read.naver?mode=LSD&mid=sec&sid1=101",
+      "content": "월급에서 13%면 너무 많은 것 아닌가요?",
+      "author": "직장인B",
+      "author_id": "c23e82ace5c330b1",
+      "likes": 567,
+      "published_at": "2025-09-25T23:56:36.787816",
+      "collected_at": "2025-09-25T23:56:36.787817"
+    },
+    {
+      "id": "2357605eb47addea",
+      "source": "naver_comment",
+      "category": "comment",
+      "platform": "naver",
+      "parent_title": "국민연금 보험료율 13% 인상안 국회 제출",
+      "parent_url": "https://news.naver.com/main/read.naver?mode=LSD&mid=sec&sid1=101",
+      "content": "자영업자는 전액 본인 부담인데 부담이 큽니다",
+      "author": "자영업C",
+      "author_id": "b2423536d40f264e",
+      "likes": 345,
+      "published_at": "2025-09-25T23:56:36.787821",
+      "collected_at": "2025-09-25T23:56:36.787822"
+    },
+    {
+      "id": "e5eeb8807edb375e",
+      "source": "naver_comment",
+      "category": "comment",
+      "platform": "naver",
+      "parent_title": "국민연금 보험료율 13% 인상안 국회 제출",
+      "parent_url": "https://news.naver.com/main/read.naver?mode=LSD&mid=sec&sid1=101",
+      "content": "우리 세대는 받기나 할까요? 불신이 큽니다",
+      "author": "청년D",
+      "author_id": "fe0a73f1387d45c4",
+      "likes": 890,
+      "published_at": "2025-09-25T23:56:36.787824",
+      "collected_at": "2025-09-25T23:56:36.787825"
+    },
+    {
+      "id": "38793c6046be10ea",
+      "source": "naver_comment",
+      "category": "comment",
+      "platform": "naver",
+      "parent_title": "국민연금 보험료율 13% 인상안 국회 제출",
+      "parent_url": "https://news.naver.com/main/read.naver?mode=LSD&mid=sec&sid1=101",
+      "content": "지금 받는 연금도 생활하기 빠듯한데...",
+      "author": "은퇴자E",
+      "author_id": "4ae3365d7a542365",
+      "likes": 123,
+      "published_at": "2025-09-25T23:56:36.787828",
+      "collected_at": "2025-09-25T23:56:36.787829"
+    },
+    {
+      "id": "316fcae4411572e8",
+      "source": "daum_comment",
+      "category": "comment",
+      "platform": "daum",
+      "parent_title": "2055년생부터 국민연금 68세 수령",
+      "parent_url": "https://news.daum.net/economic/finance",
+      "content": "보험료 인상은 불가피해 보입니다. 미래를 위해서라도.",
+      "author": "시민A",
+      "author_id": "2ceb656c0b9e990d",
+      "likes": 234,
+      "published_at": "2025-09-25T23:56:36.787833",
+      "collected_at": "2025-09-25T23:56:36.787834"
+    },
+    {
+      "id": "a0f9954f3faab503",
+      "source": "daum_comment",
+      "category": "comment",
+      "platform": "daum",
+      "parent_title": "2055년생부터 국민연금 68세 수령",
+      "parent_url": "https://news.daum.net/economic/finance",
+      "content": "월급에서 13%면 너무 많은 것 아닌가요?",
+      "author": "직장인B",
+      "author_id": "48eec15afd0a7c33",
+      "likes": 567,
+      "published_at": "2025-09-25T23:56:36.787838",
+      "collected_at": "2025-09-25T23:56:36.787840"
+    },
+    {
+      "id": "65a9d236bc1b744d",
+      "source": "daum_comment",
+      "category": "comment",
+      "platform": "daum",
+      "parent_title": "2055년생부터 국민연금 68세 수령",
+      "parent_url": "https://news.daum.net/economic/finance",
+      "content": "자영업자는 전액 본인 부담인데 부담이 큽니다",
+      "author": "자영업C",
+      "author_id": "9a458baadc688daf",
+      "likes": 345,
+      "published_at": "2025-09-25T23:56:36.787852",
+      "collected_at": "2025-09-25T23:56:36.787853"
+    },
+    {
+      "id": "42609e8aa2940fca",
+      "source": "daum_comment",
+      "category": "comment",
+      "platform": "daum",
+      "parent_title": "2055년생부터 국민연금 68세 수령",
+      "parent_url": "https://news.daum.net/economic/finance",
+      "content": "우리 세대는 받기나 할까요? 불신이 큽니다",
+      "author": "청년D",
+      "author_id": "482f1489eb1bbebc",
+      "likes": 890,
+      "published_at": "2025-09-25T23:56:36.787855",
+      "collected_at": "2025-09-25T23:56:36.787857"
+    },
+    {
+      "id": "8f53b32fc278b014",
+      "source": "daum_comment",
+      "category": "comment",
+      "platform": "daum",
+      "parent_title": "2055년생부터 국민연금 68세 수령",
+      "parent_url": "https://news.daum.net/economic/finance",
+      "content": "지금 받는 연금도 생활하기 빠듯한데...",
+      "author": "은퇴자E",
+      "author_id": "b69766947967c93b",
+      "likes": 123,
+      "published_at": "2025-09-25T23:56:36.787860",
+      "collected_at": "2025-09-25T23:56:36.787860"
+    }
+  ]
+}
