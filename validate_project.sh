@@ -102,6 +102,73 @@ else
     ((ERRORS++))
 fi
 
+# 6. 프로젝트 구조 규칙 검사 (.windsurf/rules/project-structure-rules.md)
+echo -e "\n${YELLOW}[6/6] 프로젝트 구조 규칙 검사${NC}"
+echo "----------------------------------------"
+
+# 기본 디렉토리 존재 여부 확인
+REQUIRED_DIRS=("docs" "scripts" "logs" "config" "tests" "data")
+for d in "${REQUIRED_DIRS[@]}"; do
+  if [ ! -d "$d" ]; then
+    echo -e "${YELLOW}⚠️  필수 디렉토리 없음: $d${NC}"
+    ((WARNINGS++))
+  fi
+done
+
+# 루트 디렉토리 보호: 특정 파일 유형은 전용 디렉토리에만 위치해야 함
+# 허용 루트 파일 화이트리스트
+ALLOW_ROOT_FILES=(
+  ".gitignore" ".editorconfig" "README.md" "LICENSE" \
+  "Makefile" "Makefile.osint" \
+  "package.json" "package-lock.json" \
+  "docker-compose.yml" "docker-compose.production.yml" \
+  "validate_project.sh" "check-health.sh" \
+  ".github" ".windsurf" "BACKEND-ABSA-SERVICE" "BACKEND-COLLECTOR-SERVICE" \
+  "BACKEND-WEB-COLLECTOR" "FRONTEND-DASHBOARD" "data" "scripts" "docs" \
+  "logs" "config" "tests"
+)
+
+# 함수: 루트 허용 여부 판정
+is_allowed_root() {
+  local item="$1"
+  for allowed in "${ALLOW_ROOT_FILES[@]}"; do
+    if [ "$item" = "$allowed" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# 루트에 존재하는 파일/폴더 점검 (숨김 제외)
+ROOT_ISSUES=()
+for item in $(ls -A1 | grep -v '^\.' || true); do
+  if ! is_allowed_root "$item"; then
+    # 파일 유형별 추가 규칙: *.md, *.sh, *.log는 전용 디렉토리 사용 권장
+    if [[ "$item" == *.md ]]; then
+      ROOT_ISSUES+=("문서 파일은 docs/ 하위로 이동 필요: ./$item")
+    elif [[ "$item" == *.sh ]]; then
+      # 핵심 검증 스크립트 이외는 scripts/ 하위 요구
+      if [ "$item" != "validate_project.sh" ] && [ "$item" != "check-health.sh" ]; then
+        ROOT_ISSUES+=("스크립트는 scripts/ 하위로 이동 필요: ./$item")
+      fi
+    elif [[ "$item" == *.log ]]; then
+      ROOT_ISSUES+=("로그 파일은 커밋 금지 또는 logs/ + .gitignore 처리 필요: ./$item")
+    elif [ -f "$item" ]; then
+      ROOT_ISSUES+=("루트 보호 규칙 위반(파일): ./$item → 적절한 디렉토리로 이동 필요")
+    fi
+  fi
+done
+
+if [ ${#ROOT_ISSUES[@]} -gt 0 ]; then
+  echo -e "${RED}❌ 루트 디렉토리 보호 규칙 위반 발견:${NC}"
+  for msg in "${ROOT_ISSUES[@]}"; do
+    echo "- $msg"
+  done
+  ((WARNINGS++))
+else
+  echo -e "${GREEN}✅ 루트 디렉토리 보호 규칙 위반 없음${NC}"
+fi
+
 # 결과 요약
 echo "========================================="
 echo -e "${YELLOW}검증 완료${NC}"
@@ -112,8 +179,11 @@ echo -e "경고: ${YELLOW}$WARNINGS${NC}"
 if [ $ERRORS -gt 0 ]; then
     echo -e "\n${RED}❌ 검증 실패: 오류를 수정하세요${NC}"
     exit 1
+elif [ "${RULES_ENFORCE_STRICT}" = "true" ] && [ $WARNINGS -gt 0 ]; then
+    echo -e "\n${RED}❌ 규칙 위반(엄격 모드): 경고를 오류로 처리합니다${NC}"
+    exit 1
 elif [ $WARNINGS -gt 0 ]; then
-    echo -e "\n${YELLOW}⚠️  경고 있음: 검토 필요${NC}"
+    echo -e "\n${YELLOW}⚠️  경고 있음: 검토 필요 (엄격 모드 비활성)${NC}"
     exit 0
 else
     echo -e "\n${GREEN}✅ 모든 검증 통과${NC}"

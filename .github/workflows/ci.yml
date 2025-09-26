@@ -142,10 +142,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Run validate_project.sh if present
+      - name: Run validate_project.sh (STRICT)
+        env:
+          RULES_ENFORCE_STRICT: "true"
         shell: bash
         run: |
-          if [ -x ./validate_project.sh ]; then ./validate_project.sh; else echo "No validate_project.sh"; fi
+          if [ -x ./validate_project.sh ]; then RULES_ENFORCE_STRICT=true ./validate_project.sh; else echo "No validate_project.sh"; fi
 
   docker-build:
     name: Docker Build (ABSA)
