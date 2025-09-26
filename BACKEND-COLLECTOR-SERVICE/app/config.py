@@ -29,6 +29,18 @@ class Settings(BaseSettings):
         "https://www.professionaladviser.com/pensions/"
     ]
 
+    # QA pipeline
+    qa_enable_network_checks: bool = os.getenv("QA_ENABLE_NETWORK_CHECKS", "false").lower() == "true"
+    qa_domain_whitelist: list = [
+        "www.nps.or.kr",
+        "nps.or.kr",
+        "www.mohw.go.kr",
+        "mohw.go.kr",
+        "institute.nps.or.kr"
+    ]
+    qa_min_content_length: int = int(os.getenv("QA_MIN_CONTENT_LENGTH", "40"))
+    qa_expected_keywords: list = ["연금", "국민연금", "NPS", "제도", "기금"]
+
     class Config:
         env_file = ".env"
         case_sensitive = False

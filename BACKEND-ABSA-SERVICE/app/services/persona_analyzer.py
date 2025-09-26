@@ -439,14 +439,17 @@ class PersonaAnalyzer:
             # 업데이트
             existing.profile_data = profile_data
             existing.updated_at = datetime.utcnow()
+            existing.last_calculated_at = datetime.utcnow()
         else:
             # 새로 생성
             new_persona = UserPersona(
                 user_id=profile.user_id,
                 username=profile.username,
+                platform=None,
                 profile_data=profile_data,
                 created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow()
+                updated_at=datetime.utcnow(),
+                last_calculated_at=datetime.utcnow()
             )
             self.db.add(new_persona)
         

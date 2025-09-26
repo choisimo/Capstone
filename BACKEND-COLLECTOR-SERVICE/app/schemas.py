@@ -50,6 +50,15 @@ class CollectedData(BaseModel):
     content_hash: Optional[str] = None
     metadata_json: Optional[dict] = None
     processed: bool = False
+    # QA pipeline results
+    http_ok: Optional[bool] = None
+    has_content: Optional[bool] = None
+    duplicate: Optional[bool] = None
+    normalized: Optional[bool] = None
+    quality_score: Optional[float] = None
+    semantic_consistency: Optional[float] = None
+    outlier_score: Optional[float] = None
+    trust_score: Optional[float] = None
 
     class Config:
         from_attributes = True

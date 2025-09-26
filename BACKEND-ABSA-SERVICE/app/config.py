@@ -33,6 +33,14 @@ class Settings:
     model_cache_size: int = 100  # 모델 캐시 크기
     aspect_extraction_confidence: float = 0.7  # 속성 추출 신뢰도 임계값 (0.0~1.0)
     sentiment_confidence: float = 0.6  # 감성 분석 신뢰도 임계값 (0.0~1.0)
+
+    # 인증 설정
+    auth_jwt_secret: str = os.getenv("AUTH_JWT_SECRET", "")
+    auth_jwt_algorithm: str = os.getenv("AUTH_JWT_ALG", "HS256")
+    auth_required: bool = os.getenv("AUTH_REQUIRED", "false").lower() == "true"
+
+    # 페르소나 신선도 설정
+    persona_staleness_hours_default: int = int(os.getenv("PERSONA_STALENESS_HOURS_DEFAULT", "24"))
     
     class Config:
         """
