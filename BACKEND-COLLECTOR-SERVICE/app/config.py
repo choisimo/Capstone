@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     port: int = int(os.getenv("PORT", 8002))
     debug: bool = os.getenv("DEBUG", "true").lower() == "true"
     
-    # 데이터베이스 설정
+    # 데이터베이스 설정 (환경변수 직접 사용)
     database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/pension_sentiment")
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     analysis_service_url: str = os.getenv("ANALYSIS_SERVICE_URL", "http://localhost:8001")
@@ -29,6 +29,16 @@ class Settings(BaseSettings):
         "https://www.professionaladviser.com/pensions/"
     ]
 
+    # QA pipeline
+    qa_enable_network_checks: bool = os.getenv("QA_ENABLE_NETWORK_CHECKS", "false").lower() == "true"
+    qa_domain_whitelist: list = [
+        "www.nps.or.kr",
+        "nps.or.kr",
+        "www.mohw.go.kr",
+        "mohw.go.kr",
+        "institute.nps.or.kr"
+    ]
+    qa_min_content_length: int = int(os.getenv("QA_MIN_CONTENT_LENGTH", "40"))
     class Config:
         env_file = ".env"
         case_sensitive = False

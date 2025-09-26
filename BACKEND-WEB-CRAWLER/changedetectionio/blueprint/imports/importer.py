@@ -27,7 +27,7 @@ class Importer():
 
 class import_url_list(Importer):
     """
-    Imports a list, can be in <code>https://example.com tag1, tag2, last tag</code> format
+    Imports a list, can be in <code>https://your-domain-here tag1, tag2, last tag</code> format.
     """
     def run(self,
             data,

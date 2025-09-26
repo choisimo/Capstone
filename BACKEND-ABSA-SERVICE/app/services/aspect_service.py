@@ -6,7 +6,6 @@ Aspect Service 모듈
 
 from typing import List, Dict, Any, Optional
 import uuid
-import random
 from datetime import datetime
 
 
@@ -48,24 +47,43 @@ class AspectService:
             for aspects in self.predefined_aspects.values():
                 candidate_aspects.extend(aspects)
         
-        # 텍스트 길이에 따라 속성 개수 결정
-        text_length = len(text.split())
-        num_aspects = min(random.randint(1, 4), text_length // 10 + 1)
-        
-        selected_aspects = random.sample(
-            candidate_aspects, 
-            min(num_aspects, len(candidate_aspects))
-        )
-        
-        for aspect in selected_aspects:
+        # 텍스트 기반 결정론적 추출: 텍스트에 등장하는 후보를 우선 선택
+        lowered = text.lower()
+        appearances: List[Dict[str, Any]] = []
+        for asp in candidate_aspects:
+            idx = lowered.find(asp.lower())
+            if idx != -1:
+                appearances.append({"aspect": asp, "index": idx})
+
+        # 기본 개수: 텍스트 길이에 따라 1~4개 범위에서 결정(결정론적)
+        word_count = len(lowered.split())
+        desired_count = max(1, min(4, word_count // 10 + 1))
+
+        # 우선순위: 등장 순서 -> 알파벳
+        if appearances:
+            appearances.sort(key=lambda x: (x["index"], x["aspect"]))
+            selected = [a["aspect"] for a in appearances[:desired_count]]
+        else:
+            # 등장하지 않으면 후보 리스트 앞에서 deterministic 선택
+            selected = candidate_aspects[:desired_count]
+
+        for aspect in selected:
+            pos = lowered.find(aspect.lower())
+            if pos == -1:
+                pos = 0
+            end_pos = min(len(text), pos + max(10, len(aspect)))
+            # 신뢰도: 단어 길이/텍스트 길이 기반 (0.6~0.95 범위로 정규화)
+            base = len(aspect) / max(10.0, len(text))
+            confidence = 0.6 + min(0.35, base * 5.0)
+
             aspect_data = {
                 "aspect": aspect,
-                "confidence": round(random.uniform(0.6, 0.95), 2),
+                "confidence": round(confidence, 2),
                 "position": {
-                    "start": random.randint(0, max(0, len(text) - 10)),
-                    "end": random.randint(10, len(text))
+                    "start": pos,
+                    "end": end_pos
                 },
-                "context": text[:50] + "..." if len(text) > 50 else text
+                "context": text[max(0, pos-25):min(len(text), end_pos+25)] if text else ""
             }
             extracted_aspects.append(aspect_data)
         
