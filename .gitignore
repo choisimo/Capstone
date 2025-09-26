@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#IDE
+.cursor/
+.windsurf/
+.windsurfrules
+refactor.md
+
 # C extensions
 *.so
 
