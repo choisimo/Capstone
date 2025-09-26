@@ -12,7 +12,6 @@ import feedparser
 import json
 import hashlib
 import time
-import random
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from urllib.parse import quote, urljoin, urlparse
@@ -27,6 +26,8 @@ class AdvancedCrawler:
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/120.0.0.0',
             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         ]
+        # 결정론적 로테이션 인덱스
+        self._ua_index = 0
         
         # 네이버 전용 헤더
         self.naver_headers = {
@@ -60,16 +61,18 @@ class AdvancedCrawler:
         }
         
     def get_random_user_agent(self) -> str:
-        """랜덤 User-Agent 선택"""
-        return random.choice(self.user_agents)
+        """결정론적 User-Agent 로테이션 (random 사용 금지)"""
+        ua = self.user_agents[self._ua_index % len(self.user_agents)]
+        self._ua_index += 1
+        return ua
     
     async def fetch_with_retry(self, url: str, headers: Dict = None, max_retries: int = 3) -> Optional[str]:
         """재시도 로직을 포함한 비동기 페이지 가져오기"""
         for attempt in range(max_retries):
             try:
-                # 요청 간 딜레이 (봇 감지 회피)
+                # 요청 간 딜레이 (봇 감지 회피) - 결정론적 지연
                 if attempt > 0:
-                    await asyncio.sleep(random.uniform(1, 3))
+                    await asyncio.sleep(self._deterministic_delay(attempt, url))
                 
                 cookie_jar = CookieJar()
                 timeout = aiohttp.ClientTimeout(total=30)
@@ -93,6 +96,13 @@ class AdvancedCrawler:
                 continue
         
         return None
+
+    def _deterministic_delay(self, attempt: int, url: str) -> float:
+        """URL과 시도 횟수 기반 결정론적 지연(1.0~3.0초)"""
+        seed = f"{url}:{attempt}"
+        h = hashlib.sha256(seed.encode()).digest()
+        val = int.from_bytes(h[:2], 'big') / 65535.0  # 0..1
+        return 1.0 + 2.0 * val
     
     async def crawl_naver_news(self, query: str = "국민연금") -> Dict:
         """네이버 뉴스 크롤링 - 개선된 방법"""

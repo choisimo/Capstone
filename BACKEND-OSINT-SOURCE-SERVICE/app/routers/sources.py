@@ -554,7 +554,7 @@ async def test_api():
     
     # Test source validation
     validation_data = {
-        "url": "https://example.com"
+        "url": "https://www.nps.or.kr"
     }
     
     try:
