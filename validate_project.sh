@@ -49,7 +49,10 @@ fi
 echo -e "\n${YELLOW}[3/5] 금지된 URL 패턴 검사${NC}"
 echo "----------------------------------------"
 
-FAKE_URLS=$(grep -r "example\.com\|test\.com\|localhost\.com\|dummy\.com" --include="*.py" --include="*.js" --include="*.jsx" --exclude-dir=tests --exclude-dir=test --exclude-dir=node_modules . 2>/dev/null || true)
+FAKE_URLS=$(grep -r "example\.com\|test\.com\|localhost\.com\|dummy\.com" \
+  --include="*.py" --include="*.js" --include="*.jsx" \
+  --exclude-dir=tests --exclude-dir=test --exclude-dir=node_modules \
+  --exclude-dir=venv --exclude-dir=.venv --exclude-dir=env . 2>/dev/null || true)
 if [ ! -z "$FAKE_URLS" ]; then
     echo -e "${YELLOW}⚠️  가짜 URL 패턴 발견:${NC}"
     echo "$FAKE_URLS" | head -10

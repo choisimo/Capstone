@@ -816,7 +816,12 @@ def ticker_thread_check_time_launch_checks():
             jitter = datastore.data['settings']['requests'].get('jitter_seconds', 0)
             if jitter > 0:
                 if watch.jitter_seconds == 0:
-                    watch.jitter_seconds = random.uniform(-abs(jitter), jitter)
+                    # Deterministic jitter without random - based on watch uuid and jitter value
+                    import hashlib
+                    seed = f"{uuid}:{jitter}"
+                    h = hashlib.sha256(seed.encode()).digest()
+                    val = int.from_bytes(h[:2], 'big') / 65535.0  # 0..1
+                    watch.jitter_seconds = -abs(jitter) + (2 * abs(jitter)) * val
 
             seconds_since_last_recheck = now - watch['last_checked']
 
