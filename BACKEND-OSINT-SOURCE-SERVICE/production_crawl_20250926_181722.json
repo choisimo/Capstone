@@ -1,0 +1,453 @@
+{
+  "query": "국민연금",
+  "timestamp": "2025-09-26T18:17:16.666466",
+  "sources": {
+    "google_rss": {
+      "platform": "구글 뉴스 RSS",
+      "query": "국민연금",
+      "count": 30,
+      "articles": [
+        {
+          "title": "'족쇄' 풀린 국민연금, 삼성전자 다시 늘린다 - 한국경제",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1ZU1NudS04Y1Q2aVRoeDJPSEI1TU0wcjFpaDhEX1A0YTJTNldDNXoySUJzdWFMeFBOTEUzZDJGM0tmaXBZbktocWtCdnRIV3pZWWFObE9FMzdEZ9IBVEFVX3lxTE55M0l4YVR0UGVlaUpsaDdGd19hc0hCNXZSTmNNQ0hQdGIzekdlb1BYTWUyakZmYzNwUW9Ra3gxQ2tmWWI0R2U3anVFQ281dV9SV0V0ZQ?oc=5",
+          "date": "Thu, 25 Sep 2025 08:26:17 GMT",
+          "source": "한국경제",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "“국민연금 1400만→8800만원 ‘확’ 늘어나는데”…반환일시금 10만명 넘어 - 매일경제",
+          "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE5KUUR0QUxrQ1JKdUk5T3k3TFFrUnBCOVBVM0dSTHM1SGQ0MHk5RTJ6RTMwZXptYlhBN1JTaWU1NGtNOHFoZmdWZWIwbFlkZFlkT3BsRw?oc=5",
+          "date": "Thu, 25 Sep 2025 00:20:58 GMT",
+          "source": "매일경제",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "\"노후생활 어떻게\"…국민연금 일시금 덥석 받은 10만명 - v.daum.net",
+          "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE5pQ2NERWZObVBqSnhHeXZzQmFPY1paNkVRRER6NDI2RTZoM1dhcFhVREgxT0JsT09rN2JyWFhyRHVHUEFLYjlZdGVLS2twRkE?oc=5",
+          "date": "Thu, 25 Sep 2025 02:42:00 GMT",
+          "source": "v.daum.net",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "올 상반기 국민연금 반환일시금 7000억…수령자 10만명 넘어 - 아주경제",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9mX2taWGNJTi1zRGl0cGgxU2Q3emdBZFIxakVJWGpqWjNSS3k4QmpDVmR0WkxMbHBFMHRVckd6MXlzQTFfblZTVzZSdkhPc3FESzBodzYtOFk1Z9IBWEFVX3lxTE0zdHB4OXNVZFNEazZ3dWJVQWJwd1dBa2M0TTBKVnV2Tnp2NkdaMkhkUFFVRFlDcFVmS3FVam1oUlh6V0I2RFRuVU5PS0hRam5rQzQtaUdOMEU?oc=5",
+          "date": "Wed, 24 Sep 2025 23:55:19 GMT",
+          "source": "아주경제",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금공단, “안정된 노후 보낼 수 있도록”…추석맞아 한달간 기초연금 홍보 전개 - 경기일보",
+          "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE84d2Eta2Y5MEJrVTJxSEpHd2gwZTR5MDRBXzFPSlZFckFhYWJObWQ0aFZjcFctcHJpYm9zd2NXVTAwSTRCUEpORDBuU3c0VUtSSHIwWklUZHJZOUE?oc=5",
+          "date": "Thu, 25 Sep 2025 10:06:00 GMT",
+          "source": "경기일보",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금, 기금운용직 온라인 채용설명회 개최 - 마켓인",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE1OQU5xYlVGejBOUmxNbTZkLWh2d3RVRWhDeUViYkJmd0hlV2Q0MjdLdU5ueFNGM1VXR0JkX3h5OFhxdmdXMS1Ya1NBUy1HMnA3UkJ1UTIwUVI5LTlGSlR1RkFaWXVuazNCQ3d3Vlh4YTBVZw?oc=5",
+          "date": "Thu, 25 Sep 2025 01:16:01 GMT",
+          "source": "마켓인",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금, 내달 28일 기금운용직 온라인 채용설명회 - 머니투데이 - 머니투데이",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9UVE01cjlJNFhyOFJwNXRnZE80M1ViNlFEb3JFSmktYllqWmlRSlhUd2ZtWmk4WGY0Z0hLcGs2T0M3d1hISlJrM0dRYndmTUx4UzY3MFlENFRzMkJCUWdDd2otMzdIeUo30gFuQVVfeXFMT05QeVg2ZTJxV3JFQklyT3daYVk5RVFTdUtoV3A5UEhNMEdkeUFpWHhRWXhLM19wbTVyNlBGYkVtUGNXZFpjQ3dmcUdDckZNd3Fkc2xJUEQ3VE0tMkNuOGxLNGl3T1BTbVBBNjcxNXc?oc=5",
+          "date": "Thu, 25 Sep 2025 01:31:53 GMT",
+          "source": "머니투데이",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금공단 기금운용본부 '기금운용직 온라인 채용설명회' 개최 - 서울와이어",
+          "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTFBLS0tKNzdseVEtUmZjaTVFbi15dmJmQXIzMDk5bk1BZmdSX0lBZWpKMGl3ZFVTLUYydXhSSFJRQWhlOWE1S3d4aUN5a28wOEFqQ2cybGRVN1lJMkg1bVk5Z3FKWXNCSDQwdjJB?oc=5",
+          "date": "Thu, 25 Sep 2025 09:32:43 GMT",
+          "source": "서울와이어",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금, 홈플러스 사태 9000억 손실 위기… “책임투자 늘려야” - 동아일보",
+          "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE10T3ozeU5NQWNDdV9BSTF2cDhBMFFURXlwZm5SODJNbkFuQk1jS2RIaGtIQXdfZzVxcnNCSVFPM05tbE1QZTdDeFBzSVBxWWtZUU5IRFlVTUE3dFFJaEVKc3o2QzlORHNkWlVLTGNtQnY1WGtyd0HSAWZBVV95cUxPMEo4bTBJZlByOXVoZi1XQm1lQi1MenZXNjJ1WTJqd1dwX01mbjBZOS1MQkY2RkY1TDdFS3pWeVpiMzdNb1c3VkowLVR1a2VWdVVRYW1leThzWTVVVTlic2V5ZzZ2SHc?oc=5",
+          "date": "Tue, 23 Sep 2025 18:00:00 GMT",
+          "source": "동아일보",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "MBK “국민연금, 홈플러스 투자 손실처리해도 원금 대비 2배 수익” - 마켓인",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9oVWpSYlNtMktCRktVdFJ0a1R1dENUNnNOV1F0SXFaR3M2QkxWOWQ3MnpNWFV2WmlFRUVJU1lHbEV6NnFzWUpvWHpQNVhQNXdCbDREeTg1ckV5MXhXY0VVX1JvOHVUd2lDVWFzVmR4T3BJQQ?oc=5",
+          "date": "Tue, 23 Sep 2025 09:57:54 GMT",
+          "source": "마켓인",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "MBK '손실난 국민연금의 홈플러스 투자금 54% 회수' [시그널] - 서울경제",
+          "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5mc2ZuZFJkWnFuVEhjTmRLM0tEQ2ZMM1BHTFZYcVZLWDloekJVdGRjN183eDM2SkxINkN1ZThCd3hGaXZkNk5VOEdkT0JjLU4xUnBfZENB0gFXQVVfeXFMT0t1M1AtUzkwaTJlZDBCN09IWWxTZ2NiSFpDMEhUblFwcFRrNkc0UjRHSlFNRWY4RGFMM1NBQll4bWlHendRUnZ1SmQxV2JSR0k1MmJTRVFZ?oc=5",
+          "date": "Tue, 23 Sep 2025 23:21:09 GMT",
+          "source": "서울경제",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "[정동칼럼]연금개혁이 수렁에 빠진 이유 - 경향신문",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1lMUNwREhla01yb0RkaXZRWVdZR1dXdzVHQkNMRUUwY0FvRTYxamxVbFJISWhaNWFyakRSTWxTMTFjM05ROHEzTlN2RUtrOENRU0tZdFRHVFphZ9IBX0FVX3lxTE5Hc2pSWFNjQ2hUVFN4MTgzRmpMQVgxSHFLal90Z3JJU0xubTFKUEdlaHVRZGVTcGlTYXpTMGFrSzg2NWhMUWhGY3l0SThqVmZab0J6ZWk1d1l5Y0RwUGNv?oc=5",
+          "date": "Wed, 24 Sep 2025 12:22:00 GMT",
+          "source": "경향신문",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금 상반기만 10만명 '사각지대'…연금특위는 또 '삐걱' - SBS Biz",
+          "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5TazRfLXY2TC1kNEVBSnRuWUxPd3liOFJNbXJkTGI5TlgwQUh4eGNTajZBTXM5ckhXT3lybFBlX0NEakJkLUxTTWpOek82dGJyeXdj0gFYQVVfeXFMTzc4S1BRcEVoazZiNVhVaEJoR0YxWEJtNlEtWlJJZ2xxT2tqd0Z4a3ZHdlhja2lGdkJIS3h0SEVOYUNJbTFXdnZZNnJxa2Rfa0xRWU9EMzVVVg?oc=5",
+          "date": "Thu, 25 Sep 2025 08:52:00 GMT",
+          "source": "SBS Biz",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "[단독] 복지부, '노후보장' 연금개혁 보고서 우려했다…이후 영구 비공개 - 더팩트",
+          "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFB3dndkdjctWUxGdWIwXzhNWGNvd2JJRmpVMnhUbUZONk5BRWxkME1pVlE3eElWc05uTW9uS0gwMUMyUmRWLVk4OTBmN3kwek1lSWtGcTZR0gFQQVVfeXFMTmJtSVVtODNXSzRnTHM0TnlHaHZrV0pJRC13ZTZzV2pwbi1oWmFBOW1QUk5CZElRV1dSaWdYdTZ5QWtxMUJsVkE3eHBQX0oxQWc?oc=5",
+          "date": "Wed, 24 Sep 2025 07:53:16 GMT",
+          "source": "더팩트",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금공단 경인지역본부, 금융위기청년 지원 위한 기부금 전달 - 경인일보",
+          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE1DenYzdk9WeFhVcmdTRWRZOE5oTWlzNVlQa2plMFpTeWJlU0pfaXg5NV9uSDBMSE9INEQ2aGstSWs2WVlHN0FuRjdiX2E1VExFQVE?oc=5",
+          "date": "Thu, 25 Sep 2025 08:32:21 GMT",
+          "source": "경인일보",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "'금융 미래 바꾸는 AI' 국민연금공단, 전북국제금융콘퍼런스 - 뉴시스",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE50VGdqY2V3ck4yaThqQzBDTnd3MzlWdnpfYzgxc3ZXZGlldDBHV080d2tPS0ZWZ3Rld05NMXJmMXZDeUYyQUNSTGpBZVoxQmtMVkJWNFlKbkRKRU5Gc3U0X9IBeEFVX3lxTE1URnFUMlVKR01VZmM3UnBYTTlpX1EyX3BVc1JhWWp2SDRUWG16bThhNExncHJueHkzd1hpTTJIdHdod3gtRklzYUh1SHNabWdZSUF3ZE5Ka2RXYVk2SHdRdzJ1MUIxa3lobXhaVHZ5X0JYSk01ZnV3dw?oc=5",
+          "date": "Thu, 25 Sep 2025 08:34:23 GMT",
+          "source": "뉴시스",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "'글로벌 금융시장 동향' 공유…국민연금 '2025 전북국제금융콘퍼런스' 개최 - 이데일리",
+          "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNUUl0dUl2UDBabGJHY0c3VldOQzl6Y3lLNzBFVGptUDA0aFFSUmNCY2dnNEdYaHFEYUJ5a2oxalcydmcwWVduTTZTd1BYZk95WGpIalE2RzVaZ0FjR01Sa2hkZF9WZGg0TW5JNW9ueDMzQU9hdzJ5eUdTMG14MXNoaA?oc=5",
+          "date": "Fri, 26 Sep 2025 06:32:48 GMT",
+          "source": "이데일리",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "전북자치도, 제6회 지니포럼 성황리 개최..전주시-국민연금공단과 공동 - 한국정경신문",
+          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE9vcHNIajkydlp4WV9pT2NiTDYwN2t0RzI3eERGQTNwUm1Xc2w1RVVQb2YxTkE1dTh1RVBIZllRaEhzaFB4UjNOMDdhU3BoSC1vVGc?oc=5",
+          "date": "Thu, 25 Sep 2025 22:50:53 GMT",
+          "source": "한국정경신문",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "주가조작 이용된 DI동일…국민연금도 투자 - 뉴스토마토",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9DNm1nZnBTaVNzRi1RejUtLUk2UVMxdHdIRzN6TTBvTFlUSGRnZDNLN2l0dDU4TURIcVQ0dFU5ZVlXWG81eGtzdkZjMXRENjJOVkxiUm4wQ1d6QWVHaGpWNg?oc=5",
+          "date": "Thu, 25 Sep 2025 21:00:00 GMT",
+          "source": "뉴스토마토",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "코스피 반등에 ‘국장’ 투자 늘려야 하나…국민연금의 ‘딜레마’ - 경향신문",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9JLTEwUkt4dzlpaWdiNU4zVDNvSUU5bE0xS0sycWdudzliUzU3QTNNVUNpeTdoSmdKUUVRVlpmVzMzamx2QV9LU0tpalFzblBxYWpRd0E3Tmx1Z9IBX0FVX3lxTE9udkhELS0zaWVVWTNWdEJnVnhaeVc3YjIxVm1Ea3F2QkItOGx6VUZZUnRqUklLdXJFYm9fZzNCWlFzemdYQmFyeWZFNllMSkNIMnRuRXhYclZFRUFOeGsw?oc=5",
+          "date": "Tue, 23 Sep 2025 12:01:00 GMT",
+          "source": "경향신문",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금 '국장 투자' 딜레마, '비중 축소' 계획 대통령 해외 세일즈에 누 될까 눈치 - 비즈니스포스트",
+          "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBCWVJ4WnNvcmowd3J3WmZQWGxJdy1sVEpGYlh3WTIxdWJ5SGpPcERheEFFOXBBOHhOMGdDaXNFZFlvYW9adU1mZUwtYnplX21icnBNTE9jOFFSdFk1R1pxZldYOWQyaFJMNlFWSHVDSjZGcm8?oc=5",
+          "date": "Fri, 26 Sep 2025 07:46:19 GMT",
+          "source": "비즈니스포스트",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "“국내 주식 왜 안 사” 대통령 발언에 고민 커진 국민연금 - 쿠키뉴스",
+          "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE9fUk9nYU55anFlbmxnNUFrUDBBUjl5NzJVOEh2Q1I5SlF5bkRacy02SFdZM2Z4NUVnQWtBYjl6Q21TSDhpWXF5dUJIeGdHbHE4LTB5QWl2TjNtVUNBcThBLVJDSQ?oc=5",
+          "date": "Tue, 23 Sep 2025 21:05:04 GMT",
+          "source": "쿠키뉴스",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "올 상반기 국민연금 반환일시금 7천억 육박..10만명 넘어 - tbc.co.kr",
+          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQTkZBb3A5aUJMdXYtV0k2UHNBYmpGMlFVNHhmSXRKWUxLYnpmN0lnMDJsNlFzalJRMTBwYnpfWEJQUTRocG5BZHdPNmJSZGRjRWpXY1JfSVIwLTFuVVFhLWdwVjV4X3laVExtU0pYY2wzY25PSkhlQ0owYjZ1dHFPMHY1TEJ5c3JS?oc=5",
+          "date": "Fri, 26 Sep 2025 02:29:58 GMT",
+          "source": "tbc.co.kr",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "한난-국민연금공단, 감사혁신 위한 협약 체결 - 투데이에너지",
+          "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9XeS1RcjJVZllqQUM1Q0RfQTB5dlllSHFDTVNDeDUycDlabno5VmdLOWFTNFlYbHBhN1BGTzUzZ2VqaGlhY2Y3aDNMNzRlR29RNFp4MHF2ZUhXbzFtbHUxWFF2Q1dseWhVUXN3OUJn?oc=5",
+          "date": "Fri, 26 Sep 2025 06:27:34 GMT",
+          "source": "투데이에너지",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금, 술·담배·도박 등 ‘죄악주’에 6.4조 투자 - 여성신문",
+          "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE45bktvYzdaZThpY2NCbEI4YWpQbm1xYUxhQklTUDl1WUppSHltZjNGdnlHcE9GYm9UNEVITnpfZVN2TFIxSnpmNGNWOVNMY3BwaHFPMllXWFRjWTRabGh2SnJZU09XUnJKVmVOdFFaSdIBc0FVX3lxTE1BZXgzSmt0cFZjYld0NHdZQUpzRTVqTXczT0Y3Q3kySHJHdUxiRDJSMllFLVNxMVc3dWpVU2VKb0pNM3NJVXhWSmRaQXR4TmtOZUQxS2dwVTJJeW93UFp1YnVCWjFLNm05Q2lMTmp0ZHp1NzA?oc=5",
+          "date": "Fri, 26 Sep 2025 08:21:52 GMT",
+          "source": "여성신문",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "“국민연금, 삼성전자 다시 사들인다”…벤치마크 조정·연금 개혁에 매수 여력 확대 - mstoday.co.kr",
+          "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE03M2hpQTRCU1diZ1ZBaVFCUE1fdWlLQlVJNUJHNHVRUTdVbVRCZ1dNWFA3djAzQVVZWlpUMkpSTmdNdEhQSGpoTndoeWgzYXJ6QUxjVTMzVkY2d3JtNWNUdURRM1lkOVJRZDFR?oc=5",
+          "date": "Fri, 26 Sep 2025 00:51:37 GMT",
+          "source": "mstoday.co.kr",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "국민연금, 술·담배·도박 죄악주 투자 6조 4000억원대로 역대 최고치 - 베이비뉴스",
+          "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBfRm1tSWRaM1gycDMtTFBTZmIyVm9yTzF1Q1JjeWpOZW5tX3RudG93SU9OcEdWMU1nbnNObm44LXZlUW1zNFBlTHM5YTVaY01ZTlVBWk1mbUhjVGI0QzVwMGE0NG4zUVhQUVRobQ?oc=5",
+          "date": "Fri, 26 Sep 2025 04:55:45 GMT",
+          "source": "베이비뉴스",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "올 상반기 국민연금 반환일시금 7천억원…수령인원 10만명 넘어 - 연합뉴스",
+          "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE8waGFYZFhPX1hZVzdFQkdyWWxyTURSSlVheUxRb2QxdkFrVE1uMFdnc0RqTzJlbWFVWWVWOU9JcnJyVWwwWnV1X1AxNGJzMGNydmxKenk1SVAwQ2PSAWBBVV95cUxNMVBHc1VZR3hhUnA5dDdfMnVPSG8zeWE4dV9DYVVxcThvNEg5S1NWM1hfX09lU1hDOTN1QjZNcjVtQ1NrenUzNUhvQ0hFZ0QzWE5tVFNIdkhXZmlXa1JZanQ?oc=5",
+          "date": "Wed, 24 Sep 2025 21:03:01 GMT",
+          "source": "연합뉴스",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "\"국민연금 못 받을 줄 알았더니\"…'78만명 몰렸다' 무슨 일이 [일확연금 노후부자] - 한국경제",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1NT0pRclM3MEhSdVpTQ3Q5TE9rd0JMeEVzVjhDZ3E1Y21keGJIODc0ZWlrTEphdldnc0JpeTk2Q1drV0lQck43MkpkYjRUbW5fRFpCVHBuZUJoQdIBVEFVX3lxTE9TdDJNTl9VcURzbmMwbElZaGVjaDlpWUlfU3ptOWlwWE9yV1d5cnVfUlkxRF9FSlp2VVZVSHRYamhKY1V2WTZQVHFobXF5WU9fQ0VVaQ?oc=5",
+          "date": "Mon, 22 Sep 2025 23:00:10 GMT",
+          "source": "한국경제",
+          "platform": "구글 RSS"
+        },
+        {
+          "title": "연금기금 개혁, 1%포인트의 힘 - 시사저널e",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFB4VkF0cmc4Y2xuZGgtYmd5UXE2bF9odkdjOHZESmNRR1hfVXYtMVFfcm9lTF8wTkVRTWd4eERTYldVNnRsZHEwY3FNdk5kQmQ0aS04SzFjaDB1NkxjdXJFMDVySTg1ZGhnQWRUdk5FczgyQdIBdkFVX3lxTE1wVE9KLWMwOS1TNm1keU93a2pGWWtUM3lGdG5lc1ZvcktxZFBTV3U0WkZRako3UF9pTTNwMGZIQTlsVmEzbjJvS0hvai1pbFkzX0U0WmgxTEprMjljOF9lQUVXTTJCYWd1RzBOM0lyTjhXbVZ1NEE?oc=5",
+          "date": "Fri, 26 Sep 2025 05:03:50 GMT",
+          "source": "시사저널e",
+          "platform": "구글 RSS"
+        }
+      ],
+      "timestamp": "2025-09-26T18:17:18.131746"
+    },
+    "naver_mobile": {
+      "platform": "네이버 모바일",
+      "query": "국민연금",
+      "count": 10,
+      "articles": [
+        {
+          "title": "국민연금, 술·담배·도박株 6.4조원 투자…역대 최고치",
+          "url": "https://n.news.naver.com/article/018/0006126164?sid=102",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "국민연금이 술·담배·도박 관련 기업인 ‘죄악주(Sin Stock)’에 6조 4000억원대 투자한 것으로 나타났다. 26일 국회 보건복지위원회 소속 남인순 더불어민주당 의원이국민연금",
+          "url": "https://n.news.naver.com/article/018/0006126164?sid=102",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "국민연금, 술·담배·도박株에 6.4조 투자…3년새 16% 늘어매일경제2시간 전네이버뉴스",
+          "url": "https://n.news.naver.com/article/009/0005565549?sid=101",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "국민연금, 술·담배·도박 등 ‘죄악주’에 6.4조 투자여성신문55분 전네이버뉴스",
+          "url": "https://n.news.naver.com/article/310/0000129895?sid=101",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "올 상반기국민연금반환일시금 7천억원…수령인원 10만명 넘어",
+          "url": "https://n.news.naver.com/article/001/0015647363?sid=102",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "\"반환일시금 사유 연령도달 많아…임의계속가입 등 지원해 사각 줄여야\" 올해 상반기국민연금반환일시금 금액이 7천억원에 달하는 것으로 파악됐다. 수령 인원은 10만명을 넘었다.국민연금",
+          "url": "https://n.news.naver.com/article/001/0015647363?sid=102",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "올 상반기국민연금반환일시금 7천억 육박…수령자 10만 명 넘어노컷뉴스1일 전네이버뉴스",
+          "url": "https://n.news.naver.com/article/079/0004070017?sid=102",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "\"노후생활 어떻게\"…국민연금일시금 덥석 받은 10만명SBS Biz1일 전네이버뉴스",
+          "url": "https://n.news.naver.com/article/374/0000465546?sid=101",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "국민연금기금운용직 온라인 채용설명회 개최",
+          "url": "https://n.news.naver.com/article/009/0005564579?sid=101",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        },
+        {
+          "title": "10월 28일 재직자와 질의응답 진행국민연금공단 기금운용본부가 입사를 희망하는 자산운용 전문가를 대상으로 다음 달 28일 온라인 채용설명회를 개최한다. 기금운용본부는 우수한 자산운",
+          "url": "https://n.news.naver.com/article/009/0005564579?sid=101",
+          "source": "네이버",
+          "platform": "네이버 검색"
+        }
+      ],
+      "timestamp": "2025-09-26T18:17:18.701587"
+    },
+    "daum": {
+      "platform": "다음 뉴스",
+      "query": "국민연금",
+      "count": 3,
+      "articles": [
+        {
+          "title": "개봉예정영화",
+          "url": "javascript:",
+          "platform": "다음"
+        },
+        {
+          "title": "상영중영화",
+          "url": "javascript:",
+          "platform": "다음"
+        },
+        {
+          "title": "라디오방송",
+          "url": "javascript:",
+          "platform": "다음"
+        }
+      ],
+      "timestamp": "2025-09-26T18:17:19.266844"
+    },
+    "communities": [
+      {
+        "site": "클리앙",
+        "count": 10,
+        "posts": [
+          {
+            "title": "‘연봉 1.2억’ 금융노조 총파업… “4.5일제 절박” 주장에 시민들 시큰둥",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "10여년간 쓰던 timely 앱을 못쓰니 이거 굉장히 어색하네요.",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "윤 ' 보석 안되면 분노해 위해 가할수도'",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "케데몬은 사탄마귀를 미화한 영화다?",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "윤석열이 못난 인물이 아니네요",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "오랜만에 네이트온을 깔았는데 느낀점 2가지",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "근데 한국 미국의 공식적인 조약인 한미 FTA도 없던일로 하는데 한미상호방위조약이라",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "문소개웬 '윤석열 이 새X는 나이를 x구멍으로 쳐먹나..'",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "신세계 여행 jpg",
+            "url": "",
+            "platform": "클리앙"
+          },
+          {
+            "title": "나토,EU..한번 더 영공 침범하면 무력대응/러시아 전투기 알래스카 침범",
+            "url": "",
+            "platform": "클리앙"
+          }
+        ],
+        "timestamp": "2025-09-26T18:17:19.564645"
+      },
+      {
+        "site": "SLR클럽",
+        "count": 10,
+        "posts": [
+          {
+            "title": "SLRCLUB 寃������� 愿�由ш����� : ������寃������� 愿�由ш����� 諛� ���二� 臾삳�� 吏�臾�",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=help&no=32",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": "SLR��대�� ���移�寃������� ������ ������",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=notice&no=277",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": "������ 諛� ��ㅼ�대�������� ��� 怨듭�� ��대깽��� 李몄�ъ�� 寃����湲�",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=marketinfo&no=134560",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": "���泥���� ��댁�멸�� ��� ��대�щ��嫄곗��?",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=free&no=41399855",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": "移댄�� �����쇰�� 留���대낫硫� ���以����?",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=free&no=41399854",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": "A.I濡� 蹂듭����� ��ㅼ�� ��쇱�몄����� ��몃Ъ��� ������.AVI",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=free&no=41399853",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": "13遺� ��⑤����닿��寃� ���.",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=free&no=41399852",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": ",��� ��몃�쇳����������� ,���",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=free&no=41399851",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": "���) ���援� ��곗�� 洹몃�� ���留뱀�� ��쇰�� ��멸뎅 ������..",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=free&no=41399850",
+            "platform": "SLR클럽"
+          },
+          {
+            "title": "���二쇰�� 荑���≪�� ���湲고��寃� ��ㅻ��援곗�� ��룔��",
+            "url": "http://www.slrclub.com/bbs/vx2.php?id=free&no=41399849",
+            "platform": "SLR클럽"
+          }
+        ],
+        "timestamp": "2025-09-26T18:17:20.216617"
+      }
+    ],
+    "official_sites": [
+      {
+        "site": "국민연금공단",
+        "url": "https://www.nps.or.kr",
+        "status": "active",
+        "title": "국민연금공단",
+        "accessible": true
+      },
+      {
+        "site": "보건복지부",
+        "url": "https://www.mohw.go.kr",
+        "status": "active",
+        "title": "힘이 되는 평생 친구, 보건복지부",
+        "accessible": true
+      }
+    ]
+  },
+  "statistics": {
+    "total_articles": 43,
+    "community_posts": 20,
+    "active_official_sites": 2,
+    "sources_checked": 5
+  }
+}

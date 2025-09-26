@@ -1,0 +1,65 @@
+[
+  {
+    "site": "국민연금공단",
+    "url": "https://www.nps.or.kr",
+    "status": "success",
+    "title": "국민연금공단",
+    "items_found": 10
+  },
+  {
+    "site": "네이버 뉴스",
+    "url": "https://search.naver.com/search.naver?where=news&query=국민연금&sort=0&photo=0&field=0&pd=1",
+    "status": "success",
+    "query": "국민연금",
+    "news_count": 0,
+    "sample_articles": []
+  },
+  {
+    "site": "구글 뉴스 RSS",
+    "url": "https://news.google.com/rss/search?q=국민연금+when:1d&hl=ko&gl=KR&ceid=KR:ko",
+    "status": "success",
+    "feed_count": 48,
+    "sample_items": [
+      {
+        "title": "국민연금, 술·담배·도박 등 ‘죄악주’에 6.4조 투자 - 여성신문",
+        "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE45bktvYzdaZThpY2NCbEI4YWpQbm1xYUxhQklTUDl1WUppSHltZjNGdnlHcE9GYm9UNEVITnpfZVN2TFIxSnpmNGNWOVNMY3BwaHFPMllXWFRjWTRabGh2SnJZU09XUnJKVmVOdFFaSdIBc0FVX3lxTE1BZXgzSmt0cFZjYld0NHdZQUpzRTVqTXczT0Y3Q3kySHJHdUxiRDJSMllFLVNxMVc3dWpVU2VKb0pNM3NJVXhWSmRaQXR4TmtOZUQxS2dwVTJJeW93UFp1YnVCWjFLNm05Q2lMTmp0ZHp1NzA?oc=5",
+        "published": "Fri, 26 Sep 2025 08:21:52 GMT"
+      },
+      {
+        "title": "한난-국민연금공단, 감사혁신 위한 협약 체결 - 투데이에너지",
+        "link": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9XeS1RcjJVZllqQUM1Q0RfQTB5dlllSHFDTVNDeDUycDlabno5VmdLOWFTNFlYbHBhN1BGTzUzZ2VqaGlhY2Y3aDNMNzRlR29RNFp4MHF2ZUhXbzFtbHUxWFF2Q1dseWhVUXN3OUJn?oc=5",
+        "published": "Fri, 26 Sep 2025 06:27:34 GMT"
+      },
+      {
+        "title": "올 상반기 국민연금 반환일시금 7천억 육박..10만명 넘어 - tbc.co.kr",
+        "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQTkZBb3A5aUJMdXYtV0k2UHNBYmpGMlFVNHhmSXRKWUxLYnpmN0lnMDJsNlFzalJRMTBwYnpfWEJQUTRocG5BZHdPNmJSZGRjRWpXY1JfSVIwLTFuVVFhLWdwVjV4X3laVExtU0pYY2wzY25PSkhlQ0owYjZ1dHFPMHY1TEJ5c3JS?oc=5",
+        "published": "Fri, 26 Sep 2025 02:29:58 GMT"
+      },
+      {
+        "title": "국민연금, 술·담배·도박 죄악주 투자 6조 4000억원대로 역대 최고치 - 베이비뉴스",
+        "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBfRm1tSWRaM1gycDMtTFBTZmIyVm9yTzF1Q1JjeWpOZW5tX3RudG93SU9OcEdWMU1nbnNObm44LXZlUW1zNFBlTHM5YTVaY01ZTlVBWk1mbUhjVGI0QzVwMGE0NG4zUVhQUVRobQ?oc=5",
+        "published": "Fri, 26 Sep 2025 04:55:45 GMT"
+      },
+      {
+        "title": "국민연금 '국장 투자' 딜레마, '비중 축소' 계획 대통령 해외 세일즈에 누 될까 눈치 - 비즈니스포스트",
+        "link": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBCWVJ4WnNvcmowd3J3WmZQWGxJdy1sVEpGYlh3WTIxdWJ5SGpPcERheEFFOXBBOHhOMGdDaXNFZFlvYW9adU1mZUwtYnplX21icnBNTE9jOFFSdFk1R1pxZldYOWQyaFJMNlFWSHVDSjZGcm8?oc=5",
+        "published": "Fri, 26 Sep 2025 07:46:19 GMT"
+      }
+    ]
+  },
+  {
+    "site": "연합뉴스",
+    "url": "https://www.yna.co.kr/economy/all",
+    "status": "success",
+    "articles_count": 0,
+    "sample_articles": []
+  },
+  {
+    "site": "다음 뉴스",
+    "url": "https://search.daum.net/search?w=news&q=국민연금&DA=YZR&spacing=0",
+    "status": "success",
+    "query": "국민연금",
+    "news_count": 0,
+    "sample_articles": []
+  }
+]
