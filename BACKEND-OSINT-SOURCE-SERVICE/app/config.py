@@ -24,5 +24,15 @@ class Settings:
         self.kafka_bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
         self.nats_url = os.getenv("NATS_URL", "nats://localhost:4222")
         self.event_publisher = os.getenv("EVENT_PUBLISHER", "kafka")  # kafka or nats
+        
+        # Source configuration
+        self.sources_config_file = os.getenv("SOURCES_CONFIG_FILE", "data/sources.yaml")
+        self.enable_dynamic_sources = os.getenv("ENABLE_DYNAMIC_SOURCES", "true").lower() == "true"
+        self.default_user_agent = os.getenv("DEFAULT_USER_AGENT", "PensionSentiment-Bot/1.0")
+        
+        # Monitoring settings
+        self.monitoring_interval = int(os.getenv("MONITORING_INTERVAL", "300"))  # 5 minutes
+        self.max_consecutive_failures = int(os.getenv("MAX_CONSECUTIVE_FAILURES", "5"))
+        self.http_timeout = int(os.getenv("HTTP_TIMEOUT", "10"))
 
 settings = Settings()

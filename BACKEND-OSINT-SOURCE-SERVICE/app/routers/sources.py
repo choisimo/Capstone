@@ -395,6 +395,64 @@ async def monitor_source(source_id: str, request_data: Dict[str, Any], db: Any =
     except Exception as e:
         return {"error": str(e), "status": "error"}
 
+# Dynamic Source Management
+@router.post("/dynamic/add")
+async def add_dynamic_source(source_data: Dict[str, Any], db: Any = None) -> Dict[str, Any]:
+    """Add a new source dynamically and save to configuration"""
+    if db is None:
+        db = get_db()
+    
+    try:
+        source = await source_service.add_dynamic_source(source_data)
+        return {
+            "id": source.id,
+            "url": source.url,
+            "name": source.name,
+            "category": source.category.value,
+            "message": "Source added dynamically and saved to config"
+        }
+    except Exception as e:
+        return {"error": str(e), "status": "error"}
+
+@router.delete("/dynamic/{source_id}")
+async def remove_dynamic_source(source_id: str, db: Any = None) -> Dict[str, Any]:
+    """Remove a dynamic source and update configuration"""
+    if db is None:
+        db = get_db()
+    
+    try:
+        success = await source_service.remove_dynamic_source(source_id)
+        if not success:
+            return {"error": "Source not found", "status": "error"}
+        return {"message": "Source removed from config", "id": source_id}
+    except Exception as e:
+        return {"error": str(e), "status": "error"}
+
+@router.get("/category-group/{category_group}")
+async def get_sources_by_group(category_group: str, db: Any = None) -> Dict[str, Any]:
+    """Get all sources in a specific category group"""
+    if db is None:
+        db = get_db()
+    
+    try:
+        sources = await source_service.get_sources_by_category_group(category_group)
+        return {
+            "category_group": category_group,
+            "count": len(sources),
+            "sources": [
+                {
+                    "id": s.id,
+                    "url": s.url,
+                    "name": s.name,
+                    "category": s.category.value,
+                    "status": s.status.value
+                }
+                for s in sources
+            ]
+        }
+    except Exception as e:
+        return {"error": str(e), "status": "error"}
+
 # Crawling Endpoints
 @router.get("/crawlable")
 async def get_crawlable_sources(limit: int = 100, db: Any = None) -> Dict[str, Any]:

@@ -3,9 +3,12 @@ import re
 import hashlib
 import json
 import uuid
+import yaml
+import aiohttp
 from typing import List, Optional, Dict, Set, Any
 from urllib.parse import urlparse, urljoin
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from app.models import (
     OsintSource, OsintSourceTag, SourceMetrics, SourceMonitoring,
@@ -13,12 +16,17 @@ from app.models import (
     SourceStatus, SourceCategory, SourceType, ValidationStatus,
     Region, CrawlPolicy
 )
+from app.config import settings
 
 class SourceService:
     def __init__(self):
         self.robot_parsers = {}
         self.sources_db = {}  # 실제 DB 연결 전까지 임시 저장소
         self.discovery_cache: Set[str] = set()
+        self.sources_config = self._load_sources_config()
+        self.monitoring_tasks = {}
+        # 시작시 설정 파일에서 소스 자동 로드
+        asyncio.create_task(self._initialize_sources())
         
     async def register_source(self, db: Any, url: str, name: str = "", 
                             category: SourceCategory = SourceCategory.OTHER, 
@@ -91,6 +99,234 @@ class SourceService:
         })
         
         return source
+    
+    def _load_sources_config(self) -> Dict:
+        """Load sources configuration from YAML file"""
+        config_path = Path(settings.sources_config_file)
+        if not config_path.exists():
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            return {}
+        
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                return yaml.safe_load(f) or {}
+        except Exception as e:
+            print(f"Failed to load sources config: {e}")
+            return {}
+    
+    def _save_sources_config(self, config: Dict):
+        """Save sources configuration to YAML file"""
+        config_path = Path(settings.sources_config_file)
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(config_path, 'w', encoding='utf-8') as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+    
+    async def _initialize_sources(self):
+        """Initialize sources from configuration file"""
+        if not settings.enable_dynamic_sources:
+            return
+        
+        for category_name, sources in self.sources_config.items():
+            for source_data in sources:
+                try:
+                    # Map string categories to enums
+                    category_map = {
+                        'news': SourceCategory.NEWS,
+                        'community': SourceCategory.COMMUNITY,
+                        'social': SourceCategory.SOCIAL,
+                        'research': SourceCategory.RESEARCH,
+                        'other': SourceCategory.OTHER
+                    }
+                    
+                    type_map = {
+                        'web': SourceType.WEB,
+                        'forum': SourceType.FORUM,
+                        'rss': SourceType.RSS,
+                        'api': SourceType.API,
+                        'social': SourceType.SOCIAL,
+                        'video': SourceType.VIDEO
+                    }
+                    
+                    region_map = {
+                        'KR': Region.KR,
+                        'US': Region.US,
+                        'EU': Region.EU,
+                        'CN': Region.CN,
+                        'JP': Region.JP,
+                        'GLOBAL': Region.GLOBAL
+                    }
+                    
+                    # Parse source data
+                    url = source_data['url']
+                    name = source_data['name']
+                    category = category_map.get(source_data.get('category', 'other'), SourceCategory.OTHER)
+                    source_type = type_map.get(source_data.get('type', 'web'), SourceType.WEB)
+                    region = region_map.get(source_data.get('region', 'KR'), Region.KR)
+                    
+                    # Check if already registered
+                    existing = any(s.url == url for s in self.sources_db.values())
+                    if not existing:
+                        # Create crawl policy from config
+                        crawl_policy_data = source_data.get('crawl_policy', {})
+                        crawl_policy = CrawlPolicy(
+                            rate_limit=crawl_policy_data.get('rate_limit', 1.0),
+                            max_depth=crawl_policy_data.get('max_depth', 3),
+                            timeout=crawl_policy_data.get('timeout', 30),
+                            user_agent=crawl_policy_data.get('user_agent', settings.default_user_agent),
+                            follow_redirects=crawl_policy_data.get('follow_redirects', True),
+                            respect_robots=crawl_policy_data.get('respect_robots', True)
+                        )
+                        
+                        # Register without full validation for speed
+                        source_id = str(uuid.uuid4())
+                        source = OsintSource(
+                            id=source_id,
+                            url=url,
+                            name=name,
+                            host=urlparse(url).netloc,
+                            category=category,
+                            source_type=source_type,
+                            region=region,
+                            trust_score=0.8,  # Default high trust for configured sources
+                            reliability_score=0.8,
+                            crawl_policy=crawl_policy,
+                            status=SourceStatus.ACTIVE,
+                            validation_status=ValidationStatus.VALID,
+                            metadata={'source': 'config_file', 'category_group': category_name}
+                        )
+                        
+                        self.sources_db[source_id] = source
+                        print(f"Loaded source: {name} ({url})")
+                        
+                        # Start monitoring if enabled
+                        if settings.monitoring_interval > 0:
+                            self.monitoring_tasks[source_id] = asyncio.create_task(
+                                self._monitor_source_periodic(source_id)
+                            )
+                        
+                except Exception as e:
+                    print(f"Failed to load source {source_data.get('name', 'unknown')}: {e}")
+    
+    async def _monitor_source_periodic(self, source_id: str):
+        """Periodically monitor source availability"""
+        while source_id in self.sources_db:
+            try:
+                source = self.sources_db[source_id]
+                if source.status == SourceStatus.ACTIVE:
+                    # Perform monitoring check
+                    result = await self._perform_monitoring_check(source.url, 'periodic')
+                    
+                    # Create monitoring record
+                    monitoring = SourceMonitoring(
+                        id=str(uuid.uuid4()),
+                        source_id=source_id,
+                        status='success' if result['success'] else 'failure',
+                        response_time=result['response_time'],
+                        status_code=result['status_code'],
+                        error=result.get('error'),
+                        metadata=result
+                    )
+                    
+                    # Update source based on monitoring
+                    await self._update_source_from_monitoring(source, monitoring)
+                    
+                # Wait for next interval
+                await asyncio.sleep(settings.monitoring_interval)
+                
+            except Exception as e:
+                print(f"Monitoring error for {source_id}: {e}")
+                await asyncio.sleep(settings.monitoring_interval)
+    
+    async def add_dynamic_source(self, source_data: Dict) -> OsintSource:
+        """Add a new source dynamically and save to config"""
+        # Validate required fields
+        required = ['url', 'name', 'category']
+        for field in required:
+            if field not in source_data:
+                raise ValueError(f"Missing required field: {field}")
+        
+        # Register the source
+        url = source_data['url']
+        name = source_data['name']
+        category = SourceCategory(source_data.get('category', 'other'))
+        region = Region(source_data.get('region', 'KR'))
+        source_type = SourceType(source_data.get('type', 'web'))
+        
+        source = await self.register_source(
+            None, url, name, category, region, source_type
+        )
+        
+        # Add to config file if dynamic sources enabled
+        if settings.enable_dynamic_sources:
+            # Determine category group
+            category_group = source_data.get('category_group', 'dynamic_sources')
+            
+            if category_group not in self.sources_config:
+                self.sources_config[category_group] = []
+            
+            # Add source to config
+            config_entry = {
+                'name': name,
+                'url': url,
+                'category': source_data.get('category', 'other'),
+                'region': source_data.get('region', 'KR'),
+                'type': source_data.get('type', 'web'),
+                'crawl_policy': {
+                    'rate_limit': source.crawl_policy.rate_limit,
+                    'max_depth': source.crawl_policy.max_depth,
+                    'respect_robots': source.crawl_policy.respect_robots
+                }
+            }
+            
+            self.sources_config[category_group].append(config_entry)
+            self._save_sources_config(self.sources_config)
+            
+            # Start monitoring
+            if settings.monitoring_interval > 0:
+                self.monitoring_tasks[source.id] = asyncio.create_task(
+                    self._monitor_source_periodic(source.id)
+                )
+        
+        return source
+    
+    async def remove_dynamic_source(self, source_id: str) -> bool:
+        """Remove a source and update config"""
+        source = self.sources_db.get(source_id)
+        if not source:
+            return False
+        
+        # Stop monitoring
+        if source_id in self.monitoring_tasks:
+            self.monitoring_tasks[source_id].cancel()
+            del self.monitoring_tasks[source_id]
+        
+        # Remove from config if it's a dynamic source
+        if settings.enable_dynamic_sources:
+            for category_group, sources in self.sources_config.items():
+                self.sources_config[category_group] = [
+                    s for s in sources if s.get('url') != source.url
+                ]
+            self._save_sources_config(self.sources_config)
+        
+        # Remove from database
+        del self.sources_db[source_id]
+        
+        await self._publish_event("osint.source.removed", {
+            "source_id": source_id,
+            "url": source.url,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+        
+        return True
+    
+    async def get_sources_by_category_group(self, category_group: str) -> List[OsintSource]:
+        """Get all sources in a category group"""
+        sources = []
+        for source in self.sources_db.values():
+            if source.metadata.get('category_group') == category_group:
+                sources.append(source)
+        return sources
     
     async def discover_sources(self, seed_urls: List[str], max_depth: int = 2) -> List[SourceDiscovery]:
         """Discover new sources from seed URLs"""
@@ -527,20 +763,40 @@ class SourceService:
             return ValidationStatus.INVALID
     
     async def _perform_monitoring_check(self, url: str, check_type: str) -> Dict:
-        """Perform monitoring check - mock implementation"""
-        # Mock monitoring results
-        import random
+        """Perform real HTTP monitoring check"""
+        start_time = datetime.utcnow()
         
-        success = random.random() > 0.1  # 90% success rate
-        response_time = random.uniform(100, 3000)  # 100ms to 3s
-        status_code = 200 if success else random.choice([404, 500, 503])
-        
-        return {
-            "success": success,
-            "response_time": response_time,
-            "status_code": status_code,
-            "error": None if success else f"HTTP {status_code}"
-        }
+        try:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=settings.http_timeout)) as session:
+                headers = {'User-Agent': settings.default_user_agent}
+                async with session.get(url, headers=headers, allow_redirects=True) as response:
+                    response_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+                    
+                    return {
+                        "success": response.status < 400,
+                        "response_time": response_time,
+                        "status_code": response.status,
+                        "error": None if response.status < 400 else f"HTTP {response.status}",
+                        "content_length": len(await response.text()),
+                        "headers": dict(response.headers),
+                        "checked_at": datetime.utcnow().isoformat()
+                    }
+        except asyncio.TimeoutError:
+            return {
+                "success": False,
+                "response_time": settings.http_timeout * 1000,
+                "status_code": 0,
+                "error": "Timeout",
+                "checked_at": datetime.utcnow().isoformat()
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "response_time": 0,
+                "status_code": 0,
+                "error": str(e),
+                "checked_at": datetime.utcnow().isoformat()
+            }
     
     def _get_last_monitoring(self, source_id: str) -> Optional[SourceMonitoring]:
         """Get last monitoring result for source"""
