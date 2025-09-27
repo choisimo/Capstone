@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 
 from app.db import get_db
 from app.services.persona_analyzer import PersonaAnalyzer, PersonaProfile
-from app.schemas import PersonaResponse, PersonaNetworkResponse
 import logging
+from app.security import require_role, get_current_actor, Actor
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,189 @@ async def analyze_persona(
         logger.error(f"Error analyzing persona: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# ---------------------------
+# Identity Link Requests (RBAC)
+# ---------------------------
+
+@router.post("/identities/links/requests")
+async def create_identity_link_request(
+    payload: Dict[str, Any],
+    actor: Actor = Depends(require_role(["admin", "analyst", "user"])),
+    db: Session = Depends(get_db)
+):
+    """
+    신원 링크 요청 생성 (analyst/user/admin)
+    Required body: { platform, identifier, canonical_id?, evidence_type?, evidence_ref? }
+    """
+    try:
+        from app.models import IdentityLinkRequest, IdentityAuditLog
+        platform = payload.get("platform")
+        identifier = payload.get("identifier")
+        canonical_id = payload.get("canonical_id")
+        evidence_type = payload.get("evidence_type")
+        evidence_ref = payload.get("evidence_ref")
+
+        if not platform or not identifier:
+            raise HTTPException(status_code=400, detail="platform and identifier are required")
+
+        req = IdentityLinkRequest(
+            platform=platform,
+            identifier=identifier,
+            canonical_id=canonical_id,
+            status="pending",
+            evidence_type=evidence_type,
+            evidence_ref=evidence_ref,
+            requester_role=actor.role,
+            requester_sub=actor.sub or ""
+        )
+        db.add(req)
+        db.commit()
+        db.refresh(req)
+
+        # 감사 로그
+        audit = IdentityAuditLog(
+            actor_role=actor.role,
+            actor_sub=actor.sub or "",
+            action="link_request",
+            details={"request_id": req.id, "platform": platform, "identifier": identifier}
+        )
+        db.add(audit)
+        db.commit()
+
+        return {"success": True, "request_id": req.id, "status": req.status}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating identity link request: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/identities/links/requests/{request_id}/approve")
+async def approve_identity_link_request(
+    request_id: int,
+    actor: Actor = Depends(require_role(["admin"])),
+    db: Session = Depends(get_db)
+):
+    try:
+        from app.models import IdentityLinkRequest, IdentityAuditLog
+        req = db.query(IdentityLinkRequest).filter(IdentityLinkRequest.id == request_id).first()
+        if not req:
+            raise HTTPException(status_code=404, detail="request not found")
+        if req.status != "pending":
+            raise HTTPException(status_code=400, detail="request is not pending")
+
+        req.status = "approved"
+        req.decided_at = datetime.utcnow()
+        req.decided_by = actor.sub or "admin"
+        db.commit()
+
+        audit = IdentityAuditLog(
+            actor_role=actor.role,
+            actor_sub=actor.sub or "",
+            action="approve",
+            details={"request_id": req.id, "platform": req.platform, "identifier": req.identifier}
+        )
+        db.add(audit)
+        db.commit()
+
+        return {"success": True, "request_id": req.id, "status": req.status}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error approving identity link request: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/identities/links/requests/{request_id}/reject")
+async def reject_identity_link_request(
+    request_id: int,
+    actor: Actor = Depends(require_role(["admin"])),
+    db: Session = Depends(get_db)
+):
+    try:
+        from app.models import IdentityLinkRequest, IdentityAuditLog
+        req = db.query(IdentityLinkRequest).filter(IdentityLinkRequest.id == request_id).first()
+        if not req:
+            raise HTTPException(status_code=404, detail="request not found")
+        if req.status != "pending":
+            raise HTTPException(status_code=400, detail="request is not pending")
+
+        req.status = "rejected"
+        req.decided_at = datetime.utcnow()
+        req.decided_by = actor.sub or "admin"
+        db.commit()
+
+        audit = IdentityAuditLog(
+            actor_role=actor.role,
+            actor_sub=actor.sub or "",
+            action="reject",
+            details={"request_id": req.id, "platform": req.platform, "identifier": req.identifier}
+        )
+        db.add(audit)
+        db.commit()
+
+        return {"success": True, "request_id": req.id, "status": req.status}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rejecting identity link request: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------
+# Persona Recalculation
+# ---------------------------
+
+@router.post("/recalculate/{persona_id}")
+async def recalculate_persona(
+    persona_id: str,
+    platform: Optional[str] = Query(None, description="Platform of the persona for recalculation"),
+    background_tasks: BackgroundTasks = None,
+    actor: Actor = Depends(require_role(["admin", "analyst"])),
+    db: Session = Depends(get_db)
+):
+    """
+    단일 페르소나 재계산을 스케줄합니다.
+    platform이 저장되어 있지 않다면 쿼리 파라미터로 전달해야 합니다.
+    """
+    try:
+        from app.models import UserPersona
+        persona = db.query(UserPersona).filter(UserPersona.user_id == persona_id).first()
+        if not persona:
+            raise HTTPException(status_code=404, detail="Persona not found")
+        if not platform and not persona.platform:
+            raise HTTPException(status_code=400, detail="platform is required for recalculation")
+
+        # 백그라운드 재계산
+        if background_tasks:
+            background_tasks.add_task(
+                recalculate_persona_async,
+                username=persona.username,
+                platform=platform or persona.platform,
+                db=db
+            )
+        else:
+            await recalculate_persona_async(username=persona.username, platform=platform or persona.platform, db=db)
+
+        return {"success": True, "message": "Recalculation scheduled"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error scheduling recalculation: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def recalculate_persona_async(username: str, platform: str, db: Session):
+    try:
+        analyzer = PersonaAnalyzer(db)
+        await analyzer.analyze_user_persona(
+            user_identifier=username,
+            platform=platform,
+            depth=50
+        )
+    except Exception as e:
+        logger.error(f"Error in recalculate_persona_async: {str(e)}")
 
 @router.get("/network/{user_id}")
 async def get_persona_network(
@@ -178,7 +361,7 @@ async def get_persona_details(
     특정 페르소나의 상세 정보를 가져옵니다.
     """
     try:
-        from app.models import UserPersona, Content, Comment
+        from app.models import UserPersona, Content, Comment, UserActivity
         import json
         
         # 페르소나 조회
@@ -190,11 +373,58 @@ async def get_persona_details(
             raise HTTPException(status_code=404, detail="Persona not found")
         
         profile_data = json.loads(persona.profile_data)
-        
+
+        # 평탄화된 필드 구성 (FE 요구사항 대응)
+        dominant_sentiment = profile_data.get("sentiment", {}).get("dominant")
+        sentiment_distribution = profile_data.get("sentiment", {}).get("distribution", {})
+        influence = profile_data.get("influence", {}).get("score", 0)
+        engagement_rate = profile_data.get("influence", {}).get("engagement_rate", 0)
+        key_topics = profile_data.get("topics", {}).get("key_topics", [])
+        topic_weights = profile_data.get("topics", {}).get("weights", {})
+        argumentation_style = profile_data.get("language", {}).get("argumentation_style")
+        formality_level = profile_data.get("language", {}).get("formality_level")
+        total_posts = profile_data.get("total_posts", 0)
+        total_comments = profile_data.get("total_comments", 0)
+        tracked_sources = profile_data.get("metadata", {}).get("tracked_sources", [])
+
+        # 신선도 계산
+        last_calc = persona.last_calculated_at
+        stale = False
+        staleness_reason = None
+        if last_calc:
+            # 기본 임계값: 24h
+            from app.config import settings
+            threshold = timedelta(hours=settings.persona_staleness_hours_default)
+            if datetime.utcnow() - last_calc > threshold:
+                stale = True
+                staleness_reason = "older_than_threshold"
+            # 최근 활동 존재 여부
+            recent_activity = db.query(UserActivity.id).filter(
+                UserActivity.user_identifier == persona.username,
+                UserActivity.tracked_at > last_calc
+            ).first()
+            if recent_activity:
+                stale = True
+                staleness_reason = "new_activity_since_last_calculation"
+
         response = {
             "user_id": persona_id,
             "username": persona.username,
-            **profile_data
+            "dominant_sentiment": dominant_sentiment,
+            "sentiment_distribution": sentiment_distribution,
+            "influence": influence,
+            "engagement_rate": engagement_rate,
+            "key_topics": key_topics,
+            "topic_weights": topic_weights,
+            "argumentation_style": argumentation_style,
+            "formality_level": formality_level,
+            "total_posts": total_posts,
+            "total_comments": total_comments,
+            "tracked_sources": tracked_sources,
+            "last_calculated_at": last_calc.isoformat() if last_calc else None,
+            "stale": stale,
+            "staleness_reason": staleness_reason,
+            "raw_profile": profile_data,
         }
         
         # 최근 게시물 포함
@@ -311,24 +541,31 @@ async def get_trending_personas(
         # 시간 필터
         time_threshold = datetime.utcnow() - timedelta(hours=time_window)
         
-        # 최근 활동이 있는 사용자들 조회
-        active_users = db.query(
-            UserActivity.user_identifier,
+        # 최근 활동이 있는 사용자들 조회 (서브쿼리 + 매핑)
+        active_users_subq = db.query(
+            UserActivity.user_identifier.label('user_identifier'),
             func.count(UserActivity.id).label('activity_count')
         ).filter(
             UserActivity.tracked_at >= time_threshold
         ).group_by(
             UserActivity.user_identifier
         ).subquery()
-        
-        # 페르소나 조회
+
+        # 빠르게 조회할 수 있도록 매핑 생성
+        activity_rows = db.query(
+            active_users_subq.c.user_identifier,
+            active_users_subq.c.activity_count
+        ).all()
+        activity_counts = {r[0]: r[1] for r in activity_rows}
+
+        # 페르소나 조회 및 정렬
         query = db.query(UserPersona).join(
-            active_users,
-            UserPersona.username == active_users.c.user_identifier
+            active_users_subq,
+            UserPersona.username == active_users_subq.c.user_identifier
         ).order_by(
-            desc(active_users.c.activity_count)
+            desc(active_users_subq.c.activity_count)
         )
-        
+
         personas = query.limit(limit).all()
         
         trending = []
@@ -345,7 +582,7 @@ async def get_trending_personas(
                 "influence_score": profile.get("influence", {}).get("score", 0),
                 "dominant_sentiment": profile.get("sentiment", {}).get("dominant"),
                 "key_topics": profile.get("topics", {}).get("key_topics", [])[:5],
-                "recent_activity_count": active_users.c.activity_count,
+                "recent_activity_count": int(activity_counts.get(persona.username, 0) or 0),
                 "engagement_rate": profile.get("influence", {}).get("engagement_rate", 0)
             })
         

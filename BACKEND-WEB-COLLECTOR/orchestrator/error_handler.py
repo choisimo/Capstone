@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import traceback
 import functools
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -84,10 +85,9 @@ class RetryPolicy:
         # 최대 지연 제한
         delay = min(delay, self.max_delay)
         
-        # Jitter 추가
+        # Jitter 추가 (결정론적 방식 - random 사용 금지)
         if self.jitter:
-            import random
-            delay = delay * (0.5 + random.random())
+            delay = delay * self._deterministic_jitter_factor(attempt)
         
         return delay
     
@@ -102,6 +102,18 @@ class RetryPolicy:
             for _ in range(2, n + 1):
                 a, b = b, a + b
             return b
+
+    def _deterministic_jitter_factor(self, attempt: int) -> float:
+        """
+        결정론적 지터 계수 생성 (0.5 ~ 1.5)
+        - random 모듈을 사용하지 않고, 시도 횟수와 정책 파라미터를 해시하여 생성
+        """
+        seed = f"{self.strategy.value}:{self.initial_delay}:{self.multiplier}:{attempt}"
+        h = hashlib.sha256(seed.encode()).digest()
+        # 0..1 범위
+        val = int.from_bytes(h[:2], 'big') / 65535.0
+        # 0.5..1.5로 스케일
+        return 0.5 + val
 
 
 @dataclass

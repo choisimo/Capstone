@@ -1,3 +1,9 @@
+---
+docsync: true
+last_synced: 2025-09-27T19:40:30+0000
+source_sha: 1b5d79909e27954f3e4b94ecae54aa8747aa52b3
+coverage: 1.0
+---
 # Frontend Dashboard
 
 ## Project Info
