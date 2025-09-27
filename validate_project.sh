@@ -47,66 +47,64 @@ fi
 
 # 3. 금지된 URL 패턴 검사
 echo -e "\n${YELLOW}[3/5] 금지된 URL 패턴 검사${NC}"
-echo "----------------------------------------"
 
 FAKE_URLS=$(grep -r "example\.com\|test\.com\|localhost\.com\|dummy\.com" \
   --include="*.py" --include="*.js" --include="*.jsx" \
   --exclude-dir=tests --exclude-dir=test --exclude-dir=node_modules \
   --exclude-dir=venv --exclude-dir=.venv --exclude-dir=env . 2>/dev/null || true)
-if [ ! -z "$FAKE_URLS" ]; then
+  if [ ! -z "$FAKE_URLS" ]; then
     echo -e "${YELLOW}⚠️  가짜 URL 패턴 발견:${NC}"
     echo "$FAKE_URLS" | head -10
     ((WARNINGS++))
-else
+  else
     echo -e "${GREEN}✅ 가짜 URL 패턴 없음${NC}"
-fi
+  fi
 
-# 4. 환경변수 파일 검사
-echo -e "\n${YELLOW}[4/5] 환경변수 파일 검사${NC}"
-echo "----------------------------------------"
+  # 4. 환경변수 파일 검사
+  echo -e "\n${YELLOW}[4/5] 환경변수 파일 검사${NC}"
+  echo "----------------------------------------"
 
-ENV_FILES=$(find . -name ".env" 2>/dev/null | grep -v node_modules || true)
-if [ ! -z "$ENV_FILES" ]; then
+  ENV_FILES=$(find . -name ".env" 2>/dev/null | grep -v node_modules || true)
+  if [ -n "$ENV_FILES" ]; then
     echo -e "${YELLOW}⚠️  .env 파일 발견 (커밋 금지):${NC}"
     echo "$ENV_FILES"
     ((WARNINGS++))
-fi
+  fi
 
-ENV_EXAMPLE=$(find . -name ".env.example" -o -name ".env.sample" 2>/dev/null | head -5 || true)
-if [ ! -z "$ENV_EXAMPLE" ]; then
+  ENV_EXAMPLE=$(find . -name ".env.example" -o -name ".env.sample" 2>/dev/null | head -5 || true)
+  if [ -n "$ENV_EXAMPLE" ]; then
     echo -e "${GREEN}✅ .env.example 파일 존재${NC}"
-else
+  else
     echo -e "${YELLOW}⚠️  .env.example 파일 없음${NC}"
-fi
+    ((WARNINGS++))
+  fi
 
 # 5. QA 설정 검증
 echo -e "\n${YELLOW}[5/5] QA 설정 검증${NC}"
 echo "----------------------------------------"
 
-# Collector 서비스 QA 설정 확인
-if [ -f "BACKEND-COLLECTOR-SERVICE/app/config.py" ]; then
+  if [ -f "BACKEND-COLLECTOR-SERVICE/app/config.py" ]; then
     QA_CONFIG=$(grep -E "qa_domain_whitelist|qa_min_content_length|qa_expected_keywords" BACKEND-COLLECTOR-SERVICE/app/config.py 2>/dev/null || true)
-    if [ ! -z "$QA_CONFIG" ]; then
-        echo -e "${GREEN}✅ Collector QA 설정 구현됨${NC}"
+    if [ -n "$QA_CONFIG" ]; then
+      echo -e "${GREEN}✅ Collector QA 설정 구현됨${NC}"
     else
-        echo -e "${YELLOW}⚠️  Collector QA 설정 없음${NC}"
-        ((WARNINGS++))
+      echo -e "${YELLOW}⚠️  Collector QA 설정 없음${NC}"
+      ((WARNINGS++))
     fi
-fi
+  else
+    echo -e "${YELLOW}⚠️  Collector QA 설정 파일 없음${NC}"
+    ((WARNINGS++))
+  fi
 
-# CI/CD 파일 확인
-if [ -f ".github/workflows/ci.yml" ]; then
+  # 6. 프로젝트 구조 규칙 검사 (.windsurf/rules/project-structure-rules.md)
+  echo -e "\n${YELLOW}[6/6] 프로젝트 구조 규칙 검사${NC}"
+  echo "----------------------------------------"
+  if [ -f ".github/workflows/ci.yml" ]; then
     echo -e "${GREEN}✅ CI/CD 파이프라인 존재${NC}"
-else
+  else
     echo -e "${RED}❌ CI/CD 파이프라인 없음${NC}"
     ((ERRORS++))
-fi
-
-# 6. 프로젝트 구조 규칙 검사 (.windsurf/rules/project-structure-rules.md)
-echo -e "\n${YELLOW}[6/6] 프로젝트 구조 규칙 검사${NC}"
-echo "----------------------------------------"
-
-# 기본 디렉토리 존재 여부 확인
+  fi
 REQUIRED_DIRS=("docs" "scripts" "logs" "config" "tests" "data")
 for d in "${REQUIRED_DIRS[@]}"; do
   if [ ! -d "$d" ]; then
@@ -115,18 +113,19 @@ for d in "${REQUIRED_DIRS[@]}"; do
   fi
 done
 
-# 루트 디렉토리 보호: 특정 파일 유형은 전용 디렉토리에만 위치해야 함
-# 허용 루트 파일 화이트리스트
-ALLOW_ROOT_FILES=(
-  ".gitignore" ".editorconfig" "README.md" "LICENSE" \
-  "Makefile" "Makefile.osint" \
-  "package.json" "package-lock.json" \
-  "docker-compose.yml" "docker-compose.production.yml" \
-  "validate_project.sh" "check-health.sh" \
-  ".github" ".windsurf" "BACKEND-ABSA-SERVICE" "BACKEND-COLLECTOR-SERVICE" \
-  "BACKEND-WEB-COLLECTOR" "FRONTEND-DASHBOARD" "data" "scripts" "docs" \
-  "logs" "config" "tests"
-)
+  # 루트 디렉토리 보호: 특정 파일 유형은 전용 디렉토리에만 위치해야 함
+  ALLOW_ROOT_FILES=(
+    ".gitignore" ".editorconfig" "README.md" "LICENSE" \
+    "Makefile" "Makefile.osint" \
+    "package.json" "package-lock.json" \
+    "docker-compose.yml" "docker-compose.production.yml" \
+    "validate_project.sh" "check-health.sh" \
+    "requirements-docsync.txt" \
+    ".github" ".windsurf" \
+    "BACKEND-ABSA-SERVICE" "BACKEND-COLLECTOR-SERVICE" "BACKEND-WEB-COLLECTOR" \
+    "FRONTEND-DASHBOARD" "data" "scripts" "docs" \
+    "logs" "config" "tests"
+  )
 
 # 함수: 루트 허용 여부 판정
 is_allowed_root() {
@@ -139,11 +138,10 @@ is_allowed_root() {
   return 1
 }
 
-# 루트에 존재하는 파일/폴더 점검 (숨김 제외)
-ROOT_ISSUES=()
-for item in $(ls -A1 | grep -v '^\.' || true); do
+  # 루트에 존재하는 파일/폴더 점검 (숨김 제외)
+  ROOT_ISSUES=()
+  for item in $(ls -A1 | grep -v '^\.' || true); do
   if ! is_allowed_root "$item"; then
-    # 파일 유형별 추가 규칙: *.md, *.sh, *.log는 전용 디렉토리 사용 권장
     if [[ "$item" == *.md ]]; then
       ROOT_ISSUES+=("문서 파일은 docs/ 하위로 이동 필요: ./$item")
     elif [[ "$item" == *.sh ]]; then
@@ -168,11 +166,30 @@ if [ ${#ROOT_ISSUES[@]} -gt 0 ]; then
 else
   echo -e "${GREEN}✅ 루트 디렉토리 보호 규칙 위반 없음${NC}"
 fi
+# Select python binary
+echo -e "\n${YELLOW}[DocSync] 문서 동기화 검증${NC}"
+echo "----------------------------------------"
+if command -v python3 >/dev/null 2>&1; then
+  PYBIN=python3
+else
+  PYBIN=python
+fi
+
+if [ -f "tools/doc_sync/cli.py" ]; then
+  if $PYBIN tools/doc_sync/cli.py check --strict; then
+    echo -e "${GREEN}✅ DocSync 검증 통과${NC}"
+  else
+    echo -e "${RED}❌ DocSync 검증 실패: 문서 동기화 누락 또는 메타데이터 문제${NC}"
+    ((ERRORS++))
+  fi
+else
+  echo -e "${YELLOW}⚠️  DocSync CLI 미존재: tools/doc_sync/cli.py (검증 건너뜀)${NC}"
+  ((WARNINGS++))
+fi
 
 # 결과 요약
 echo "========================================="
 echo -e "${YELLOW}검증 완료${NC}"
-echo "========================================="
 echo -e "오류: ${RED}$ERRORS${NC}"
 echo -e "경고: ${YELLOW}$WARNINGS${NC}"
 
