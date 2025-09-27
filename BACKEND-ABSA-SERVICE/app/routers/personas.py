@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 
-from app.db import get_db
+from app.db import get_db, SessionLocal
 from app.services.persona_analyzer import PersonaAnalyzer, PersonaProfile
 import logging
 from app.security import require_role, get_current_actor, Actor
@@ -210,10 +210,9 @@ async def recalculate_persona(
                 recalculate_persona_async,
                 username=persona.username,
                 platform=platform or persona.platform,
-                db=db
             )
         else:
-            await recalculate_persona_async(username=persona.username, platform=platform or persona.platform, db=db)
+            await recalculate_persona_async(username=persona.username, platform=platform or persona.platform)
 
         return {"success": True, "message": "Recalculation scheduled"}
     except HTTPException:
@@ -223,7 +222,8 @@ async def recalculate_persona(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def recalculate_persona_async(username: str, platform: str, db: Session):
+async def recalculate_persona_async(username: str, platform: str):
+    db = SessionLocal()
     try:
         analyzer = PersonaAnalyzer(db)
         await analyzer.analyze_user_persona(
@@ -233,6 +233,8 @@ async def recalculate_persona_async(username: str, platform: str, db: Session):
         )
     except Exception as e:
         logger.error(f"Error in recalculate_persona_async: {str(e)}")
+    finally:
+        db.close()
 
 @router.get("/network/{user_id}")
 async def get_persona_network(
@@ -509,7 +511,6 @@ async def track_user_activity(
                 update_persona_async,
                 user_identifier=user_identifier,
                 platform=platform,
-                db=db
             )
         
         return {
@@ -597,10 +598,11 @@ async def get_trending_personas(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def update_persona_async(user_identifier: str, platform: str, db: Session):
+async def update_persona_async(user_identifier: str, platform: str):
     """
     비동기로 페르소나를 업데이트합니다.
     """
+    db = SessionLocal()
     try:
         analyzer = PersonaAnalyzer(db)
         await analyzer.analyze_user_persona(
@@ -610,6 +612,8 @@ async def update_persona_async(user_identifier: str, platform: str, db: Session)
         )
     except Exception as e:
         logger.error(f"Error updating persona: {str(e)}")
+    finally:
+        db.close()
 
 
 @router.post("/connections/update")

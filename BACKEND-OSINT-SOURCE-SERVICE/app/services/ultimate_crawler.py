@@ -30,7 +30,7 @@ class UltimateCrawler:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Encoding': 'gzip, deflate',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1'
         }
@@ -106,7 +106,7 @@ class UltimateCrawler:
         print(f"\n🔍 네이버 뉴스 크롤링 (Selenium): {query}")
         
         url = f"https://search.naver.com/search.naver?where=news&query={quote(query)}"
-        html = self.crawl_with_selenium(url, wait_selector="a.news_tit", wait_time=5)
+        html = await asyncio.to_thread(self.crawl_with_selenium, url, wait_selector="a.news_tit", wait_time=5)
         
         results = []
         if html:
@@ -154,7 +154,7 @@ class UltimateCrawler:
         print(f"\n🔍 다음 뉴스 크롤링 (Selenium): {query}")
         
         url = f"https://search.daum.net/search?w=news&q={quote(query)}"
-        html = self.crawl_with_selenium(url, wait_selector="a.tit_main", wait_time=5)
+        html = await asyncio.to_thread(self.crawl_with_selenium, url, wait_selector="a.tit_main", wait_time=5)
         
         results = []
         if html:
@@ -233,7 +233,7 @@ class UltimateCrawler:
         for site in communities:
             print(f"  📍 {site['name']} 크롤링 중...")
             
-            html = self.crawl_with_selenium(site['url'], site.get('wait_selector'), wait_time=5)
+            html = await asyncio.to_thread(self.crawl_with_selenium, site['url'], wait_selector=site.get('wait_selector'), wait_time=5)
             
             if html:
                 soup = BeautifulSoup(html, 'html.parser')

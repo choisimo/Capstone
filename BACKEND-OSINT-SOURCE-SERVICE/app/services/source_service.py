@@ -26,7 +26,11 @@ class SourceService:
         self.sources_config = self._load_sources_config()
         self.monitoring_tasks = {}
         # 시작시 설정 파일에서 소스 자동 로드
-        asyncio.create_task(self._initialize_sources())
+        try:
+            asyncio.get_running_loop().create_task(self._initialize_sources())
+        except RuntimeError:
+            # No running loop; defer scheduling to caller's startup hook
+            pass
         
     async def register_source(self, db: Any, url: str, name: str = "", 
                             category: SourceCategory = SourceCategory.OTHER, 

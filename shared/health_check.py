@@ -167,6 +167,11 @@ class StandardHealthCheck:
         
         # 프로세스 메트릭
         process = psutil.Process()
+        try:
+            open_files_count = len(process.open_files())
+        except Exception:
+            # Some platforms or permissions may raise AccessDenied/NotImplemented
+            open_files_count = 0
         
         return {
             # 서비스 메타데이터
@@ -189,7 +194,7 @@ class StandardHealthCheck:
             "process_cpu_percent": process.cpu_percent(),
             "process_memory_mb": process.memory_info().rss / 1024 / 1024,
             "process_threads": process.num_threads(),
-            "process_open_files": len(process.open_files()),
+            "process_open_files": open_files_count,
             
             # 타임스탬프
             "timestamp": datetime.utcnow().isoformat()

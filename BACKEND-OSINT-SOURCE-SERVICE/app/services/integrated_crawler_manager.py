@@ -388,13 +388,15 @@ class IntegratedCrawlerManager:
         
         # 병렬 크롤링 실행
         tasks = []
+        results = []
         for job in self.job_queue:
             task = asyncio.create_task(self.crawl(job))
             tasks.append(task)
             
             # 동시 실행 제한 (10개)
             if len(tasks) >= 10:
-                results = await asyncio.gather(*tasks, return_exceptions=True)
+                batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+                results.extend(batch_results)
                 tasks = []
         
         # 남은 작업 처리

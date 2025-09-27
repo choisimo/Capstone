@@ -818,7 +818,7 @@ def ticker_thread_check_time_launch_checks():
                 if watch.jitter_seconds == 0:
                     # Deterministic jitter without random - based on watch uuid and jitter value
                     import hashlib
-                    seed = f"{uuid}:{jitter}"
+                    seed = f"{getattr(watch, 'uuid', watch.get('uuid', uuid))}:{jitter}"
                     h = hashlib.sha256(seed.encode()).digest()
                     val = int.from_bytes(h[:2], 'big') / 65535.0  # 0..1
                     watch.jitter_seconds = -abs(jitter) + (2 * abs(jitter)) * val
