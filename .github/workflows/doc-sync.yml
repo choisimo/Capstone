@@ -17,6 +17,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Switch to PR head branch (same-repo PRs)
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          git fetch origin ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }} --depth=1
+          git checkout ${{ github.event.pull_request.head.ref }}
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -34,7 +40,8 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -A
             git commit -m "chore(docsync): update docs metadata [skip ci]"
-            git push
+            # Prefer pushing to the PR head branch explicitly in case of detached HEAD scenarios
+            git push origin HEAD:${{ github.event.pull_request.head.ref }} || git push
           else
             echo "No doc changes to commit"
           fi
