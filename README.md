@@ -1,3 +1,9 @@
+---
+docsync: true
+last_synced: 2025-09-27T19:40:30+0000
+source_sha: 1b5d79909e27954f3e4b94ecae54aa8747aa52b3
+coverage: 1.0
+---
 # 국민연금 온라인 여론 분석·정책 피드백 시스템
 
 **마이크로서비스 아키텍처(MSA) 기반 완전 구현 플랫폼**
