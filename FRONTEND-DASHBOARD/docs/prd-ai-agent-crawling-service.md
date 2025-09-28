@@ -1,7 +1,7 @@
 ---
 docsync: true
-last_synced: 2025-09-28T06:46:46+0000
-source_sha: e6eb317e1bb92c9a5c38bde1496c07ea86192436
+last_synced: 2025-09-29T01:02:34+0900
+source_sha: af745df9851adc5c9bb20a05c6f65b6905f0ed33
 coverage: 1.0
 ---
 # AI Agent 크롤링 매크로 생성 서비스 PRD

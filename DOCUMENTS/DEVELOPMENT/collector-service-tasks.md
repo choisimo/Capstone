@@ -1,6 +1,11 @@
-# Collector Service Phased Plan (Draft)
+---
+docsync: true
+last_synced: 2025-09-28T21:58:30+09:00
+source_sha: af745df9851adc5c9bb20a05c6f65b6905f0ed33
+coverage: 1.0
+---
 
-Intended final location: `DOCUMENTS/DEVELOPMENT/collector-service-tasks.md`
+# Collector Service Phased Plan
 
 ## Overview
 Goal: Reliably ingest heterogeneous external content (feeds, APIs, webhooks) into standardized raw event format with resilience, observability, and backpressure safety.
@@ -10,8 +15,8 @@ Components: Source Adapter Interface, Fetch Scheduler, RateLimiter, Fingerprint/
 
 Data Flow: Source -> Adapter (normalize) -> Validation -> Fingerprint (hash) -> Emit RawEvent -> Queue -> Downstream (Dedup/Preprocess).
 
-## Week-by-Week
-### Week 1
+## Week-by-Week Execution
+### Week 1 (Tasks C1-C3)
 - Spec ingestion schema (id, source_id, collected_at, payload, content_hash)
 - Implement adapter interface contract (interface + registry)
 - Build RSS adapter (baseline)
@@ -22,7 +27,7 @@ Data Flow: Source -> Adapter (normalize) -> Validation -> Fingerprint (hash) -> 
 - Metrics: ingest_count, ingest_errors labeled by source
 - Health endpoint: /healthz (OK if adapter loop active)
 
-### Week 2
+### Week 2 (Tasks C4-C8)
 - Add exponential backoff + jitter for transient failures
 - Implement rate limiter per source (token bucket)
 - Webhook adapter (HTTP endpoint) with signature verification placeholder
@@ -32,7 +37,7 @@ Data Flow: Source -> Adapter (normalize) -> Validation -> Fingerprint (hash) -> 
 - Source configuration loader (YAML or DB stub)
 - Integration test: feed -> queue round trip
 
-### Week 3
+### Week 3 (Tasks C9-C10)
 - Backfill job skeleton (historical ingestion) with time range parameters
 - Adaptive scheduling (dynamic interval based on error/success ratio)
 - Benchmark: sustained ingest at target eps
@@ -40,23 +45,35 @@ Data Flow: Source -> Adapter (normalize) -> Validation -> Fingerprint (hash) -> 
 - Partial failure classification (network vs data)
 - Config reload without restart
 
-### Week 4
+### Week 4 (Tasks C11-C12)
 - Multi-tenant quotas (org-based rate allocation)
 - Additional adapters (e.g., JSONLines bulk endpoint)
 - Observability spans with trace IDs
 - Performance tuning (goroutine / async batching)
 - Stress test with 5x expected load
 
-### Week 5+
+### Week 5+ (Task C13)
 - Regional failover design & doc
 - Source UI integration contract (API spec for CRUD)
 - Automated schema drift detection (payload diffing)
 - Cost optimization review
 
-## Task Inventory (Mapped to Detailed List)
-C1-C13 represented; Weeks 1-2 cover C1-C8; Weeks 3-4 cover C9-C12; Week5+ covers C13.
+## Task Master Alignment
+- **C1**: Ingestion schema 정의 (`task-master` ID T-C1)
+- **C2**: Adapter 인터페이스 구현 (ID T-C2)
+- **C3**: RSS 어댑터 구축 (ID T-C3)
+- **C4**: 백오프/지터 로직 추가 (ID T-C4)
+- **C5**: Rate Limiter 구현 (ID T-C5)
+- **C6**: Webhook 어댑터 초안 (ID T-C6)
+- **C7**: Secret 연동/설정 로더 (ID T-C7)
+- **C8**: 통합 테스트 파이프라인 (ID T-C8)
+- **C9**: 백필 잡 스켈레톤 (ID T-C9)
+- **C10**: 어댑터 스케줄 자동화 (ID T-C10)
+- **C11**: 다중 테넌트 쿼터 모델 (ID T-C11)
+- **C12**: Observability/Trace 확장 (ID T-C12)
+- **C13**: 지역 Failover 및 비용 리뷰 (ID T-C13)
 
-## Non-Functional Requirements
+## Definition of Done / Non-Functional Requirements
 - p95 ingestion latency < 2s (adapter fetch to enqueue)
 - Error budget: <1% failed attempts per 24h (excluding remote 5xx)
 - Zero data loss on single node failure (at-least-once semantics)
@@ -83,5 +100,3 @@ Alerts:
 - External API instability (mitigate retries + circuit logic)
 - Payload schema drift (add logging + sample retention)
 - Over-ingestion cost (quotas + adaptive intervals)
-
-(END OF DRAFT)

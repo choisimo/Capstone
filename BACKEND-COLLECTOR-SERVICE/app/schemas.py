@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class DataSourceCreate(BaseModel):
     name: str
@@ -89,6 +89,47 @@ class CollectionStats(BaseModel):
 class CollectionRequest(BaseModel):
     source_ids: Optional[List[int]] = None
     force: bool = False
+
+
+class RawEventPayload(BaseModel):
+    title: Optional[str] = None
+    summary: Optional[str] = None
+    url: Optional[str] = None
+    published_at: Optional[datetime] = None
+    body: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class RawEvent(BaseModel):
+    """표준화된 원시 이벤트 스키마 (T-C1)."""
+
+    id: str
+    source_id: int
+    source_name: str
+    collected_at: datetime
+    payload: RawEventPayload
+    content_hash: str
+    adapter: str
+    version: str = "1.0.0"
+
+    class Config:
+        frozen = True
+
+
+class WebhookEvent(BaseModel):
+    id: Optional[str] = None
+    title: Optional[str] = None
+    summary: Optional[str] = None
+    url: Optional[str] = None
+    body: Optional[str] = None
+    published_at: Optional[datetime] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class WebhookEventRequest(BaseModel):
+    events: List[WebhookEvent]
+    source_name: Optional[str] = None
+
 
 class RSSFeedItem(BaseModel):
     title: str

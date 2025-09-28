@@ -1,6 +1,11 @@
-# Frontend Dashboard Plan (Draft - Continued)
+---
+docsync: true
+last_synced: 2025-09-28T21:59:05+09:00
+source_sha: af745df9851adc5c9bb20a05c6f65b6905f0ed33
+coverage: 1.0
+---
 
-Intended final location: `DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks-continued.md`
+# Frontend Dashboard Plan (Continued)
 
 ## Implementation Backlog (Sequenced)
 1. Initialize repo + dependency baseline (Day 1)
@@ -84,4 +89,16 @@ Intended final location: `DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks-continu
 - Gradual enablement per org/tenant
 - Collect usage metrics for adoption dashboard
 
-(END OF DRAFT)
+## Task Master Alignment (Backlog IDs)
+- **FD-B1**: Repo 및 스크립트 기초화 (Backlog ID T-FD-B1)
+- **FD-B2**: 레이아웃/내비게이션 (T-FD-B2)
+- **FD-B4**: 실시간 스트림 구현 (T-FD-B4)
+- **FD-B5**: 차트 컴포넌트 세트 (T-FD-B5)
+- **FD-B6**: 접근성 & A11y QA (T-FD-B6)
+- **FD-B7**: 성능 최적화 패스 (T-FD-B7)
+- **FD-B8**: 보안/프라이버시 가이드 (T-FD-B8)
+- **FD-B9**: 롤아웃/피처 플래그 전략 (T-FD-B9)
+
+## Definition of Done (추가)
+- Backlog 항목별 테스트 통과 증빙(Jest/E2E) 첨부
+- Lighthouse CI ≥ 85, 접근성 감사 리포트 첨부
