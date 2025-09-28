@@ -1,7 +1,7 @@
 ---
 docsync: true
-last_synced: 2025-09-27T19:40:30+0000
-source_sha: 1b5d79909e27954f3e4b94ecae54aa8747aa52b3
+last_synced: 2025-09-28T06:46:46+0000
+source_sha: e6eb317e1bb92c9a5c38bde1496c07ea86192436
 coverage: 1.0
 ---
 # 웹크롤러 연동 계획서 (ChangeDetection.io + AI Agent 기반)
