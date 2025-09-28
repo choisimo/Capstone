@@ -21,6 +21,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Switch to PR head branch (same-repo PRs)
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          git fetch origin ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }} --depth=1
+          git checkout ${{ github.event.pull_request.head.ref }}
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -29,6 +35,7 @@ jobs:
       - name: Run DocSync (write all docs)
         run: |
           python tools/doc_sync/cli.py write --all
+
 
       - name: Note for fork PRs
         if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
