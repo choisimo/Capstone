@@ -1,0 +1,56 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8000']
+    metrics_path: '/metrics'
+    
+  - job_name: 'analysis-service'
+    static_configs:
+      - targets: ['analysis-service:8001']
+    metrics_path: '/metrics'
+    
+  - job_name: 'collector-service'
+    static_configs:
+      - targets: ['collector-service:8002']
+    metrics_path: '/metrics'
+    
+  - job_name: 'absa-service'
+    static_configs:
+      - targets: ['absa-service:8003']
+    metrics_path: '/metrics'
+    
+  - job_name: 'alert-service'
+    static_configs:
+      - targets: ['alert-service:8004']
+    metrics_path: '/metrics'
+    
+  - job_name: 'osint-orchestrator'
+    static_configs:
+      - targets: ['osint-orchestrator:8005']
+    metrics_path: '/metrics'
+    
+  - job_name: 'osint-planning'
+    static_configs:
+      - targets: ['osint-planning:8006']
+    metrics_path: '/metrics'
+    
+  - job_name: 'osint-source'
+    static_configs:
+      - targets: ['osint-source:8007']
+    metrics_path: '/metrics'
+    
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongo:27017']

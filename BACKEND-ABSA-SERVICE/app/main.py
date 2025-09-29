@@ -53,6 +53,22 @@ async def startup_event():
     서비스 시작 시 데이터베이스 테이블을 생성합니다.
     """
     Base.metadata.create_all(bind=engine)  # SQLAlchemy 모델 기반 테이블 생성
+    # Also create tables from app.models Base (separate declarative base)
+    try:
+        from app import models as models_module
+        models_module.Base.metadata.create_all(bind=engine)
+    except Exception:
+        # Non-fatal; some environments may not have models module available or tables already exist
+        pass
+    # Best-effort runtime migration for new columns
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE user_personas ADD COLUMN IF NOT EXISTS last_calculated_at TIMESTAMP"))
+            conn.commit()
+    except Exception:
+        # Ignore if DB does not support IF NOT EXISTS or lacks permissions
+        pass
 
 @app.get("/health")
 async def health_check():

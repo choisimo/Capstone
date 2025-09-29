@@ -10,7 +10,6 @@ from typing import List, Dict, Any, Optional
 from app.db import get_db, ABSAAnalysis
 from datetime import datetime
 import uuid
-import random
 
 router = APIRouter()
 
@@ -49,10 +48,12 @@ async def analyze_absa(
     for aspect in aspects:
         # 간단한 규칙 기반 분석 (데모용)
         sentiment_score = _analyze_aspect_sentiment(text, aspect)
+        # 결정론적 신뢰도: |score| 기반 (0.5 ~ 1.0)
+        aspect_confidence = 0.5 + 0.5 * min(1.0, abs(sentiment_score))
         aspect_sentiments[aspect] = {
             "sentiment_score": sentiment_score,
             "sentiment_label": _get_sentiment_label(sentiment_score),
-            "confidence": random.uniform(0.7, 0.95)
+            "confidence": round(aspect_confidence, 3)
         }
     
     # 전체 감성 점수 계산
@@ -61,13 +62,20 @@ async def analyze_absa(
     ) / len(aspect_sentiments) if aspect_sentiments else 0
     
     # 결과 저장
+    # 전체 신뢰도: 속성별 |score| 평균 기반 (0.5 ~ 1.0)
+    if aspect_sentiments:
+        mean_abs = sum(abs(v["sentiment_score"]) for v in aspect_sentiments.values()) / len(aspect_sentiments)
+        overall_confidence = 0.5 + 0.5 * min(1.0, mean_abs)
+    else:
+        overall_confidence = 0.5
+
     analysis = ABSAAnalysis(
         content_id=content_id,
         text=text[:1000],  # 텍스트 길이 제한
         aspects=aspects,
         aspect_sentiments=aspect_sentiments,
         overall_sentiment=overall_sentiment,
-        confidence_score=random.uniform(0.75, 0.95)
+        confidence_score=round(overall_confidence, 3)
     )
     
     db.add(analysis)

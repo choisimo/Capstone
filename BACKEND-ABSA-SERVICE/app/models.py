@@ -26,16 +26,57 @@ class UserPersona(Base):
     # 메타데이터
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    last_calculated_at = Column(DateTime, index=True)
+
     # 관계
     connections_as_user1 = relationship("UserConnection", foreign_keys="UserConnection.user1_id", back_populates="user1")
     connections_as_user2 = relationship("UserConnection", foreign_keys="UserConnection.user2_id", back_populates="user2")
     activities = relationship("UserActivity", back_populates="user")
-    
+
     # 인덱스
     __table_args__ = (
         Index('idx_user_platform', 'username', 'platform'),
     )
+
+
+class IdentityLinkRequest(Base):
+    """신원 링크 요청"""
+    __tablename__ = "identity_link_requests"
+
+    id = Column(Integer, primary_key=True, index=True)
+    platform = Column(String(50), index=True, nullable=False)
+    identifier = Column(String(255), index=True, nullable=False)
+    canonical_id = Column(String(64), index=True)  # 승인 시 채워짐 (선택)
+    status = Column(String(20), index=True, default="pending")  # pending/approved/rejected
+
+    evidence_type = Column(String(50))  # oauth/challenge/other
+    evidence_ref = Column(String(1000))  # 증빙 URL/nonce hash 등
+
+    requester_role = Column(String(50))
+    requester_sub = Column(String(255))
+
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    decided_at = Column(DateTime)
+    decided_by = Column(String(255))
+
+    __table_args__ = (
+        Index('idx_identity_link_req_unique_pending', 'platform', 'identifier', 'status'),
+    )
+
+
+class IdentityAuditLog(Base):
+    """신원 링크/언링크 등 감사 로그"""
+    __tablename__ = "identity_audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    actor_role = Column(String(50), index=True)
+    actor_sub = Column(String(255), index=True)
+    action = Column(String(50), index=True)  # link_request/approve/reject/link/unlink
+    details = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+ 
 
 
 class UserConnection(Base):
@@ -275,6 +316,7 @@ class TrendingTopic(Base):
     
     # 메타데이터
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # 인덱스
     __table_args__ = (
