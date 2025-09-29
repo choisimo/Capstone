@@ -157,60 +157,19 @@ def collect_reddit_data() -> List[Dict[str, Any]]:
     
     return collected_data
 
-def generate_sample_comments() -> List[Dict[str, Any]]:
-    """샘플 댓글 데이터 생성 (실제 패턴 기반)"""
-    sample_comments = [
-        # 긍정적 의견
-        {"author": "희망찬미래", "content": "국민연금 개혁안 환영합니다. 지속가능한 연금제도를 위해 필요한 조치라고 생각해요.", "sentiment": "positive"},
-        {"author": "연금지키미", "content": "보험료 인상은 불가피하지만 우리 자녀 세대를 위해서라도 개혁이 필요합니다.", "sentiment": "positive"},
-        {"author": "노후준비중", "content": "연금 수령액이 보장된다니 다행이네요. 안정적인 노후 준비가 가능할 것 같습니다.", "sentiment": "positive"},
-        {"author": "경제박사", "content": "장기적으로 연금 재정 안정화에 도움이 될 것으로 예상됩니다.", "sentiment": "positive"},
-        {"author": "미래설계사", "content": "개인연금과 함께 준비하면 충분한 노후 자금이 될 것 같아요.", "sentiment": "positive"},
-        
-        # 부정적 의견
-        {"author": "세금폭탄", "content": "또 보험료 인상이라니... 월급에서 떼가는 게 너무 많아요.", "sentiment": "negative"},
-        {"author": "불신의시대", "content": "정말 나중에 받을 수 있을까요? 믿을 수가 없네요.", "sentiment": "negative"},
-        {"author": "청년의눈물", "content": "청년들만 손해 보는 구조. 내는 것만 많고 받을 건 별로 없어요.", "sentiment": "negative"},
-        {"author": "분노한시민", "content": "관리비용이 너무 높아요. 비효율적인 운영이 문제입니다.", "sentiment": "negative"},
-        {"author": "피해자1", "content": "수익률이 너무 낮아서 차라리 개인적으로 투자하는 게 나을 것 같습니다.", "sentiment": "negative"},
-        
-        # 중립적 의견
-        {"author": "객관적시각", "content": "연금 개혁은 필요하지만 구체적인 실행 방안이 더 명확해야 합니다.", "sentiment": "neutral"},
-        {"author": "분석가", "content": "장단점이 모두 있는 정책입니다. 신중한 검토가 필요해 보입니다.", "sentiment": "neutral"},
-        {"author": "중도보수", "content": "보험료 인상폭과 급여 수준의 균형을 잘 맞춰야 할 것 같습니다.", "sentiment": "neutral"},
-        {"author": "관찰자", "content": "다른 나라 사례를 참고해서 우리 실정에 맞게 조정이 필요합니다.", "sentiment": "neutral"},
-        {"author": "시민A", "content": "더 많은 논의와 사회적 합의가 필요한 사안인 것 같습니다.", "sentiment": "neutral"}
-    ]
+def collect_real_comments_from_api() -> List[Dict[str, Any]]:
+    """실제 API를 통한 댑글 수집 (Mock 데이터 생성 금지)
     
-    collected_data = []
-    base_time = datetime.now()
+    주의: 이 함수는 실제 다음/네이버 API가 필요합니다.
+    공개 API가 없는 경우 빈 리스트를 반환합니다.
+    """
+    print("⚠️  댑글 API 수집은 인증이 필요하므로 스키합니다.")
+    print("🚫  Mock 데이터 생성은 금지되어 있습니다.")
+    print("ℹ️  댓글 데이터가 필요한 경우:")
+    print("   1. 네이버/다음 공식 API 사용 (인증 키 필요)")
+    print("   2. 또는 RSS 피드에서 기사만 수집")
     
-    for i, comment in enumerate(sample_comments * 7):  # 105개 생성
-        time_offset = timedelta(hours=i*2, minutes=i*15)
-        published_time = base_time - time_offset
-        
-        # 사용자별로 일관된 패턴 유지
-        author_hash = hashlib.md5(comment['author'].encode()).hexdigest()[:8]
-        
-        data = {
-            "id": f"comment_{author_hash}_{i:04d}",
-            "source": "news_comment",
-            "category": "comment",
-            "platform": "news",
-            "title": "",
-            "content": comment['content'],
-            "url": f"https://news.example.com/article/{i//10}/comment/{i}",
-            "author": comment['author'],
-            "author_id": generate_user_id(comment['author'], "news"),
-            "parent_article": f"국민연금 개혁 관련 기사 {i//10 + 1}",
-            "sentiment_label": comment['sentiment'],
-            "likes": (i % 20) + 1,
-            "published_at": published_time.isoformat(),
-            "collected_at": datetime.now().isoformat()
-        }
-        collected_data.append(data)
-    
-    return collected_data
+    return []
 
 def analyze_collected_data(data: List[Dict[str, Any]]) -> Dict[str, Any]:
     """수집된 데이터 분석"""
@@ -283,11 +242,15 @@ def main():
     all_data.extend(reddit_data)
     print(f"✅ Reddit 수집 완료: {len(reddit_data)}개")
     
-    # 3. 샘플 댓글 생성 (실제 패턴 기반)
-    print("\n[3/3] 댓글 데이터 생성 중...")
-    comment_data = generate_sample_comments()
-    all_data.extend(comment_data)
-    print(f"✅ 댓글 생성 완료: {len(comment_data)}개")
+    # 3. 실제 댓글 수집 시도 (API 인증 필요)
+    print("\n[3/3] 댓글 데이터 수집 시도 중...")
+    comment_data = collect_real_comments_from_api()
+    if comment_data:
+        all_data.extend(comment_data)
+        print(f"✅ 댓글 수집 완료: {len(comment_data)}개")
+    else:
+        print("⚠️  댓글 수집 스킵 (API 인증 필요 또는 사용 불가)")
+        print("   대신 RSS 피드의 기사 본문만 사용하세요.")
     
     # 분석 결과
     print("\n" + "=" * 60)

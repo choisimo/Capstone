@@ -6,8 +6,8 @@ Aspect Service 모듈
 
 from typing import List, Dict, Any, Optional
 import uuid
-import random
 from datetime import datetime
+import re
 
 
 class AspectService:
@@ -27,7 +27,7 @@ class AspectService:
         domain: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        텍스트에서 속성 추출
+        텍스트에서 속성 추출 (키워드 기반 실제 분석)
         
         Args:
             text: 분석할 텍스트
@@ -36,38 +36,72 @@ class AspectService:
         Returns:
             추출된 속성 리스트
         """
-        # 실제 NLP 모델 대신 임시 구현
         extracted_aspects = []
         
-        # 도메인별 속성 선택
+        # 도메인별 키워드 매핑 (실제 언급 기반)
+        aspect_keywords = {
+            "contribution": ["보험료", "기여", "납부", "부담"],
+            "benefit": ["급여", "수령", "지급", "연금액"],
+            "retirement_age": ["수령", "은퇴", "정년", "나이"],
+            "investment": ["수익", "투자", "운용", "수익률"],
+            "security": ["안정", "보장", "신뢰", "안전"],
+            "cost": ["비용", "수수료", "경비"],
+            "fee": ["수수료", "관리비", "비용"],
+            "return": ["수익률", "이익", "수익"],
+            "risk": ["위험", "리스크", "불안"],
+            "liquidity": ["유동성", "환금"],
+            "customer_service": ["서비스", "고객", "상담"],
+            "accessibility": ["접근", "편의", "이용"],
+            "transparency": ["투명", "공개", "명확"],
+            "speed": ["신속", "빠른", "지연"],
+            "reliability": ["신뢰", "믿음", "안정"]
+        }
+        
+        # 도메인 필터링
         if domain and domain in self.predefined_aspects:
             candidate_aspects = self.predefined_aspects[domain]
         else:
-            # 모든 속성을 후보로 설정
             candidate_aspects = []
             for aspects in self.predefined_aspects.values():
                 candidate_aspects.extend(aspects)
         
-        # 텍스트 길이에 따라 속성 개수 결정
-        text_length = len(text.split())
-        num_aspects = min(random.randint(1, 4), text_length // 10 + 1)
-        
-        selected_aspects = random.sample(
-            candidate_aspects, 
-            min(num_aspects, len(candidate_aspects))
-        )
-        
-        for aspect in selected_aspects:
-            aspect_data = {
-                "aspect": aspect,
-                "confidence": round(random.uniform(0.6, 0.95), 2),
-                "position": {
-                    "start": random.randint(0, max(0, len(text) - 10)),
-                    "end": random.randint(10, len(text))
-                },
-                "context": text[:50] + "..." if len(text) > 50 else text
-            }
-            extracted_aspects.append(aspect_data)
+        # 텍스트에서 실제 언급된 속성만 추출
+        text_lower = text.lower()
+        for aspect in candidate_aspects:
+            keywords = aspect_keywords.get(aspect, [])
+            
+            for keyword in keywords:
+                # 키워드가 실제로 텍스트에 있는지 확인
+                pattern = re.compile(re.escape(keyword), re.IGNORECASE)
+                matches = list(pattern.finditer(text))
+                
+                if matches:
+                    # 첫 번째 매치 위치 사용
+                    match = matches[0]
+                    start_pos = match.start()
+                    end_pos = match.end()
+                    
+                    # 주변 컨텍스트 추출 (앞뒤 30자)
+                    context_start = max(0, start_pos - 30)
+                    context_end = min(len(text), end_pos + 30)
+                    context = text[context_start:context_end]
+                    
+                    # 신뢰도는 매치 횟수와 위치에 기반
+                    confidence = min(0.95, 0.6 + len(matches) * 0.1)
+                    
+                    aspect_data = {
+                        "aspect": aspect,
+                        "confidence": round(confidence, 2),
+                        "position": {
+                            "start": start_pos,
+                            "end": end_pos
+                        },
+                        "context": context.strip(),
+                        "keyword_matched": keyword,
+                        "match_count": len(matches)
+                    }
+                    extracted_aspects.append(aspect_data)
+                    break  # 한 aspect당 하나의 매치만
         
         return extracted_aspects
     

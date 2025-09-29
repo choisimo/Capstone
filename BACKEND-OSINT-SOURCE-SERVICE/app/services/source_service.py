@@ -527,20 +527,31 @@ class SourceService:
             return ValidationStatus.INVALID
     
     async def _perform_monitoring_check(self, url: str, check_type: str) -> Dict:
-        """Perform monitoring check - mock implementation"""
-        # Mock monitoring results
-        import random
-        
-        success = random.random() > 0.1  # 90% success rate
-        response_time = random.uniform(100, 3000)  # 100ms to 3s
-        status_code = 200 if success else random.choice([404, 500, 503])
-        
-        return {
-            "success": success,
-            "response_time": response_time,
-            "status_code": status_code,
-            "error": None if success else f"HTTP {status_code}"
-        }
+        """Perform monitoring check - 실제 HTTP 요청"""
+        import time
+        try:
+            import aiohttp
+            start_time = time.time()
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                    response_time = (time.time() - start_time) * 1000  # ms
+                    status_code = response.status
+                    success = 200 <= status_code < 400
+                    
+                    return {
+                        "success": success,
+                        "response_time": response_time,
+                        "status_code": status_code,
+                        "error": None if success else f"HTTP {status_code}"
+                    }
+        except Exception as e:
+            return {
+                "success": False,
+                "response_time": 0,
+                "status_code": 0,
+                "error": str(e)
+            }
     
     def _get_last_monitoring(self, source_id: str) -> Optional[SourceMonitoring]:
         """Get last monitoring result for source"""

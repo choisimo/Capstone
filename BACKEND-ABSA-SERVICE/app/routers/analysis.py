@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional
 from app.db import get_db, ABSAAnalysis
 from datetime import datetime
 import uuid
-import random
+import re
 
 router = APIRouter()
 
@@ -44,21 +44,27 @@ async def analyze_absa(
     aspects = request.get("aspects", ["수익률", "안정성", "관리비용", "서비스"])
     content_id = request.get("content_id", str(uuid.uuid4()))
     
-    # 속성별 감성 분석 (실제로는 ML 모델 사용)
+    # 속성별 감성 분석 (규칙 기반 실제 분석)
     aspect_sentiments = {}
     for aspect in aspects:
-        # 간단한 규칙 기반 분석 (데모용)
+        # 키워드 기반 감성 분석
         sentiment_score = _analyze_aspect_sentiment(text, aspect)
+        confidence = _calculate_confidence(text, aspect, sentiment_score)
         aspect_sentiments[aspect] = {
             "sentiment_score": sentiment_score,
             "sentiment_label": _get_sentiment_label(sentiment_score),
-            "confidence": random.uniform(0.7, 0.95)
+            "confidence": confidence
         }
     
     # 전체 감성 점수 계산
     overall_sentiment = sum(
         asp["sentiment_score"] for asp in aspect_sentiments.values()
     ) / len(aspect_sentiments) if aspect_sentiments else 0
+    
+    # 전체 신뢰도 계산 (각 속성별 신뢰도의 평균)
+    overall_confidence = sum(
+        asp["confidence"] for asp in aspect_sentiments.values()
+    ) / len(aspect_sentiments) if aspect_sentiments else 0.0
     
     # 결과 저장
     analysis = ABSAAnalysis(
@@ -67,7 +73,7 @@ async def analyze_absa(
         aspects=aspects,
         aspect_sentiments=aspect_sentiments,
         overall_sentiment=overall_sentiment,
-        confidence_score=random.uniform(0.75, 0.95)
+        confidence_score=round(overall_confidence, 2)
     )
     
     db.add(analysis)
@@ -211,3 +217,42 @@ def _get_sentiment_label(score: float) -> str:
         return "negative"
     else:
         return "neutral"
+
+
+def _calculate_confidence(text: str, aspect: str, sentiment_score: float) -> float:
+    """
+    신뢰도 계산 (실제 언급 기반)
+    
+    Args:
+        text: 원본 텍스트
+        aspect: 분석 속성
+        sentiment_score: 계산된 감성 점수
+    
+    Returns:
+        신뢰도 (0.0 ~ 1.0)
+    """
+    text_lower = text.lower()
+    aspect_lower = aspect.lower()
+    
+    # 기본 신뢰도
+    confidence = 0.5
+    
+    # 속성 언급 여부
+    if aspect_lower in text_lower:
+        confidence += 0.2
+    
+    # 감성 키워드 수
+    positive_keywords = ["좋다", "훌륭", "만족", "우수", "높은", "안정", "저렴"]
+    negative_keywords = ["나쁘다", "불만", "부족", "높다", "비싸다", "불안"]
+    
+    sentiment_keyword_count = sum(
+        1 for kw in positive_keywords + negative_keywords if kw in text_lower
+    )
+    confidence += min(0.3, sentiment_keyword_count * 0.05)
+    
+    # 텍스트 길이 보정
+    word_count = len(text.split())
+    if word_count > 20:
+        confidence += 0.1
+    
+    return round(min(1.0, confidence), 2)
