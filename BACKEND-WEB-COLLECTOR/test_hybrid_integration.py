@@ -27,7 +27,7 @@ class TestHybridCollectorIntegration(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.gemini_api_key = "test_gemini_key"
-        self.test_url = "https://example.com/pension-news"
+        self.test_url = "https://www.nps.or.kr/jsppage/info/easy/easy_01_01.jsp"
         self.test_content = """
         <html>
         <head><title>국민연금 보험료 인상 발표</title></head>

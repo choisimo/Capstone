@@ -186,7 +186,7 @@ async def test_alert_rule(
     
     try:
         # Test the rule
-        result = rule_service.test_rule(rule_id, test_request.test_data)
+        result = rule_service.test_rule(rule_id, test_request.validation_data)
         
         return TestRuleResponse(
             would_trigger=result["would_trigger"],

@@ -55,7 +55,7 @@ class TestScrapeGraphAIAdapter(unittest.TestCase):
         mock_get.return_value = mock_response
 
         adapter = ScrapeGraphAIAdapter(gemini_api_key=self.api_key)
-        result = adapter._fetch_html_content("http://test.com")
+        result = adapter._fetch_html_content("https://www.nps.or.kr")
         
         self.assertEqual(result, self.sample_html)
         mock_get.assert_called_once()
@@ -68,7 +68,7 @@ class TestScrapeGraphAIAdapter(unittest.TestCase):
         adapter = ScrapeGraphAIAdapter(gemini_api_key=self.api_key)
         
         with self.assertRaises(RuntimeError):
-            adapter._fetch_html_content("http://test.com")
+            adapter._fetch_html_content("https://www.nps.or.kr")
 
     def test_clean_html_content(self):
         """Test HTML cleaning functionality"""
@@ -120,7 +120,7 @@ class TestScrapeGraphAIAdapter(unittest.TestCase):
         adapter = ScrapeGraphAIAdapter(gemini_api_key=self.api_key)
         
         request = ScrapeRequest(
-            url="http://test.com",
+            url="https://www.nps.or.kr",
             prompt="Extract pension policy information",
             strategy=ScrapeStrategy.SMART_SCRAPER
         )
@@ -154,7 +154,7 @@ class TestScrapeGraphAIAdapter(unittest.TestCase):
         adapter = ScrapeGraphAIAdapter(gemini_api_key=self.api_key)
         
         request = ScrapeRequest(
-            url="http://test.com",
+            url="https://www.nps.or.kr",
             prompt="Extract structured data",
             strategy=ScrapeStrategy.STRUCTURED_SCRAPER,
             additional_config={"title": "string", "content": "string"}
@@ -175,7 +175,7 @@ class TestScrapeGraphAIAdapter(unittest.TestCase):
         adapter = ScrapeGraphAIAdapter(gemini_api_key=self.api_key)
         
         request = ScrapeRequest(
-            url="http://test.com",
+            url="https://www.nps.or.kr",
             prompt="Test prompt"
         )
         
@@ -238,7 +238,7 @@ class TestScrapeGraphAIAdapter(unittest.TestCase):
         adapter = ScrapeGraphAIAdapter(gemini_api_key=self.api_key)
         
         request = ScrapeRequest(
-            url="http://test.com",
+            url="https://www.nps.or.kr",
             prompt="Test async scraping"
         )
         
@@ -264,7 +264,7 @@ class TestSmartScraper(unittest.TestCase):
         mock_adapter.scrape.return_value = mock_result
         
         scraper = SmartScraper("Test prompt", mock_adapter, {})
-        result = scraper.run("http://test.com")
+        result = scraper.run("https://www.nps.or.kr")
         
         self.assertEqual(result["extracted_content"], "Test content")
         mock_adapter.scrape.assert_called_once()
@@ -283,7 +283,7 @@ class TestSmartScraper(unittest.TestCase):
         mock_adapter.scrape.return_value = mock_result
         
         scraper = SmartScraper("Test prompt", mock_adapter, {})
-        result = scraper.run("http://test.com")
+        result = scraper.run("https://www.nps.or.kr")
         
         self.assertIn("error", result)
         self.assertEqual(result["error"], "Test error")
