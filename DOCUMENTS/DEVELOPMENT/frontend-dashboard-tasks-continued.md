@@ -1,6 +1,6 @@
 ---
 docsync: true
-last_synced: 2025-09-28T21:59:05+09:00
+last_synced: 2025-09-29T21:42:30+09:00
 source_sha: af745df9851adc5c9bb20a05c6f65b6905f0ed33
 coverage: 1.0
 ---

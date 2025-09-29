@@ -168,4 +168,16 @@
 4. **법적 검토**: 데이터 수집 전 관련 법규 및 윤리 가이드라인 검토
 5. **커뮤니티 참여**: 오픈소스 프로젝트 기여 및 모범 사례 공유
 
+## 실무 작업 백로그(2025-09-29)
+
+- **Crawler HTTP 상태 관측성 도입**: `BACKEND-WEB-COLLECTOR/` 페치 파이프라인에 상태 코드 계측 배포
+- **콘텐츠 해시 기반 중복 제거**: `BACKEND-COLLECTOR-SERVICE/collection_service.py`에 해시 필터 단계 삽입
+- **Playwright 기반 동적 렌더 대기**: 렌더 완료 확인 로직을 크롤링 어댑터 표준으로 채택
+- **Cross-Platform Persona 상관분석 파이프라인**: `BACKEND-ABSA-SERVICE/app/services/persona_analyzer.py` 확장 및 `BACKEND-OSINT-ORCHESTRATOR-SERVICE/` 이벤트 스키마 정비
+- **GDPR/윤리 컴플라이언스 점검 체크리스트**: `DOCUMENTS/DEVELOPMENT/` 하위에 감사 항목 문서화
+- **능동/수동 풋프린트 통합 수집**: OSINT 오케스트레이터에서 데이터 출처 태그 분리 저장
+- **상관계수 메트릭 내재화**: `BACKEND-ANALYSIS-SERVICE/app/services/`에서 피어슨/스피어먼/부분 상관계수 계산 파이프라인 설계
+- **컴플라이언스 텔레메트리 대시보드**: `monitoring/grafana/`에 투명성 지표 패널 생성
+- **프록시 로테이션·Rate Limiting 표준화**: `shared/http_client.py` 공용 정책 구현
+- **적응형 AI 크롤링 단계적 롤아웃**: 파일럿 → 점진 확장 계획 수립 및 위험 평가
 

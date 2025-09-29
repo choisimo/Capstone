@@ -23,7 +23,12 @@ echo -e "\n${YELLOW}[1/5] Mock/Fake 패턴 검사${NC}"
 echo "----------------------------------------"
 
 # Python 파일에서 mock 패턴 검색
-MOCK_PATTERNS=$(grep -r "random\.\|faker\.\|Mock()\|from unittest.mock\|import mock" --include="*.py" --exclude-dir=tests --exclude-dir=test --exclude-dir=__pycache__ --exclude-dir=venv --exclude-dir=env . 2>/dev/null | grep -v "test_" || true)
+MOCK_PATTERNS=$(grep -r "random\.\|faker\.\|Mock()\|from unittest.mock\|import mock" \
+  --include="*.py" \
+  --exclude-dir=tests --exclude-dir=test --exclude-dir=__pycache__ \
+  --exclude-dir=venv --exclude-dir=env --exclude-dir=.venv --exclude-dir=node_modules \
+  --exclude-dir=dist-packages --exclude-dir=site-packages \
+  . 2>/dev/null | grep -v "test_" || true)
 if [ ! -z "$MOCK_PATTERNS" ]; then
     echo -e "${RED}❌ Mock 패턴 발견:${NC}"
     echo "$MOCK_PATTERNS" | head -20
@@ -185,6 +190,32 @@ if [ -f "tools/doc_sync/cli.py" ]; then
 else
   echo -e "${YELLOW}⚠️  DocSync CLI 미존재: tools/doc_sync/cli.py (검증 건너뜀)${NC}"
   ((WARNINGS++))
+fi
+
+# 7. 작업 히스토리 기록 검사
+echo -e "\n${YELLOW}[7/7] 작업 히스토리 기록 검사${NC}"
+echo "----------------------------------------"
+
+HISTORY_DIR="DOCUMENTS/HISTORY"
+if [ -d "$HISTORY_DIR" ]; then
+  LATEST_HISTORY=$(ls "${HISTORY_DIR}"/*-history.md 2>/dev/null | sort -r | head -1)
+  if [ -z "$LATEST_HISTORY" ]; then
+    echo -e "${RED}❌ 히스토리 파일 없음: history-log-prompt.md 규칙 위반${NC}"
+    ((ERRORS++))
+  else
+    LAST_MODIFIED=$(stat -c %Y "$LATEST_HISTORY")
+    NOW=$(date +%s)
+    AGE_HOURS=$(( (NOW - LAST_MODIFIED) / 3600 ))
+    if [ $AGE_HOURS -gt 24 ]; then
+      echo -e "${YELLOW}⚠️  최근 24시간 내 히스토리 파일 없음 (${AGE_HOURS}시간 경과)${NC}"
+      ((WARNINGS++))
+    else
+      echo -e "${GREEN}✅ 최근 히스토리 파일: $(basename "$LATEST_HISTORY")${NC}"
+    fi
+  fi
+else
+  echo -e "${RED}❌ 히스토리 디렉터리 없음: DOCUMENTS/HISTORY${NC}"
+  ((ERRORS++))
 fi
 
 # 결과 요약

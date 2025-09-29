@@ -48,6 +48,22 @@
 - 유닛/통합/계약 테스트(pytest + schemathesis), CDC(Schema Registry) 테스트.
 - 데이터 품질: Great Expectations, 일일 리포트.
 
+## 6-1. 히스토리 기록 자동화
+- `scripts/history_logger.py`로 작업 종료 시 히스토리 파일 자동 생성.
+- 명령 예시:
+  ```bash
+  python scripts/history_logger.py \
+    --summary "Collector 서비스 웹훅 통합" \
+    --purpose "Collector: 웹훅 파이프라인 안정화" \
+    --change "Collection Service: 웹훅 어댑터 추가" \
+    --impact "Collector Service: 실시간 이벤트 확대" \
+    --modified "BACKEND-COLLECTOR-SERVICE/app/services/collection_service.py: 웹훅 통합" \
+    --verification "pytest BACKEND-COLLECTOR-SERVICE: PASS" \
+    --followup "Docs: system-architecture 업데이트"
+  ```
+- 출력 위치: `DOCUMENTS/HISTORY/<YYYYMMDD-HHMMSS>-history.md`
+- `validate_project.sh` 7단계에서 최신 히스토리 존재 여부를 검사하므로 작업 후 반드시 실행.
+
 ## 7. 보안·컴플라이언스
 - 시크릿: Vault/Secrets Manager. 접근 최소화, 감사 로그.
 - 로깅: PII 금지, 비식별 토큰 사용.
