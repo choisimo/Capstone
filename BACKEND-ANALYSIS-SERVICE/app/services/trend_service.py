@@ -2,14 +2,30 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import json
-from collections import defaultdict
+from collections import defaultdict, Counter
 from app.db import TrendAnalysis, SentimentAnalysis
 from app.schemas import TrendAnalysisResponse, TrendItem
+import re
+
+# Korean NLP for keyword extraction
+try:
+    from konlpy.tag import Okt
+    KONLPY_AVAILABLE = True
+except ImportError:
+    KONLPY_AVAILABLE = False
 
 
 class TrendService:
     def __init__(self, db: Session):
         self.db = db
+        # Initialize Korean NLP tokenizer
+        self.okt = Okt() if KONLPY_AVAILABLE else None
+        # Korean stopwords
+        self.stopwords = {
+            '이', '그', '저', '것', '수', '등', '및', '중', '때', '년', '월', '일',
+            '되', '하', '있', '않', '없', '한', '를', '을', '가', '이', '은', '는',
+            '에', '의', '로', '으로', '와', '과', '도', '만', '에서', '까지'
+        }
     
     async def analyze_trends(self, period: str, entity: Optional[str] = None, 
                            start_date: Optional[datetime] = None, 
@@ -147,14 +163,25 @@ class TrendService:
         }
     
     def _extract_keywords(self, analyses: List, limit: int = 5) -> List[str]:
+        """
+        한국어 키워드 추출 (KoNLPy 형태소 분석 사용)
+        """
         all_text = " ".join([a.text for a in analyses])
-        words = all_text.lower().split()
         
-        stop_words = {"the", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by", "is", "are", "was", "were"}
-        filtered_words = [w for w in words if w not in stop_words and len(w) > 3]
-        
-        word_counts = defaultdict(int)
-        for word in filtered_words:
-            word_counts[word] += 1
-        
-        return [word for word, count in sorted(word_counts.items(), key=lambda x: x[1], reverse=True)[:limit]]
+        if KONLPY_AVAILABLE and self.okt:
+            # 형태소 분석으로 명사 추출
+            nouns = self.okt.nouns(all_text)
+            # 불용어 제거 및 2글자 이상 필터링
+            filtered_nouns = [
+                noun for noun in nouns 
+                if noun not in self.stopwords and len(noun) >= 2
+            ]
+            # 빈도수 계산
+            noun_counts = Counter(filtered_nouns)
+            return [noun for noun, count in noun_counts.most_common(limit)]
+        else:
+            # Fallback: 간단한 공백 기반 분리
+            words = re.findall(r'[가-힣]{2,}', all_text)
+            filtered_words = [w for w in words if w not in self.stopwords]
+            word_counts = Counter(filtered_words)
+            return [word for word, count in word_counts.most_common(limit)]
