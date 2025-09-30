@@ -3,8 +3,8 @@ uvicorn[standard]
 sqlalchemy
 psycopg2-binary
 pydantic
-transformers
-torch
+pydantic-settings
+transformers==4.35.0
 # Report generation dependencies
 reportlab>=4.0.0
 openpyxl>=3.1.0
@@ -15,7 +15,7 @@ redis>=5.0.0
 numpy==1.24.3
 pandas==2.0.3
 scikit-learn==1.3.0
-torch==2.1.0
+torch==2.2.2
 requests==2.31.0
 python-multipart==0.0.6
 python-jose[cryptography]==3.3.0
