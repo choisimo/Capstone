@@ -1,3 +1,9 @@
+---
+docsync: true
+last_synced: 2025-09-30T01:39:12+0000
+source_sha: 6e9c96accdc46e88c87c4fe11f49aa2efddb98d8
+coverage: 1.0
+---
 # 웹크롤러 연동 계획서 (ChangeDetection.io + AI Agent 기반)
 
 ## 1. 프로젝트 개요

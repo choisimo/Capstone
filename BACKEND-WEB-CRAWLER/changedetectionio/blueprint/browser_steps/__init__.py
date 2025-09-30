@@ -105,8 +105,8 @@ def construct_blueprint(datastore: ChangeDetectionStore):
         
         browsersteps_start_session['browserstepper'] = browserstepper
 
-        # For test
-        #await browsersteps_start_session['browserstepper'].action_goto_url(value="http://example.com?time="+str(time.time()))
+        # For test (use verified real domain)
+        #await browsersteps_start_session['browserstepper'].action_goto_url(value="https://www.nps.or.kr?time="+str(time.time()))
 
         return browsersteps_start_session
 

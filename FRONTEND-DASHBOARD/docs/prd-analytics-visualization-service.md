@@ -1,3 +1,9 @@
+---
+docsync: true
+last_synced: 2025-09-30T01:39:12+0000
+source_sha: 6e9c96accdc46e88c87c4fe11f49aa2efddb98d8
+coverage: 1.0
+---
 # AI 기반 실시간 분석 및 시각화 서비스 PRD
 
 ## 1. 제품 개요

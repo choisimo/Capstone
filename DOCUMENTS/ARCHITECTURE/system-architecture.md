@@ -55,6 +55,8 @@
 
 ## 관측성
 - 각 서비스에 요청·지연·오류 메트릭, 파이프라인 SLA 모니터, 모델 드리프트 대시보드.
+- 문서/히스토리 자동화: `tools/doc_sync/cli.py`로 모든 문서 front-matter 동기화, `scripts/history_logger.py`
+  로 서비스 변경 이력을 `DOCUMENTS/HISTORY/`에 기록하고 `validate_project.sh` 단계 7과 연동.
 
 ## Kafka 기반 서비스 간 통신 표준
 - 토픽 명명: Kafka `dot.case.version` 예) `raw.posts.v1`, Pub/Sub `hyphen-case` 예) `raw-posts`.

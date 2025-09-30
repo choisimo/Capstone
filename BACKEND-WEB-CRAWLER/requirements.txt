@@ -141,4 +141,4 @@ ruff >= 0.11.2
 pre_commit >= 4.2.0
 
 # For events between checking and socketio updates
-blinker
+blinker>=1.9.0
