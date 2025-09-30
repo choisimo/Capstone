@@ -1,7 +1,7 @@
 ---
 docsync: true
-last_synced: 2025-09-30T08:38:26+0900
-source_sha: 733a9bd12e34e77d0e4054796389a7477c15b29d
+last_synced: 2025-09-30T01:41:06+0000
+source_sha: 6e9c96accdc46e88c87c4fe11f49aa2efddb98d8
 coverage: 1.0
 ---
 # Frontend Dashboard
