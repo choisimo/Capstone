@@ -1,3 +1,10 @@
+---
+docsync: true
+last_synced: 2025-09-30T22:20:00+0900
+source_sha: 040c52aaecf2b90d835daebcf707702959735c5c
+coverage: 1.0
+---
+
 # 구현 진행 상황 (2025-09-30)
 
 ## ✅ 완료된 작업
