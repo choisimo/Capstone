@@ -1,3 +1,9 @@
+---
+docsync: true
+last_synced: 2025-09-30T23:47:32+0000
+source_sha: 5d465b04bd1c563005c45c1a27ac1939e2e194cf
+coverage: 1.0
+---
 # 알림 및 이벤트 관리 서비스 PRD
 
 ## 1. 제품 개요

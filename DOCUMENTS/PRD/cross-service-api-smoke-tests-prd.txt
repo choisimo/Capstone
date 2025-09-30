@@ -1,0 +1,98 @@
+<context>
+# Overview
+Define and automate cross-service API functional smoke tests via the API Gateway to validate service health, readiness, and non-destructive functional endpoints. Tests run against localhost bindings from `docker-compose.production.yml` and use strictly idempotent requests. Results include HTTP codes, latencies, and truncated bodies.
+
+Why valuable:
+- Early detection of regressions across services after builds/updates
+- Single entrypoint verification through API Gateway plus direct service checks
+- Repeatable, deterministic, CI-friendly
+
+Environment:
+- Local Docker Compose (production compose)
+- FastAPI-based microservices (gateway + backend services)
+
+Constraints & Policies:
+- 12-Factor: configuration via environment variables
+- No secrets committed (use .env / .env.example)
+- Non-destructive, read-only or safe POSTs only
+- Deterministic behavior (no random jitter)
+
+# Core Features
+- Curl-based smoke suite with strict timeouts and concise output
+- Health checks for: gateway, analysis, collector (/health and /ready), absa, alert, osint-orchestrator, osint-planning, osint-source, frontend
+- Functional checks via Gateway:
+  - Analysis sentiment sample request
+  - ABSA aspects extract
+  - Optional minimal Alert endpoint (list rules/status) if available
+- Output summary (codes, latencies), machine-readable log, and human summary
+- Exit non-zero on failure to integrate with CI and shell scripts
+
+# User Experience
+- Run a single script: `scripts/quick-test.sh` or via `docker-test-and-stability.sh`
+- See a one-screen summary and optional JSON/NDJSON output for archiving
+</context>
+<PRD>
+# Technical Architecture
+- Test Harness
+  - Bash script under `scripts/` (portable; jq optional)
+  - Environment variables for endpoints and timeouts (e.g., `GATEWAY_URL=http://localhost:8000`)
+  - Per-endpoint: capture `HTTP_CODE`, `time_total`, truncated `body` (<= 300 bytes)
+  - Structured line format for easy grepping and CI parsing
+- Endpoints (default via compose ports)
+  - Gateway: `/health`
+  - Analysis: `/health`; functional via Gateway route to Analysis sentiment
+  - Collector: `/health` and `/ready` (readiness must be 200 OK eventually)
+  - ABSA: `/health`; functional via Gateway aspects/extract
+  - Alert: `/health`; functional (optional) via available safe GET
+  - OSINT Orchestrator/Planning/Source: `/health` (functional minimal if present)
+  - Frontend: `/` 200 OK
+- Output Artifacts
+  - `data/SERVICE_SMOKE_REPORT_<UTC_ISO>.log` (line-based)
+  - Optional `data/SERVICE_SMOKE_REPORT_<UTC_ISO>.json` if `jq` available
+- Integration
+  - Wire into `docker-test-and-stability.sh` to run post-upgrade
+  - Add `npm` Task Master integration (parse PRD into actionable tasks)
+
+# Development Roadmap
+- MVP
+  - Implement `scripts/quick-test.sh` smoke suite
+  - Cover all health endpoints + two functional calls (Analysis, ABSA)
+  - Exit non-zero on any required endpoint failure
+- Phase 2
+  - Add JSON schema validation for health payloads (jq-based minimal schema)
+  - Add Alert functional check (list rules) if non-destructive
+  - Add retries with bounded deterministic backoff (no randomness)
+- Phase 3 (CI & Docs)
+  - GitHub Actions job to run smoke tests on push/compose changes
+  - Publish artifact to `data/` and attach to CI
+  - Update `DOCUMENTS/implementation-progress.md` and `FINAL-IMPLEMENTATION-SUMMARY.md`
+
+# Logical Dependency Chain
+1) Ensure `collector-readiness-stabilization` deployed (Collector `/ready` passes eventually)
+2) Implement `scripts/quick-test.sh` with env-driven URLs and timeouts
+3) Integrate into `docker-test-and-stability.sh`
+4) Add CI job and documentation updates
+
+# Risks and Mitigations
+- Readiness flapping → deterministic retries and threshold for success
+- Route drift in Gateway → load `BACKEND-API-GATEWAY/app/config.py` service URLs, avoid hardcoding; validate with a discovery ping
+- Timeout sensitivity on low-end hosts → configurable timeouts via env
+- False positives from content changes → assert on HTTP code and minimal schema, not full body
+
+# Acceptance & Validation Checklist
+- [ ] All health endpoints return 200 within configured timeout (PASS/FAIL with codes)
+- [ ] Collector `/ready` returns 200 once dependencies healthy (PASS/FAIL)
+- [ ] Analysis sentiment via Gateway returns 200 and valid JSON shape (PASS/FAIL)
+- [ ] ABSA aspects extract via Gateway returns 200 and aspects array (PASS/FAIL)
+- [ ] Report file written to `data/` with timestamp (PASS/FAIL)
+- [ ] No secrets committed; configuration from env only (PASS/FAIL)
+
+# Appendix
+- Suggested env defaults:
+  - `GATEWAY_URL=http://localhost:8000`
+  - `ANALYSIS_URL=http://localhost:8001`
+  - `COLLECTOR_URL=http://localhost:8002`
+  - `HTTP_TIMEOUT_SECONDS=8`
+- Sample line format:
+  - `NAME|URL|code=200|time=0.123s|body={...}`
+</PRD>

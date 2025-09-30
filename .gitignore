@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#IDE
+.cursor/
+.windsurf/
+.windsurfrules
+refactor.md
+
 # C extensions
 *.so
 
@@ -206,6 +212,8 @@ tasks/
 !FRONTEND-DASHBOARD/src/lib/**
  
 # Allow environment templates while still ignoring actual env files
+  !.env.example
 !FRONTEND-DASHBOARD/.env.example
 !FRONTEND-DASHBOARD/.env.development.example
 !FRONTEND-DASHBOARD/.env.production.example
+
