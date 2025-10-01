@@ -270,54 +270,25 @@ class RealDataScraper:
         
         return data
     
-    def scrape_news_comments_sample(self) -> List[Dict[str, Any]]:
-        """뉴스 댓글 샘플 (실제 API는 인증 필요)"""
-        # 실제 네이버/다음 댓글 API는 인증이 필요하므로
-        # 실제 뉴스 URL과 함께 현실적인 댓글 패턴만 제공
+    def scrape_news_comments_from_api(self) -> List[Dict[str, Any]]:
+        """실제 API로부터 뉴스 댓글 수집
         
-        comments = []
+        주의: 네이버/다음 댓글 API는 공개 API가 아니믰로
+        접근이 불가능합니다. Mock 데이터는 생성하지 않습니다.
         
-        # 실제 뉴스 기사 URL (검증된 URL)
-        real_articles = [
-            {
-                "title": "국민연금 보험료율 13% 인상안 국회 제출",
-                "url": "https://news.naver.com/main/read.naver?mode=LSD&mid=sec&sid1=101",
-                "platform": "naver"
-            },
-            {
-                "title": "2055년생부터 국민연금 68세 수령",
-                "url": "https://news.daum.net/economic/finance",
-                "platform": "daum"
-            }
-        ]
+        대안:
+        1. RSS 피드의 기사 본문을 감성 분석
+        2. 사용자가 허용한 커뮤니티 사이트 크롤링
+        3. 공식 API가 있는 플랫폼만 사용
+        """
+        print("⚠️  네이버/다음 댓글 API는 비공개입니다.")
+        print("🚫  Mock 데이터 생성은 규칙 위반입니다.")
+        print("ℹ️  대신 다음 방법을 사용하세요:")
+        print("   - RSS 피드의 기사 본문 감성 분석")
+        print("   - Reddit 같은 공개 API 사용")
+        print("   - 허용된 커뮤니티 사이트 (robots.txt 확인)")
         
-        # 실제 댓글 패턴 (실제 수집된 댓글 기반)
-        real_comment_patterns = [
-            {"author": "시민A", "content": "보험료 인상은 불가피해 보입니다. 미래를 위해서라도.", "likes": 234},
-            {"author": "직장인B", "content": "월급에서 13%면 너무 많은 것 아닌가요?", "likes": 567},
-            {"author": "자영업C", "content": "자영업자는 전액 본인 부담인데 부담이 큽니다", "likes": 345},
-            {"author": "청년D", "content": "우리 세대는 받기나 할까요? 불신이 큽니다", "likes": 890},
-            {"author": "은퇴자E", "content": "지금 받는 연금도 생활하기 빠듯한데...", "likes": 123}
-        ]
-        
-        for article in real_articles:
-            for comment in real_comment_patterns:
-                comments.append({
-                    "id": hashlib.md5(f"{article['url']}_{comment['author']}".encode()).hexdigest()[:16],
-                    "source": f"{article['platform']}_comment",
-                    "category": "comment",
-                    "platform": article['platform'],
-                    "parent_title": article['title'],
-                    "parent_url": article['url'],
-                    "content": comment['content'],
-                    "author": comment['author'],
-                    "author_id": self.generate_user_id(comment['author'], article['platform']),
-                    "likes": comment['likes'],
-                    "published_at": datetime.now().isoformat(),
-                    "collected_at": datetime.now().isoformat()
-                })
-        
-        return comments
+        return []
     
     def collect_all(self) -> Dict[str, Any]:
         """모든 실제 데이터 수집"""
@@ -354,11 +325,15 @@ class RealDataScraper:
         all_data.extend(daum_data)
         print(f"✅ 수집 완료: {len(daum_data)}개")
         
-        # 5. 댓글 샘플
-        print("\n[5/5] 댓글 패턴 수집...")
-        comments = self.scrape_news_comments_sample()
-        all_data.extend(comments)
-        print(f"✅ 수집 완료: {len(comments)}개")
+        # 5. 댓글 수집 시도
+        print("\n[5/5] 댓글 수집 시도...")
+        comments = self.scrape_news_comments_from_api()
+        if comments:
+            all_data.extend(comments)
+            print(f"✅ 수집 완료: {len(comments)}개")
+        else:
+            print("⚠️  댓글 수집 스킵 (API 없음)")
+            print("   RSS 피드 기사와 Reddit 데이터를 사용하세요.")
         
         # 통계
         stats = self._generate_statistics(all_data)
