@@ -1,6 +1,6 @@
 ---
 docsync: true
-last_synced: 2025-09-30T16:20:53+0000
+last_synced: 2025-10-07T00:00:00+0000
 source_sha: eda54a3bd6243ead850a5500ebc124e5ff92980f
 coverage: 1.0
 ---
@@ -13,16 +13,26 @@ coverage: 1.0
 
 ## ⚡ 빠른 시작
 
+> ⚠️ **보안 주의**: 예시 비밀번호(`Gr@fana2025`, `MyNewPassword`)와 기본 `JWT_SECRET_KEY`는 반드시 최초 배포 후 교체하세요. 운영 환경에서는 `.env.production`을 버전관리에서 제외하고 비밀 저장소(예: Vault, Secret Manager) 사용을 권장합니다.
+
 ```bash
-# 전체 시스템 시작 (1줄 명령)
-./production-start.sh
+# 전체 시스템 시작 (기본: 기존 볼륨 유지, 모니터링 제외)
+./scripts/production-start.sh
 
 # 모니터링 포함 시작
-./production-start.sh --with-monitoring
+./scripts/production-start.sh --with-monitoring
 
-# 클린 시작 (볼륨 초기화)
-./production-start.sh --clean --with-monitoring
+# 볼륨 초기화 + 모니터링 포함 시작
+./scripts/production-start.sh --clean --with-monitoring
 ```
+
+### 실행 옵션
+| 순서 | 인자 조합 | 의미 | 비고 |
+|------|-----------|------|------|
+| 1 | (없음) | 기존 데이터 유지, 모니터링 미포함 | 기본 경량 기동 |
+| 2 | `--with-monitoring` | Prometheus+Grafana 포함 | 초기 자원 300~400MB 추가 |
+| 3 | `--clean --with-monitoring` | 볼륨 초기화 후 전체+모니터링 | 데이터 리셋 주의 |
+| 4 | `--clean` | 볼륨 초기화만, 모니터링 제외 | 재초기화 점검용 |
 
 ## 📦 포함 구성요소
 
