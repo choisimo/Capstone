@@ -2,93 +2,16 @@ from typing import List, Optional, Dict, Any
 import asyncio
 import sys
 import os
+from fastapi import APIRouter
 
 # Add parent directory to path for imports
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-# Mock HTTP response for environments without aiohttp
-class MockHTTPResponse:
-    def __init__(self, status=200, headers=None, text=""):
-        self.status = status
-        self.headers = headers or {}
-        self._text = text
-    
-    async def text(self):
-        return self._text
-    
-    async def __aenter__(self):
-        return self
-    
-    async def __aexit__(self, *args):
-        pass
+# Use FastAPI's APIRouter
 
-class MockHTTPSession:
-    async def get(self, url, timeout=10):
-        # Mock robots.txt responses
-        if "robots.txt" in url:
-            return MockHTTPResponse(200, {}, "User-agent: *\nDisallow:")
-        return MockHTTPResponse(200, {"content-type": "text/html"})
-    
-    async def head(self, url, timeout=15):
-        return MockHTTPResponse(200, {
-            "content-type": "text/html",
-            "server": "nginx",
-            "last-modified": "Mon, 01 Jan 2024 00:00:00 GMT"
-        })
-    
-    async def close(self):
-        pass
-
-# For FastAPI-like functionality
-class APIRouter:
-    def __init__(self, prefix="", tags=None):
-        self.prefix = prefix
-        self.tags = tags or []
-        self.routes = []
-    
-    def post(self, path):
-        def decorator(func):
-            self.routes.append(("POST", path, func))
-            return func
-        return decorator
-    
-    def get(self, path):
-        def decorator(func):
-            self.routes.append(("GET", path, func))
-            return func
-        return decorator
-    
-    def patch(self, path):
-        def decorator(func):
-            self.routes.append(("PATCH", path, func))
-            return func
-        return decorator
-    
-    def delete(self, path):
-        def decorator(func):
-            self.routes.append(("DELETE", path, func))
-            return func
-        return decorator
-
-# Mock dependencies
-def get_db():
-    class MockDB:
-        def __init__(self):
-            self.data = {}
-        def add(self, obj): pass
-        def commit(self): pass
-        def refresh(self, obj): pass
-        def query(self, model): 
-            class MockQuery:
-                def filter(self, *args): return self
-                def first(self): return None
-                def all(self): return []
-                def limit(self, n): return self
-                def offset(self, n): return self
-            return MockQuery()
-    return MockDB()
+# No DB stub; SourceService currently uses in-memory storage
 
 # Import the service and models
 from services.source_service import SourceService
@@ -99,11 +22,8 @@ source_service = SourceService()
 
 # Source Management Endpoints
 @router.post("/")
-async def register_source(source_data: Dict[str, Any], db: Any = None) -> Dict[str, Any]:
+async def register_source(source_data: Dict[str, Any]) -> Dict[str, Any]:
     """Register a new source"""
-    if db is None:
-        db = get_db()
-    
     try:
         url = source_data.get("url", "")
         if not url:
@@ -115,7 +35,7 @@ async def register_source(source_data: Dict[str, Any], db: Any = None) -> Dict[s
         source_type = SourceType(source_data.get("source_type", "web"))
         
         source = await source_service.register_source(
-            db, url, name, category, region, source_type
+            None, url, name, category, region, source_type
         )
         
         return {
@@ -138,13 +58,9 @@ async def list_sources(
     region: Optional[str] = None,
     min_trust_score: Optional[float] = None,
     limit: int = 100,
-    offset: int = 0,
-    db: Any = None
+    offset: int = 0
 ) -> Dict[str, Any]:
     """List sources with optional filters"""
-    if db is None:
-        db = get_db()
-    
     try:
         # Convert string parameters to enums
         category_filter = SourceCategory(category) if category else None
@@ -193,11 +109,8 @@ async def list_sources(
         return {"error": str(e), "status": "error"}
 
 @router.get("/{source_id}")
-async def get_source(source_id: str, db: Any = None) -> Dict[str, Any]:
+async def get_source(source_id: str) -> Dict[str, Any]:
     """Get a specific source by ID"""
-    if db is None:
-        db = get_db()
-    
     try:
         source = await source_service.get_source_by_id(source_id)
         if not source:
@@ -234,11 +147,8 @@ async def get_source(source_id: str, db: Any = None) -> Dict[str, Any]:
         return {"error": str(e), "status": "error"}
 
 @router.patch("/{source_id}")
-async def update_source(source_id: str, update_data: Dict[str, Any], db: Any = None) -> Dict[str, Any]:
+async def update_source(source_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
     """Update a source"""
-    if db is None:
-        db = get_db()
-    
     try:
         # Convert enum fields if present
         if "category" in update_data:
@@ -263,11 +173,8 @@ async def update_source(source_id: str, update_data: Dict[str, Any], db: Any = N
         return {"error": str(e), "status": "error"}
 
 @router.delete("/{source_id}")
-async def delete_source(source_id: str, db: Any = None) -> Dict[str, Any]:
+async def delete_source(source_id: str) -> Dict[str, Any]:
     """Delete a source"""
-    if db is None:
-        db = get_db()
-    
     try:
         success = await source_service.delete_source(source_id)
         if not success:
@@ -279,11 +186,8 @@ async def delete_source(source_id: str, db: Any = None) -> Dict[str, Any]:
 
 # Bulk Operations
 @router.post("/bulk-register")
-async def bulk_register_sources(request_data: Dict[str, Any], db: Any = None) -> Dict[str, Any]:
+async def bulk_register_sources(request_data: Dict[str, Any]) -> Dict[str, Any]:
     """Register multiple sources in bulk"""
-    if db is None:
-        db = get_db()
-    
     try:
         sources_list = request_data.get("sources", [])
         if not sources_list:
@@ -304,11 +208,8 @@ async def bulk_register_sources(request_data: Dict[str, Any], db: Any = None) ->
 
 # Discovery Endpoints
 @router.post("/discover")
-async def discover_sources(request_data: Dict[str, Any], db: Any = None) -> Dict[str, Any]:
+async def discover_sources(request_data: Dict[str, Any]) -> Dict[str, Any]:
     """Discover new sources from seed URLs"""
-    if db is None:
-        db = get_db()
-    
     try:
         seed_urls = request_data.get("seed_urls", [])
         max_depth = request_data.get("max_depth", 2)
@@ -369,11 +270,8 @@ async def validate_source(request_data: Dict[str, Any]) -> Dict[str, Any]:
 
 # Monitoring Endpoints
 @router.post("/{source_id}/monitor")
-async def monitor_source(source_id: str, request_data: Dict[str, Any], db: Any = None) -> Dict[str, Any]:
+async def monitor_source(source_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
     """Monitor source health and performance"""
-    if db is None:
-        db = get_db()
-    
     try:
         check_type = request_data.get("check_type", "availability")
         
@@ -397,11 +295,8 @@ async def monitor_source(source_id: str, request_data: Dict[str, Any], db: Any =
 
 # Dynamic Source Management
 @router.post("/dynamic/add")
-async def add_dynamic_source(source_data: Dict[str, Any], db: Any = None) -> Dict[str, Any]:
+async def add_dynamic_source(source_data: Dict[str, Any]) -> Dict[str, Any]:
     """Add a new source dynamically and save to configuration"""
-    if db is None:
-        db = get_db()
-    
     try:
         source = await source_service.add_dynamic_source(source_data)
         return {
@@ -415,11 +310,8 @@ async def add_dynamic_source(source_data: Dict[str, Any], db: Any = None) -> Dic
         return {"error": str(e), "status": "error"}
 
 @router.delete("/dynamic/{source_id}")
-async def remove_dynamic_source(source_id: str, db: Any = None) -> Dict[str, Any]:
+async def remove_dynamic_source(source_id: str) -> Dict[str, Any]:
     """Remove a dynamic source and update configuration"""
-    if db is None:
-        db = get_db()
-    
     try:
         success = await source_service.remove_dynamic_source(source_id)
         if not success:
@@ -429,11 +321,8 @@ async def remove_dynamic_source(source_id: str, db: Any = None) -> Dict[str, Any
         return {"error": str(e), "status": "error"}
 
 @router.get("/category-group/{category_group}")
-async def get_sources_by_group(category_group: str, db: Any = None) -> Dict[str, Any]:
+async def get_sources_by_group(category_group: str) -> Dict[str, Any]:
     """Get all sources in a specific category group"""
-    if db is None:
-        db = get_db()
-    
     try:
         sources = await source_service.get_sources_by_category_group(category_group)
         return {
@@ -455,11 +344,8 @@ async def get_sources_by_group(category_group: str, db: Any = None) -> Dict[str,
 
 # Crawling Endpoints
 @router.get("/crawlable")
-async def get_crawlable_sources(limit: int = 100, db: Any = None) -> Dict[str, Any]:
+async def get_crawlable_sources(limit: int = 100) -> Dict[str, Any]:
     """Get sources ready for crawling"""
-    if db is None:
-        db = get_db()
-    
     try:
         crawlable = await source_service.get_crawlable_sources(limit)
         
@@ -472,11 +358,8 @@ async def get_crawlable_sources(limit: int = 100, db: Any = None) -> Dict[str, A
 
 # Reporting Endpoints
 @router.post("/report")
-async def generate_source_report(request_data: Dict[str, Any], db: Any = None) -> Dict[str, Any]:
+async def generate_source_report(request_data: Dict[str, Any]) -> Dict[str, Any]:
     """Generate comprehensive source performance report"""
-    if db is None:
-        db = get_db()
-    
     try:
         source_ids = request_data.get("source_ids")
         period_days = request_data.get("period_days", 7)

@@ -60,8 +60,8 @@ class AdvancedCrawler:
             'Sec-Fetch-Site': 'same-origin'
         }
         
-    def get_random_user_agent(self) -> str:
-        """결정론적 User-Agent 로테이션 (random 사용 금지)"""
+    def next_user_agent(self) -> str:
+        """결정론적 User-Agent 로테이션 (random 미사용)"""
         ua = self.user_agents[self._ua_index % len(self.user_agents)]
         self._ua_index += 1
         return ua
@@ -80,9 +80,9 @@ class AdvancedCrawler:
                 async with aiohttp.ClientSession(cookie_jar=cookie_jar, timeout=timeout) as session:
                     # 세션 쿠키 설정을 위한 메인 페이지 방문
                     if 'naver.com' in url:
-                        await session.get('https://www.naver.com', headers={'User-Agent': self.get_random_user_agent()})
+                        await session.get('https://www.naver.com', headers={'User-Agent': self.next_user_agent()})
                     elif 'daum.net' in url:
-                        await session.get('https://www.daum.net', headers={'User-Agent': self.get_random_user_agent()})
+                        await session.get('https://www.daum.net', headers={'User-Agent': self.next_user_agent()})
                     
                     # 실제 요청
                     async with session.get(url, headers=headers) as response:
@@ -134,7 +134,7 @@ class AdvancedCrawler:
         
         for strategy in strategies:
             headers = self.naver_headers.copy()
-            headers['User-Agent'] = self.get_random_user_agent()
+            headers['User-Agent'] = self.next_user_agent()
             
             html = await self.fetch_with_retry(strategy['url'], headers)
             
@@ -206,7 +206,7 @@ class AdvancedCrawler:
         
         for strategy in strategies:
             headers = self.daum_headers.copy()
-            headers['User-Agent'] = self.get_random_user_agent()
+            headers['User-Agent'] = self.next_user_agent()
             
             html = await self.fetch_with_retry(strategy['url'], headers)
             
@@ -303,7 +303,7 @@ class AdvancedCrawler:
             print(f"  📍 {site['name']} 크롤링 중...")
             
             headers = {
-                'User-Agent': self.get_random_user_agent(),
+                'User-Agent': self.next_user_agent(),
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'Accept-Language': 'ko-KR,ko;q=0.9'
             }

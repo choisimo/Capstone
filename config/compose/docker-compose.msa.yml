@@ -55,7 +55,7 @@ services:
     environment:
       - PORT=8000
       - DEBUG=false
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pension_sentiment}
       - REDIS_URL=redis://redis:6379
       - ANALYSIS_SERVICE_URL=http://analysis-service:8001
       - COLLECTOR_SERVICE_URL=http://collector-service:8002
@@ -91,7 +91,7 @@ services:
     environment:
       - PORT=8001
       - DEBUG=false
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pension_sentiment}
       - REDIS_URL=redis://redis:6379
     ports:
       - "8001:8001"
@@ -115,7 +115,7 @@ services:
     environment:
       - PORT=8002
       - DEBUG=false
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pension_sentiment}
       - REDIS_URL=redis://redis:6379
       - ANALYSIS_SERVICE_URL=http://analysis-service:8001
     ports:
@@ -138,7 +138,7 @@ services:
     environment:
       - PORT=8003
       - DEBUG=false
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pension_sentiment}
       - REDIS_URL=redis://redis:6379
       - ANALYSIS_SERVICE_URL=http://analysis-service:8001
     ports:
@@ -163,7 +163,7 @@ services:
     environment:
       - PORT=8004
       - DEBUG=false
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pension_sentiment}
       - REDIS_URL=redis://redis:6379
       - ANALYSIS_SERVICE_URL=http://analysis-service:8001
       - COLLECTOR_SERVICE_URL=http://collector-service:8002
@@ -189,8 +189,9 @@ services:
     environment:
       - PORT=8005
       - DEBUG=false
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pension_sentiment}
       - REDIS_URL=redis://redis:6379
+      - MONGO_URL=${MONGO_URL}
       - PLANNING_SERVICE_URL=http://osint-planning:8006
       - SOURCE_SERVICE_URL=http://osint-source:8007
     ports:
@@ -215,7 +216,7 @@ services:
     environment:
       - PORT=8006
       - DEBUG=false
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pension_sentiment}
       - REDIS_URL=redis://redis:6379
     ports:
       - "8006:8006"
@@ -237,8 +238,9 @@ services:
     environment:
       - PORT=8007
       - DEBUG=false
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/pension_sentiment
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pension_sentiment}
       - REDIS_URL=redis://redis:6379
+      - MONGO_URL=${MONGO_URL}
     ports:
       - "8007:8007"
     depends_on:

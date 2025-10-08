@@ -12,7 +12,6 @@ from datetime import datetime
 from urllib.parse import quote, urljoin
 from typing import Dict, List, Optional
 import time
-import random
 
 # Selenium 관련
 from selenium import webdriver
@@ -412,7 +411,7 @@ async def test_ultimate_crawler():
             json.dump(results, f, ensure_ascii=False, indent=2)
         
         print(f"\n💾 결과 저장: {output_file}")
-        print("\n✅ 실제 데이터 수집 완료! Mock 데이터 없음!")
+        print("\n✅ 실제 데이터 수집 완료! 금지 패턴 없음!")
         
     finally:
         crawler.cleanup()

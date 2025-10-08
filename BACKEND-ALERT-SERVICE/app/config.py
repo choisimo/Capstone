@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     환경 변수에서 설정을 읽어오며, 기본값을 제공합니다.
     """
     
-    # 데이터베이스 설정
-    database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:password@postgres:5432/pension_sentiment")  # PostgreSQL URL
+    # 데이터베이스 설정 (환경 변수 필수)
+    database_url: str = os.getenv("DATABASE_URL")  # PostgreSQL URL
     
     # Redis 캐시 설정
     redis_url: str = os.getenv("REDIS_URL", "redis://redis:6379")  # Redis 캐시 서버 URL

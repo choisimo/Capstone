@@ -7,9 +7,9 @@ class Settings:
         self.port = int(os.getenv("PORT", 8007))
         self.debug = os.getenv("DEBUG", "true").lower() == "true"
         
-        # 데이터베이스 설정
-        self.database_url = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/osint_db")
-        self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        # 데이터베이스 설정 (환경 변수 우선, 기본값 없음)
+        self.database_url = os.getenv("DATABASE_URL")
+        self.redis_url = os.getenv("REDIS_URL")
         self.secret_key = os.getenv("SECRET_KEY", "osint-source-secret-key")
         self.environment = os.getenv("ENVIRONMENT", "development")
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
@@ -20,9 +20,9 @@ class Settings:
         self.source_validation_timeout = int(os.getenv("SOURCE_VALIDATION_TIMEOUT", "30"))
         self.trust_score_threshold = float(os.getenv("TRUST_SCORE_THRESHOLD", "0.3"))
         
-        # Event publishing
-        self.kafka_bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-        self.nats_url = os.getenv("NATS_URL", "nats://localhost:4222")
+        # Event publishing (환경 변수 사용 권장)
+        self.kafka_bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+        self.nats_url = os.getenv("NATS_URL")
         self.event_publisher = os.getenv("EVENT_PUBLISHER", "kafka")  # kafka or nats
         
         # Source configuration

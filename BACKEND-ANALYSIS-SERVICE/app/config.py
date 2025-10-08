@@ -6,7 +6,7 @@ Analysis Service 설정 모듈
 """
 
 import os
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings
 
 
@@ -18,20 +18,20 @@ class Settings(BaseSettings):
     기본값은 개발 환경을 위한 설정이며, 프로덕션에서는 환경 변수로 오버라이드합니다.
     """
     
-    # 데이터베이스 설정
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/pension_sentiment"  # PostgreSQL 연결 URL
-    REDIS_URL: str = "redis://localhost:6379"  # Redis 캐시 서버 URL
+    # 데이터베이스 설정 (환경 변수 사용 권장, 기본값 제거)
+    DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL")  # PostgreSQL 연결 URL
+    REDIS_URL: Optional[str] = os.getenv("REDIS_URL")  # Redis 캐시 서버 URL
     
     # 애플리케이션 설정
     DEBUG: bool = True  # 디버그 모드 (개발: True, 프로덕션: False)
     SECRET_KEY: str = "your-secret-key-here"  # JWT 및 암호화용 비밀 키
     ALLOWED_HOSTS: List[str] = ["*"]  # CORS 허용 호스트 목록
     
-    # 마이크로서비스 URL 설정
-    API_GATEWAY_URL: str = "http://localhost:8000"  # API Gateway URL
-    COLLECTOR_SERVICE_URL: str = "http://localhost:8002"  # 수집 서비스 URL
-    ABSA_SERVICE_URL: str = "http://localhost:8003"  # ABSA 서비스 URL
-    ALERT_SERVICE_URL: str = "http://localhost:8004"  # 알림 서비스 URL
+    # 마이크로서비스 URL 설정 (Compose 서비스 DNS 사용)
+    API_GATEWAY_URL: str = "http://api-gateway:8000"  # API Gateway URL
+    COLLECTOR_SERVICE_URL: str = "http://collector-service:8002"  # 수집 서비스 URL
+    ABSA_SERVICE_URL: str = "http://absa-service:8003"  # ABSA 서비스 URL
+    ALERT_SERVICE_URL: str = "http://alert-service:8004"  # 알림 서비스 URL
     
     # ML 모델 및 캐싱 설정
     ML_MODEL_PATH: str = "/app/models"  # ML 모델 저장 경로

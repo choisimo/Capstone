@@ -18,12 +18,12 @@ class Settings:
     port: int = int(os.getenv("PORT", 8003))
     debug: bool = os.getenv("DEBUG", "true").lower() == "true"
     
-    # 데이터베이스 및 캐시 설정
-    database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/pension_sentiment")  # PostgreSQL URL
-    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")  # Redis 캐시 URL
+    # 데이터베이스 및 캐시 설정 (환경 변수 필수)
+    database_url: str = os.getenv("DATABASE_URL")  # PostgreSQL URL
+    redis_url: str = os.getenv("REDIS_URL")  # Redis 캐시 URL
     
-    # 다른 서비스 연동 설정
-    analysis_service_url: str = os.getenv("ANALYSIS_SERVICE_URL", "http://localhost:8001")  # 분석 서비스 URL
+    # 다른 서비스 연동 설정 (Compose 서비스 DNS)
+    analysis_service_url: str = os.getenv("ANALYSIS_SERVICE_URL", "http://analysis-service:8001")  # 분석 서비스 URL
     
     # 요청 처리 설정
     max_concurrent_requests: int = 5  # 최대 동시 처리 요청 수

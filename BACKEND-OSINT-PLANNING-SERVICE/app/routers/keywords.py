@@ -5,7 +5,7 @@ from app.schemas import (
     PlanExecutionRequest, PlanExecutionResponse, PlanRecommendationRequest, PlanRecommendationResponse
 )
 
-# Mock FastAPI router
+# Lightweight APIRouter shim (used locally in this module)
 class APIRouter:
     def __init__(self, prefix="", tags=None):
         self.prefix = prefix

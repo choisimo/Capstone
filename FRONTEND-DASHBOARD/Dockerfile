@@ -11,9 +11,9 @@ RUN npm ci
 # Copy rest of source
 COPY . .
 
-# Build-time API endpoint (can be overridden with --build-arg)
-ARG VITE_API_URL=http://localhost:8000
-ENV VITE_API_URL=${VITE_API_URL}
+# Build-time API endpoint (provided via docker-compose build args)
+ARG REACT_APP_API_URL
+ENV VITE_API_URL=${REACT_APP_API_URL}
 
 # Build static assets
 RUN npm run build

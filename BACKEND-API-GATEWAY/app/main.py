@@ -190,6 +190,32 @@ app.include_router(
     tags=["OSINT Orchestrator Service"]  # Swagger UI에서의 그룹 태그
 )
 
+app.include_router(
+    osint_orchestrator.tasks_alias_router,
+    prefix="/api/v1/osint",
+    tags=["OSINT Orchestrator Service"]
+)
+
+# Legacy alias for /api/v1/tasks
+app.include_router(
+    osint_orchestrator.tasks_alias_router,
+    prefix="/api/v1",
+    tags=["OSINT Orchestrator Service"]
+)
+
+# Dashboard alias (overview, issues top)
+app.include_router(
+    osint_orchestrator.dashboard_alias_router,
+    prefix="/api/v1/dashboard",
+    tags=["OSINT Orchestrator Service"]
+)
+
+app.include_router(
+    osint_orchestrator.dashboard_alias_router,
+    prefix="/api/v1/osint",
+    tags=["OSINT Orchestrator Service"]
+)
+
 # OSINT 계획 서비스 라우터 등록
 app.include_router(
     osint_planning.router,
@@ -197,11 +223,23 @@ app.include_router(
     tags=["OSINT Planning Service"]  # Swagger UI에서의 그룹 태그
 )
 
+app.include_router(
+    osint_planning.plans_alias_router,
+    prefix="/api/v1/osint",
+    tags=["OSINT Planning Service"]
+)
+
 # OSINT 소스 서비스 라우터 등록
 app.include_router(
     osint_source.router,
     prefix="/api/v1/osint-source",  # URL 접두사
     tags=["OSINT Source Service"]  # Swagger UI에서의 그룹 태그
+)
+
+app.include_router(
+    osint_source.sources_alias_router,
+    prefix="/api/v1/osint",
+    tags=["OSINT Source Service"]
 )
 
 # 전역 예외 처리기

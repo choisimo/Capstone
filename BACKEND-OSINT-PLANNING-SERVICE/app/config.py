@@ -5,10 +5,10 @@ class Settings:
     port: int = int(os.getenv("PORT", 8006))
     debug: bool = os.getenv("DEBUG", "true").lower() == "true"
     
-    # 데이터베이스 설정
-    database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/osint_db")
-    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")
-    message_broker_url: str = os.getenv("MESSAGE_BROKER_URL", "amqp://guest:guest@localhost/")
+    # 데이터베이스/브로커 설정 (환경 변수 필수, 기본값 없음)
+    database_url: str = os.getenv("DATABASE_URL")
+    redis_url: str = os.getenv("REDIS_URL")
+    message_broker_url: str = os.getenv("MESSAGE_BROKER_URL")
     service_name: str = "osint-planning-service"
     log_level: str = "INFO"
 

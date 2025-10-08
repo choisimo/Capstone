@@ -1,6 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 from app.config import settings
+from app.routers import tasks
+from app.routers import dashboard
 
 app = FastAPI(
     title="OSINT Task Orchestrator Service",
@@ -8,8 +10,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# from app.routers import tasks
-# app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
+app.include_router(tasks.router)
+app.include_router(dashboard.router)
 
 @app.get("/health")
 async def health_check():

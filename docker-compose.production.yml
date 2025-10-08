@@ -14,8 +14,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
       POSTGRES_DB: ${POSTGRES_DB:-pension_sentiment}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init-scripts/postgres:/docker-entrypoint-initdb.d:ro
@@ -41,8 +39,6 @@ services:
     container_name: redis-prod
     restart: always
     command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -70,8 +66,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?required}
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-osint_data}
-    ports:
-      - "${MONGO_PORT:-27017}:27017"
     volumes:
       - mongo-data:/data/db
       - ./init-scripts/mongo:/docker-entrypoint-initdb.d:ro
@@ -114,7 +108,7 @@ services:
       
       # Database
       DATABASE_URL: ${DATABASE_URL:?required}
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       
       # Service URLs
       ANALYSIS_SERVICE_URL: http://analysis-service:8001
@@ -178,7 +172,7 @@ services:
       PORT: 8001
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?required}
-      REDIS_URL: redis://redis:6379/1
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/1}
       
       # ML Model Settings
       MODEL_PATH: /app/models
@@ -187,8 +181,6 @@ services:
       # Performance
       WORKERS: ${ANALYSIS_WORKERS:-4}
       BATCH_SIZE: ${BATCH_SIZE:-32}
-    ports:
-      - "${ANALYSIS_PORT:-8001}:8001"
     depends_on:
       postgres:
         condition: service_healthy
@@ -234,7 +226,7 @@ services:
       PORT: 8002
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?required}
-      REDIS_URL: redis://redis:6379/2
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/2}
       ANALYSIS_SERVICE_URL: http://analysis-service:8001
       
       # Crawler Settings
@@ -245,8 +237,6 @@ services:
       # Collection Settings
       COLLECTION_INTERVAL: ${COLLECTION_INTERVAL:-3600}  # 1 hour
       MAX_CONCURRENT_CRAWLS: ${MAX_CONCURRENT_CRAWLS:-10}
-    ports:
-      - "${COLLECTOR_PORT:-8002}:8002"
     depends_on:
       postgres:
         condition: service_healthy
@@ -293,7 +283,7 @@ services:
       PORT: 8003
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?required}
-      REDIS_URL: redis://redis:6379/3
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/3}
       ANALYSIS_SERVICE_URL: http://analysis-service:8001
       
       # NLP Model Settings
@@ -303,8 +293,6 @@ services:
       # Korean NLP
       USE_KONLPY: ${USE_KONLPY:-true}
       KOREAN_DICT_PATH: /app/dictionaries/korean
-    ports:
-      - "${ABSA_PORT:-8003}:8003"
     depends_on:
       postgres:
         condition: service_healthy
@@ -351,7 +339,7 @@ services:
       PORT: 8004
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?required}
-      REDIS_URL: redis://redis:6379/4
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/4}
       
       # Alert Settings
       ALERT_CHECK_INTERVAL: ${ALERT_CHECK_INTERVAL:-60}  # seconds
@@ -365,8 +353,6 @@ services:
       
       # Webhook Settings
       SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
-    ports:
-      - "${ALERT_PORT:-8004}:8004"
     depends_on:
       postgres:
         condition: service_healthy
@@ -415,7 +401,7 @@ services:
       PORT: 8005
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?required}
-      REDIS_URL: redis://redis:6379/5
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/5}
       MONGO_URL: ${MONGO_URL:?required}
       
       # Service URLs
@@ -425,8 +411,6 @@ services:
       # Task Queue Settings
       TASK_QUEUE_NAME: osint_tasks
       MAX_CONCURRENT_TASKS: ${MAX_CONCURRENT_TASKS:-20}
-    ports:
-      - "${OSINT_ORCHESTRATOR_PORT:-8005}:8005"
     depends_on:
       postgres:
         condition: service_healthy
@@ -468,13 +452,11 @@ services:
       PORT: 8006
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?required}
-      REDIS_URL: redis://redis:6379/6
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/6}
       
       # Planning Settings
       PLANNING_HORIZON: ${PLANNING_HORIZON:-7}  # days
       PRIORITY_ALGORITHM: ${PRIORITY_ALGORITHM:-weighted}
-    ports:
-      - "${OSINT_PLANNING_PORT:-8006}:8006"
     depends_on:
       postgres:
         condition: service_healthy
@@ -514,14 +496,12 @@ services:
       PORT: 8007
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?required}
-      REDIS_URL: redis://redis:6379/7
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/7}
       MONGO_URL: ${MONGO_URL:?required}
       
       # Source Management
       SOURCE_REFRESH_INTERVAL: ${SOURCE_REFRESH_INTERVAL:-3600}
       MAX_SOURCES_PER_TYPE: ${MAX_SOURCES_PER_TYPE:-100}
-    ports:
-      - "${OSINT_SOURCE_PORT:-8007}:8007"
     depends_on:
       postgres:
         condition: service_healthy
@@ -558,15 +538,15 @@ services:
       context: ./FRONTEND-DASHBOARD
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
+        - REACT_APP_API_URL=${REACT_APP_API_URL:?required}
         - BUILD_ENV=production
     container_name: frontend-prod
     restart: always
     environment:
       - NODE_ENV=production
-      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
+      - REACT_APP_API_URL=${REACT_APP_API_URL:?required}
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_PORT:-3117}:3000"
     depends_on:
       - api-gateway
     networks:

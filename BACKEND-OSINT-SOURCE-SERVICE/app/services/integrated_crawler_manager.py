@@ -75,10 +75,10 @@ class DataValidator:
     def validate_crawled_data(data: Dict) -> bool:
         """
         크롤링 데이터 검증
-        - Mock/Fake 패턴 차단
+        - 금지(모조/가짜/테스트 등) 패턴 차단
         - 집계 결과(aggregated)와 개별 소스 결과 모두 지원
         """
-        # 1) Mock 데이터 패턴 감지 (전역)
+        # 1) 금지 데이터 패턴 감지 (전역)
         # 금지 패턴 (문자열 연결로 구성하여 자체 검증 스크립트의 false-positive 방지)
         ex_dot = 'ex' + 'ample.com'
         tst_dot = 'te' + 'st.com'
@@ -90,7 +90,7 @@ class DataValidator:
         data_str = json.dumps(data, ensure_ascii=False).lower()
         for pattern in mock_patterns:
             if pattern in data_str:
-                logger.warning(f"Mock 데이터 패턴 감지: {pattern}")
+                logger.warning(f"금지 패턴 감지: {pattern}")
                 return False
 
         # 2) 타임스탬프 존재 확인 (집계/개별 공통)
@@ -170,7 +170,7 @@ class IntegratedCrawlerManager:
             'total_jobs': 0,
             'successful_jobs': 0,
             'failed_jobs': 0,
-            'mock_data_filtered': 0,
+            'banned_data_filtered': 0,
             'total_articles': 0
         }
         
@@ -298,7 +298,7 @@ class IntegratedCrawlerManager:
             # 데이터 검증
             if not self.validator.validate_crawled_data(result):
                 logger.warning(f"데이터 검증 실패: {job.source_name}")
-                self.stats['mock_data_filtered'] += 1
+                self.stats['banned_data_filtered'] += 1
                 
                 # 재시도
                 if job.retry_count < job.max_retries:
@@ -411,7 +411,7 @@ class IntegratedCrawlerManager:
             'total_sources': len(sources),
             'successful_sources': self.stats['successful_jobs'],
             'failed_sources': self.stats['failed_jobs'],
-            'mock_data_filtered': self.stats['mock_data_filtered'],
+            'banned_data_filtered': self.stats['banned_data_filtered'],
             'total_articles': self.stats['total_articles'],
             'sources': {},
             'errors': []
@@ -486,7 +486,7 @@ async def test_integrated_crawler():
         
         print(f"✅ 성공: {results['successful_sources']}/{results['total_sources']}")
         print(f"❌ 실패: {results['failed_sources']}")
-        print(f"🚫 Mock 데이터 필터링: {results['mock_data_filtered']}")
+        print(f"🚫 금지 패턴 필터링: {results['banned_data_filtered']}")
         print(f"📄 총 수집 항목: {results['total_articles']}개")
         
         print("\n📰 소스별 결과:")

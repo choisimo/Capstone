@@ -12,6 +12,9 @@ from app.config import settings
 
 # 라우터 인스턴스 생성
 router = APIRouter()
+sources_alias_router = APIRouter()
+
+SOURCES_BASE_PATH = "sources"
 
 async def proxy_request(request: Request, path: str = ""):
     """
@@ -72,3 +75,16 @@ async def root(request: Request):
 async def catch_all(path: str, request: Request):
     """Catch-all 라우트"""
     return await proxy_request(request, path)
+
+
+@sources_alias_router.api_route("/sources", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def sources_root_alias(request: Request):
+    """/api/v1/osint/sources 표준 경로 alias"""
+    return await proxy_request(request, SOURCES_BASE_PATH)
+
+
+@sources_alias_router.api_route("/sources/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def sources_alias_catch_all(path: str, request: Request):
+    """/api/v1/osint/sources/* 경로 alias"""
+    forward_path = f"{SOURCES_BASE_PATH}/{path}" if path else SOURCES_BASE_PATH
+    return await proxy_request(request, forward_path)

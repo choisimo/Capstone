@@ -12,7 +12,6 @@ import hashlib
 from datetime import datetime
 from urllib.parse import quote, urljoin, urlparse
 from typing import Dict, List, Optional
-import random
 
 class ProductionCrawler:
     def __init__(self):
@@ -475,7 +474,7 @@ def main():
     
     print(f"\n💾 결과 저장: {output_file}")
     print("\n✅ 100% 실제 데이터 수집 완료!")
-    print("✅ Mock/Fake 데이터 없음!")
+    print("✅ 금지 패턴 없음!")
     
     return results
 

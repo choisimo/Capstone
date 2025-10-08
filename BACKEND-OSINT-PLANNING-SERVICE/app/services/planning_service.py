@@ -123,7 +123,7 @@ class PlanningService:
             orchestrator_url: Orchestrator 서비스 URL
         """
         self.db = db
-        self.orchestrator_url = orchestrator_url or "http://localhost:8005"
+        self.orchestrator_url = orchestrator_url or "http://osint-orchestrator:8005"
         self.active_plans: Dict[str, Plan] = {}
     
     async def create_collection_plan(

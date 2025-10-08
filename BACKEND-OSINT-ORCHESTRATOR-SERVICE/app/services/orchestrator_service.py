@@ -41,8 +41,8 @@ class TaskOrchestrator:
         self.dependencies = {}
         
     async def create_task(self, task_type: str, keywords: List[str], sources: List[str],
-                         priority: str = "medium", metadata: Dict[str, Any] = None,
-                         dependencies: List[str] = None, timeout_seconds: int = 3600,
+                         priority: str = "medium", metadata: Optional[Dict[str, Any]] = None,
+                         dependencies: Optional[List[str]] = None, timeout_seconds: int = 3600,
                          expected_results: int = 0) -> str:
         task_id = str(uuid.uuid4())
         
@@ -52,7 +52,7 @@ class TaskOrchestrator:
             keywords=keywords,
             sources=sources,
             priority=TaskPriority(priority),
-            metadata=metadata or {},
+            metadata=(metadata or {}),
             dependencies=dependencies or [],
             timeout_seconds=timeout_seconds,
             expected_results=expected_results
@@ -191,7 +191,7 @@ class TaskOrchestrator:
         return result_id
     
     async def register_worker(self, node_id: str, node_type: str, capabilities: List[str],
-                             max_concurrent_tasks: int = 5, metadata: Dict[str, Any] = None) -> str:
+                             max_concurrent_tasks: int = 5, metadata: Optional[Dict[str, Any]] = None) -> str:
         worker_id = str(uuid.uuid4())
         
         worker = WorkerNode(
@@ -200,7 +200,7 @@ class TaskOrchestrator:
             node_type=node_type,
             capabilities=capabilities,
             max_concurrent_tasks=max_concurrent_tasks,
-            metadata=metadata or {},
+            metadata=(metadata or {}),
             last_heartbeat=datetime.utcnow()
         )
         
@@ -256,6 +256,34 @@ class TaskOrchestrator:
             "queue_throughput": throughput,
             "active_workers": len([w for w in self.workers.values() if w.status == "active"])
         }
+
+    async def list_tasks(
+        self,
+        status: Optional[str] = None,
+        priority: Optional[str] = None,
+        assigned_to: Optional[str] = None,
+    ) -> List[OsintTask]:
+        tasks = list(self.tasks.values())
+
+        if status:
+            try:
+                status_enum = TaskStatus(status)
+                tasks = [t for t in tasks if t.status == status_enum]
+            except ValueError:
+                tasks = []
+
+        if priority and tasks:
+            try:
+                priority_enum = TaskPriority(priority)
+                tasks = [t for t in tasks if t.priority == priority_enum]
+            except ValueError:
+                tasks = []
+
+        if assigned_to and tasks:
+            tasks = [t for t in tasks if t.assigned_to == assigned_to]
+
+        tasks.sort(key=lambda t: t.created_at)  # oldest first
+        return tasks
     
     async def _dependencies_met(self, task_id: str) -> bool:
         if task_id not in self.tasks:
@@ -322,7 +350,7 @@ class TaskOrchestrator:
             })
     
     async def _publish_event(self, event_type: str, data: Dict[str, Any]):
-        # Mock event publishing - in real implementation would use Kafka/NATS
+        # Event publishing stub - integrate with Kafka/NATS in production
         event = {
             "event_type": event_type,
             "timestamp": datetime.utcnow().isoformat(),

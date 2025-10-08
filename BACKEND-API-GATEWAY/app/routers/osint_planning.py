@@ -12,6 +12,9 @@ from app.config import settings
 
 # 라우터 인스턴스 생성
 router = APIRouter()
+plans_alias_router = APIRouter()
+
+PLANNING_BASE_PATH = "api/v1/plans"
 
 async def proxy_request(request: Request, path: str = ""):
     """
@@ -72,3 +75,16 @@ async def root(request: Request):
 async def catch_all(path: str, request: Request):
     """Catch-all 라우트"""
     return await proxy_request(request, path)
+
+
+@plans_alias_router.api_route("/planning", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def planning_root_alias(request: Request):
+    """/api/v1/osint/planning 표준 경로 alias"""
+    return await proxy_request(request, PLANNING_BASE_PATH)
+
+
+@plans_alias_router.api_route("/planning/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def planning_alias_catch_all(path: str, request: Request):
+    """/api/v1/osint/planning/* 경로 alias"""
+    forward_path = f"{PLANNING_BASE_PATH}/{path}" if path else PLANNING_BASE_PATH
+    return await proxy_request(request, forward_path)
