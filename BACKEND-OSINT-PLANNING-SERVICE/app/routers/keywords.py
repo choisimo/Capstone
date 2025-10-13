@@ -5,30 +5,7 @@ from app.schemas import (
     PlanExecutionRequest, PlanExecutionResponse, PlanRecommendationRequest, PlanRecommendationResponse
 )
 
-# Lightweight APIRouter shim (used locally in this module)
-class APIRouter:
-    def __init__(self, prefix="", tags=None):
-        self.prefix = prefix
-        self.tags = tags or []
-        self.routes = []
-    
-    def post(self, path):
-        def decorator(func):
-            self.routes.append(("POST", self.prefix + path, func))
-            return func
-        return decorator
-    
-    def get(self, path):
-        def decorator(func):
-            self.routes.append(("GET", self.prefix + path, func))
-            return func
-        return decorator
-    
-    def put(self, path):
-        def decorator(func):
-            self.routes.append(("PUT", self.prefix + path, func))
-            return func
-        return decorator
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter(prefix="/api/v1/plans", tags=["plans"])
 

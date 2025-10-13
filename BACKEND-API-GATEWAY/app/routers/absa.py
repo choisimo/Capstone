@@ -10,7 +10,13 @@ async def proxy_request(request: Request, path: str = ""):
     Proxy requests to the ABSA Service
     """
     # Remove the /api/v1/absa prefix from the path
-    target_path = path if path else ""
+    # Personas endpoints are mounted under /api/v1/personas in backend
+    if not path:
+        target_path = ""
+    elif path.startswith("personas"):
+        target_path = f"api/v1/{path}"
+    else:
+        target_path = path
     
     # Build the target URL
     target_url = f"{settings.ABSA_SERVICE_URL}/{target_path}"

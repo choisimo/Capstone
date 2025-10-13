@@ -8,8 +8,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# from app.routers import keywords
-# app.include_router(keywords.router, prefix="/api/v1/plans", tags=["plans"])
+from app.routers import keywords
+# Router already defines prefix=/api/v1/plans; include without extra prefix to avoid duplication
+app.include_router(keywords.router, tags=["plans"])
 
 @app.get("/health")
 async def health_check():

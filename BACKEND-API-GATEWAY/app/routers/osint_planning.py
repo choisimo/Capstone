@@ -22,8 +22,26 @@ async def proxy_request(request: Request, path: str = ""):
     
     들어온 요청을 그대로 OSINT Planning Service로 전달하고,
     응답을 클라이언트에게 반환합니다.
+    
+    규칙:
+    - "health" 는 그대로 전달
+    - 이미 "api/" 로 시작하면 그대로 전달
+    - 그 외에는 "api/v1/plans" 접두사를 붙여 전달
     """
-    target_path = path if path else ""
+    if not path:
+        # Mount root → backend plans root
+        target_path = PLANNING_BASE_PATH
+    elif path == "health":
+        target_path = "health"
+    elif path.startswith("api/"):
+        target_path = path
+    elif path == "plans":
+        target_path = PLANNING_BASE_PATH
+    elif path.startswith("plans/"):
+        # Avoid double 'plans' segment
+        target_path = f"{PLANNING_BASE_PATH}/{path[len('plans/'):]}"
+    else:
+        target_path = f"{PLANNING_BASE_PATH}/{path}"
     target_url = f"{settings.OSINT_PLANNING_SERVICE_URL}/{target_path}"
     
     method = request.method
@@ -68,8 +86,8 @@ async def health_check(request: Request):
 
 @router.get("/")
 async def root(request: Request):
-    """OSINT Planning Service 루트 엔드포인트"""
-    return await proxy_request(request, "")
+    """OSINT Planning Service 루트 엔드포인트 (plans root)"""
+    return await proxy_request(request, PLANNING_BASE_PATH)
 
 @router.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def catch_all(path: str, request: Request):

@@ -14,7 +14,7 @@ from app.config import settings
 router = APIRouter()
 sources_alias_router = APIRouter()
 
-SOURCES_BASE_PATH = "sources"
+SOURCES_BASE_PATH = "api/v1/sources"
 
 async def proxy_request(request: Request, path: str = ""):
     """
@@ -23,7 +23,15 @@ async def proxy_request(request: Request, path: str = ""):
     들어온 요청을 그대로 OSINT Source Service로 전달하고,
     응답을 클라이언트에게 반환합니다.
     """
-    target_path = path if path else ""
+    # Backend expects /api/v1 for most OSINT source endpoints
+    if not path:
+        target_path = ""
+    elif path == "health":
+        target_path = "health"
+    elif path.startswith("api/"):
+        target_path = path
+    else:
+        target_path = f"api/v1/{path}"
     target_url = f"{settings.OSINT_SOURCE_SERVICE_URL}/{target_path}"
     
     method = request.method
