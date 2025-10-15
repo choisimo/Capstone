@@ -1,6 +1,6 @@
 ---
 docsync: true
-last_synced: 2025-09-30T09:16:00+0900
+last_synced: 2025-10-15T20:03:08+0900
 source_sha: f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0
 coverage: 1.0
 title: API Gateway Detailed PRD
@@ -160,6 +160,9 @@ API Gateway 정보
 - `POST /api/v1/absa/aspects/extract`
 - `POST /api/v1/absa/analysis/analyze`
 - `GET /api/v1/absa/personas/{user}/analyze`
+
+##### Routing Notes
+- ABSA personas endpoints are mounted in the backend under `/api/v1/personas/*`. The gateway rewrites `/api/v1/absa/personas/*` → `api/v1/personas/*` when proxying to the ABSA service.
 
 #### Alert Service
 - `POST /api/v1/alerts/rules/`

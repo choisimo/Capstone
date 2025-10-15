@@ -42,6 +42,8 @@
 - 백엔드 서비스 (8개) 헬스 체크
 - API 엔드포인트 기능 테스트
 
+> 참고: 기능 테스트(엔드포인트 호출)는 가급적 **API Gateway(8000)** 경유 경로(`/api/v1/*`)를 사용하세요. 개별 서비스 포트는 헬스 체크 용도로만 사용합니다. 예: ABSA 기능 테스트는 `http://localhost:8000/api/v1/absa/...`를 사용.
+
 **예상 시간**: ~1분  
 **성공 기준**: 80% 이상
 
@@ -142,6 +144,24 @@
 **7. API 기능 테스트**
 - Analysis Service Health
 - API Gateway Health
+
+예시) ABSA 분석 API (게이트웨이 경유)
+```bash
+curl -s -X POST \
+  'http://localhost:8000/api/v1/absa/analysis/analyze' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "text": "수익률은 상승했으나 관리비용 증가가 우려된다",
+    "aspects": ["수익률", "관리비용"]
+  }'
+```
+
+헬스 체크 포트 정리(직접 호출 시):
+- API Gateway: 8000
+- Analysis: 8001
+- Collector: 8002
+- ABSA: 8003
+- Alert: 8004
 
 **8. 안정성 모니터링 (60초)**
 - 10초 간격으로 6회 체크

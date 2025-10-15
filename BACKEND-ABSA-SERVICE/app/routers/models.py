@@ -9,16 +9,85 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any, List
 from app.db import get_db, AspectModel
 from datetime import datetime
+from pydantic import BaseModel, Field
+
+# Optional: use shared pagination schema if available
+try:
+    from shared.schemas import PaginationMeta as SharedPaginationMeta  # type: ignore
+except Exception:
+    SharedPaginationMeta = None  # Fallback defined below
+
+
+class PaginationMeta(BaseModel):
+    total: int = Field(..., ge=0)
+    limit: int = Field(..., ge=1)
+    offset: int = Field(..., ge=0)
+
+
+# If shared PaginationMeta exists, alias to it to keep one definition
+if SharedPaginationMeta is not None:
+    PaginationMeta = SharedPaginationMeta  # type: ignore
+
+
+class ModelItem(BaseModel):
+    id: str
+    name: str
+    description: str | None = None
+    model_version: str | None = None
+    is_active: int | bool
+    created_at: str | None = None
+
+
+class ModelListResponse(BaseModel):
+    models: List[ModelItem]
+    total: int
+    skip: int
+    limit: int
+    pagination: PaginationMeta
+
+
+class ModelDetailResponse(BaseModel):
+    id: str
+    name: str
+    description: str | None = None
+    keywords: List[str] | None = None
+    model_version: str | None = None
+    is_active: int | bool
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class ModelUpdateResponse(BaseModel):
+    id: str
+    name: str
+    description: str | None = None
+    keywords: List[str] | None = None
+    model_version: str | None = None
+    is_active: int | bool
+    updated_at: str | None = None
+
+
+class DeleteResponse(BaseModel):
+    message: str
+    deleted_id: str
+
+
+class InitializeResponse(BaseModel):
+    created: List[str]
+    skipped: List[str]
+    total_created: int
+    total_skipped: int
+
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/", response_model=ModelListResponse)
 async def list_models(
     skip: int = 0,
     limit: int = 10,
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+) -> ModelListResponse:
     """
     ABSA 모델 목록 조회
     
@@ -32,30 +101,33 @@ async def list_models(
     """
     models = db.query(AspectModel).offset(skip).limit(limit).all()
     total = db.query(AspectModel).count()
-    
-    return {
-        "models": [
-            {
-                "id": model.id,
-                "name": model.name,
-                "description": model.description,
-                "model_version": model.model_version,
-                "is_active": model.is_active,
-                "created_at": model.created_at.isoformat() if model.created_at else None
-            }
-            for model in models
-        ],
-        "total": total,
-        "skip": skip,
-        "limit": limit
-    }
+
+    items = [
+        ModelItem(
+            id=model.id,
+            name=model.name,
+            description=model.description,
+            model_version=model.model_version,
+            is_active=model.is_active,
+            created_at=model.created_at.isoformat() if model.created_at else None,
+        )
+        for model in models
+    ]
+
+    return ModelListResponse(
+        models=items,
+        total=total,
+        skip=skip,
+        limit=limit,
+        pagination=PaginationMeta(total=total, limit=limit, offset=skip),
+    )
 
 
-@router.get("/{model_id}")
+@router.get("/{model_id}", response_model=ModelDetailResponse)
 async def get_model(
     model_id: str,
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+) -> ModelDetailResponse:
     """
     특정 ABSA 모델 상세 조회
     
@@ -71,24 +143,24 @@ async def get_model(
     if not model:
         raise HTTPException(status_code=404, detail="Model not found")
     
-    return {
-        "id": model.id,
-        "name": model.name,
-        "description": model.description,
-        "keywords": model.keywords,
-        "model_version": model.model_version,
-        "is_active": model.is_active,
-        "created_at": model.created_at.isoformat() if model.created_at else None,
-        "updated_at": model.updated_at.isoformat() if model.updated_at else None
-    }
+    return ModelDetailResponse(
+        id=model.id,
+        name=model.name,
+        description=model.description,
+        keywords=model.keywords,
+        model_version=model.model_version,
+        is_active=model.is_active,
+        created_at=model.created_at.isoformat() if model.created_at else None,
+        updated_at=model.updated_at.isoformat() if model.updated_at else None,
+    )
 
 
-@router.put("/{model_id}")
+@router.put("/{model_id}", response_model=ModelUpdateResponse)
 async def update_model(
     model_id: str,
     update_data: Dict[str, Any],
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+) -> ModelUpdateResponse:
     """
     ABSA 모델 업데이트
     
@@ -115,22 +187,22 @@ async def update_model(
     db.commit()
     db.refresh(model)
     
-    return {
-        "id": model.id,
-        "name": model.name,
-        "description": model.description,
-        "keywords": model.keywords,
-        "model_version": model.model_version,
-        "is_active": model.is_active,
-        "updated_at": model.updated_at.isoformat() if model.updated_at else None
-    }
+    return ModelUpdateResponse(
+        id=model.id,
+        name=model.name,
+        description=model.description,
+        keywords=model.keywords,
+        model_version=model.model_version,
+        is_active=model.is_active,
+        updated_at=model.updated_at.isoformat() if model.updated_at else None,
+    )
 
 
-@router.delete("/{model_id}")
+@router.delete("/{model_id}", response_model=DeleteResponse)
 async def delete_model(
     model_id: str,
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+) -> DeleteResponse:
     """
     ABSA 모델 삭제
     
@@ -150,16 +222,16 @@ async def delete_model(
     db.delete(model)
     db.commit()
     
-    return {
-        "message": f"Model '{model_name}' deleted successfully",
-        "deleted_id": model_id
-    }
+    return DeleteResponse(
+        message=f"Model '{model_name}' deleted successfully",
+        deleted_id=model_id,
+    )
 
 
-@router.post("/initialize")
+@router.post("/initialize", response_model=InitializeResponse)
 async def initialize_default_models(
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+) -> InitializeResponse:
     """
     기본 ABSA 모델 초기화
     
@@ -226,9 +298,9 @@ async def initialize_default_models(
     
     db.commit()
     
-    return {
-        "created": created_models,
-        "skipped": skipped_models,
-        "total_created": len(created_models),
-        "total_skipped": len(skipped_models)
-    }
+    return InitializeResponse(
+        created=created_models,
+        skipped=skipped_models,
+        total_created=len(created_models),
+        total_skipped=len(skipped_models),
+    )

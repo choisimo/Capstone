@@ -1,6 +1,6 @@
 ---
 docsync: true
-last_synced: 2025-09-30T08:45:00+0900
+last_synced: 2025-10-15T20:03:08+0900
 source_sha: 733a9bd12e34e77d0e4054796389a7477c15b29d
 coverage: 1.0
 title: ABSA Service Detailed PRD
@@ -128,11 +128,13 @@ BACKEND-ABSA-SERVICE/
 **Response**:
 ```json
 {
+  "text": "국민연금 수익률이 좋아졌지만 관리비용이 높다",
   "aspects": [
     {"aspect": "수익률", "confidence": 0.85, "keywords_found": ["수익률"]},
     {"aspect": "관리비용", "confidence": 0.85, "keywords_found": ["관리비용"]}
   ],
-  "total_aspects": 2
+  "total_aspects": 2,
+  "model_version": "v1.0.0"
 }
 ```
 
@@ -154,12 +156,17 @@ BACKEND-ABSA-SERVICE/
 **Response**:
 ```json
 {
+  "analysis_id": "c0f6b7b0-...",
+  "content_id": "content-123",
+  "text_preview": "수익률은 상승했으나 관리비용 증가가 우려된다",
+  "aspects_analyzed": ["수익률", "관리비용"],
   "aspect_sentiments": {
     "수익률": {"sentiment_score": 0.6, "sentiment_label": "positive", "confidence": 0.8},
     "관리비용": {"sentiment_score": -0.5, "sentiment_label": "negative", "confidence": 0.75}
   },
   "overall_sentiment": {"score": 0.05, "label": "neutral"},
-  "confidence": 0.775
+  "confidence": 0.775,
+  "analyzed_at": "2025-10-15T11:00:00Z"
 }
 ```
 

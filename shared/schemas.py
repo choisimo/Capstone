@@ -260,3 +260,36 @@ class BatchResponse(BaseModel):
     errors: Optional[List[Dict[str, str]]] = None
     processing_time: float
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+# 표준 에러 스키마
+class ErrorItem(BaseModel):
+    code: Optional[str] = None
+    field: Optional[str] = None
+    message: str
+    hint: Optional[str] = None
+
+
+class ErrorResponse(BaseModel):
+    error: str = Field(..., description="High-level error code")
+    message: str = Field(..., description="Human-readable message")
+    details: Optional[List[ErrorItem]] = None
+    request_id: Optional[str] = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+# 페이지네이션 스키마
+class PaginationParams(BaseModel):
+    limit: int = Field(default=100, ge=1, le=1000)
+    offset: int = Field(default=0, ge=0)
+
+
+class PaginationMeta(BaseModel):
+    total: int = Field(..., ge=0)
+    limit: int = Field(..., ge=1, le=1000)
+    offset: int = Field(..., ge=0)
+
+
+class PaginatedResult(BaseModel):
+    items: List[Dict[str, Any]]
+    pagination: PaginationMeta

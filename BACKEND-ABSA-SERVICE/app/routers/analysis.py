@@ -10,15 +10,73 @@ from typing import List, Dict, Any, Optional
 from app.db import get_db, ABSAAnalysis
 from datetime import datetime
 import uuid
+from pydantic import BaseModel, Field
+
+# Optional: use shared pagination schema if available
+try:
+    from shared.schemas import PaginationMeta as SharedPaginationMeta  # type: ignore
+except Exception:
+    SharedPaginationMeta = None  # Fallback defined below
+
+
+class PaginationMeta(BaseModel):
+    total: int = Field(..., ge=0)
+    limit: int = Field(..., ge=1)
+    offset: int = Field(..., ge=0)
+
+
+# If shared PaginationMeta exists, alias to it to keep one definition
+if SharedPaginationMeta is not None:
+    PaginationMeta = SharedPaginationMeta  # type: ignore
+
+
+class AspectSentiment(BaseModel):
+    sentiment_score: float
+    sentiment_label: str
+    confidence: float
+
+
+class OverallSentiment(BaseModel):
+    score: float
+    label: str
+
+
+class AnalyzeResponse(BaseModel):
+    analysis_id: str
+    content_id: str
+    text_preview: str
+    aspects_analyzed: List[str]
+    aspect_sentiments: Dict[str, AspectSentiment]
+    overall_sentiment: OverallSentiment
+    confidence: float
+    analyzed_at: str
+
+
+class HistoryItem(BaseModel):
+    id: str
+    aspects: List[str]
+    aspect_sentiments: Dict[str, AspectSentiment]
+    overall_sentiment: float | Dict[str, Any]
+    confidence: float
+    analyzed_at: Optional[str] = None
+
+
+class HistoryResponse(BaseModel):
+    content_id: str
+    analyses: List[HistoryItem]
+    total: int
+    limit: int
+    pagination: PaginationMeta
+
 
 router = APIRouter()
 
 
-@router.post("/analyze")
+@router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze_absa(
     request: Dict[str, Any],
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+) -> AnalyzeResponse:
     """
     속성 기반 감성 분석 수행
     
@@ -44,27 +102,27 @@ async def analyze_absa(
     content_id = request.get("content_id", str(uuid.uuid4()))
     
     # 속성별 감성 분석 (실제로는 ML 모델 사용)
-    aspect_sentiments = {}
+    aspect_sentiments: Dict[str, AspectSentiment] = {}
     for aspect in aspects:
         # 간단한 규칙 기반 분석 (데모용)
         sentiment_score = _analyze_aspect_sentiment(text, aspect)
         # 결정론적 신뢰도: |score| 기반 (0.5 ~ 1.0)
         aspect_confidence = 0.5 + 0.5 * min(1.0, abs(sentiment_score))
-        aspect_sentiments[aspect] = {
-            "sentiment_score": sentiment_score,
-            "sentiment_label": _get_sentiment_label(sentiment_score),
-            "confidence": round(aspect_confidence, 3)
-        }
+        aspect_sentiments[aspect] = AspectSentiment(
+            sentiment_score=sentiment_score,
+            sentiment_label=_get_sentiment_label(sentiment_score),
+            confidence=round(aspect_confidence, 3),
+        )
     
     # 전체 감성 점수 계산
     overall_sentiment = sum(
-        asp["sentiment_score"] for asp in aspect_sentiments.values()
+        asp.sentiment_score for asp in aspect_sentiments.values()
     ) / len(aspect_sentiments) if aspect_sentiments else 0
     
     # 결과 저장
     # 전체 신뢰도: 속성별 |score| 평균 기반 (0.5 ~ 1.0)
     if aspect_sentiments:
-        mean_abs = sum(abs(v["sentiment_score"]) for v in aspect_sentiments.values()) / len(aspect_sentiments)
+        mean_abs = sum(abs(v.sentiment_score) for v in aspect_sentiments.values()) / len(aspect_sentiments)
         overall_confidence = 0.5 + 0.5 * min(1.0, mean_abs)
     else:
         overall_confidence = 0.5
@@ -73,7 +131,7 @@ async def analyze_absa(
         content_id=content_id,
         text=text[:1000],  # 텍스트 길이 제한
         aspects=aspects,
-        aspect_sentiments=aspect_sentiments,
+        aspect_sentiments={k: v.dict() for k, v in aspect_sentiments.items()},
         overall_sentiment=overall_sentiment,
         confidence_score=round(overall_confidence, 3)
     )
@@ -82,27 +140,24 @@ async def analyze_absa(
     db.commit()
     db.refresh(analysis)
     
-    return {
-        "analysis_id": analysis.id,
-        "content_id": content_id,
-        "text_preview": text[:200],
-        "aspects_analyzed": aspects,
-        "aspect_sentiments": aspect_sentiments,
-        "overall_sentiment": {
-            "score": overall_sentiment,
-            "label": _get_sentiment_label(overall_sentiment)
-        },
-        "confidence": analysis.confidence_score,
-        "analyzed_at": datetime.now().isoformat()
-    }
+    return AnalyzeResponse(
+        analysis_id=analysis.id,
+        content_id=content_id,
+        text_preview=text[:200],
+        aspects_analyzed=aspects,
+        aspect_sentiments=aspect_sentiments,
+        overall_sentiment=OverallSentiment(score=overall_sentiment, label=_get_sentiment_label(overall_sentiment)),
+        confidence=analysis.confidence_score,
+        analyzed_at=datetime.now().isoformat(),
+    )
 
 
-@router.get("/history/{content_id}")
+@router.get("/history/{content_id}", response_model=HistoryResponse)
 async def get_analysis_history(
     content_id: str,
     limit: int = 10,
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+) -> HistoryResponse:
     """
     특정 컨텐츠의 ABSA 분석 히스토리 조회
     
@@ -117,22 +172,26 @@ async def get_analysis_history(
     analyses = db.query(ABSAAnalysis).filter(
         ABSAAnalysis.content_id == content_id
     ).order_by(ABSAAnalysis.created_at.desc()).limit(limit).all()
-    
-    return {
-        "content_id": content_id,
-        "analyses": [
-            {
-                "id": analysis.id,
-                "aspects": analysis.aspects,
-                "aspect_sentiments": analysis.aspect_sentiments,
-                "overall_sentiment": analysis.overall_sentiment,
-                "confidence": analysis.confidence_score,
-                "analyzed_at": analysis.created_at.isoformat() if analysis.created_at else None
-            }
-            for analysis in analyses
-        ],
-        "total": len(analyses)
-    }
+
+    items: List[HistoryItem] = [
+        HistoryItem(
+            id=analysis.id,
+            aspects=analysis.aspects,
+            aspect_sentiments={k: AspectSentiment(**v) for k, v in (analysis.aspect_sentiments or {}).items()},
+            overall_sentiment=analysis.overall_sentiment,
+            confidence=analysis.confidence_score,
+            analyzed_at=analysis.created_at.isoformat() if analysis.created_at else None,
+        )
+        for analysis in analyses
+    ]
+
+    return HistoryResponse(
+        content_id=content_id,
+        analyses=items,
+        total=len(items),
+        limit=limit,
+        pagination=PaginationMeta(total=len(items), limit=limit, offset=0),
+    )
 
 
 @router.post("/batch")
@@ -159,7 +218,7 @@ async def batch_analyze(
     for req in requests:
         try:
             result = await analyze_absa(req, db)
-            results.append(result)
+            results.append(result.dict() if hasattr(result, "dict") else result)
             success_count += 1
         except Exception as e:
             error_count += 1
