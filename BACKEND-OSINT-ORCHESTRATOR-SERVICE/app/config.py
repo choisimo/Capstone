@@ -31,6 +31,10 @@ class Settings:
         self.nats_url = os.getenv("NATS_URL")
         self.event_publisher = os.getenv("EVENT_PUBLISHER", "kafka")  # kafka or nats
         
+        # Alert routing
+        self.alert_service_url = os.getenv("ALERT_SERVICE_URL", "http://alert-service:8004")
+        self.system_alert_rule_id = os.getenv("SYSTEM_ALERT_RULE_ID")  # optional rule id for system-generated alerts
+        
         # Service discovery (Compose 서비스 DNS 사용)
         self.planning_service_url = os.getenv("PLANNING_SERVICE_URL", "http://osint-planning:8006")
         self.source_service_url = os.getenv("SOURCE_SERVICE_URL", "http://osint-source:8007")

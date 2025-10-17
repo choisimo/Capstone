@@ -19,6 +19,8 @@ from contextlib import asynccontextmanager
 
 from app.config import settings
 from app.routers import analysis, collector, absa, alerts, osint_orchestrator, osint_planning, osint_source
+from app.middleware.auth import auth_middleware, rbac_middleware
+from app.middleware.rate_limit import rate_limit_middleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -59,6 +61,12 @@ app.add_middleware(
     allow_methods=["*"],  # 모든 HTTP 메서드 허용 (GET, POST, PUT, DELETE 등)
     allow_headers=["*"],  # 모든 헤더 허용
 )
+
+# Function-based middlewares
+# 순서: 인증 → RBAC → Rate Limit (인증 정보를 기반으로 역할별 제한 적용)
+app.middleware("http")(auth_middleware)
+app.middleware("http")(rbac_middleware)
+app.middleware("http")(rate_limit_middleware)
 
 @app.get("/health")
 async def health_check():

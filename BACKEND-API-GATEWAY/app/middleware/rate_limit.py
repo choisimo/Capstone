@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 import time
 import hashlib
 import logging
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -272,8 +273,8 @@ class RateLimiter:
             logger.info(f"Cleaned {cleaned} expired rate limit entries from memory")
 
 
-# 전역 Rate Limiter 인스턴스
-rate_limiter = RateLimiter(redis_url=None)  # Redis URL은 환경 변수에서 설정
+# 전역 Rate Limiter 인스턴스 (환경 변수 기반 Redis URL 사용)
+rate_limiter = RateLimiter(redis_url=settings.RATE_LIMIT_REDIS_URL)
 
 
 async def rate_limit_middleware(request: Request, call_next):

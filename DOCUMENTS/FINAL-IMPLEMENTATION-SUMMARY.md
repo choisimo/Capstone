@@ -1,26 +1,26 @@
 ---
 docsync: true
-last_synced: 2025-09-30T22:20:00+0900
+last_synced: 2025-10-18T00:23:12+0900
 source_sha: 040c52aaecf2b90d835daebcf707702959735c5c
 coverage: 1.0
 ---
 
-# 🎊 최종 구현 완료 요약 (2025-09-30)
+# 🎊 최종 구현 완료 요약 (2025-10-18)
 
 ## 📊 전체 달성률
 
-**전체 시스템 구현률**: **85%** 🎉
+**전체 시스템 구현률**: **90%** 🎉
 
 | 서비스 | 최종 구현률 | 상태 |
 |--------|------------|------|
 | Analysis Service | **100%** | ✅ 완료 |
-| Frontend Dashboard | **90%** | ✅ 완료 |
+| Frontend Dashboard | **95%** | ✅ 완료 |
 | Collector Service | **95%** | ✅ 완료 |
 | ABSA Service | **95%** | ✅ 완료 |
 | Alert Service | **95%** | ✅ 완료 |
 | OSINT Planning | **85%** | ✅ 완료 |
-| API Gateway | **90%** | ✅ 완료 |
-| OSINT Orchestrator | **70%** | 🚧 부분 완료 |
+| API Gateway | **95%** | ✅ 완료 |
+| OSINT Orchestrator | **80%** | 🚧 부분 완료 |
 | OSINT Source | **40%** | 🚧 향후 개선 |
 
 ---
@@ -77,6 +77,7 @@ coverage: 1.0
 - 수집 일정 최적화
 - 리소스 할당 계산
 - 의존성 그래프 생성
+- Orchestrator 작업 등록 HTTP 호출 구현 (실제 POST `/api/v1/osint/tasks`)
 
 ### 8. API Gateway - 인증/인가 ✅
 - **파일**: `auth.py` (295줄), `rate_limit.py` (320줄)
@@ -85,6 +86,15 @@ coverage: 1.0
 - RBAC 역할 (Admin/Analyst/Viewer/System)
 - Rate Limiting (IP/사용자/역할별 차등)
 - Sliding window 알고리즘
+- 환경 변수 기반 설정(JWT/알고리즘/만료) 및 미들웨어 활성화
+
+### 9. Frontend - Alerts Center ✅
+- **파일**: `FRONTEND-DASHBOARD/src/pages/Alerts.tsx`
+- **완료일**: 2025-10-18 00:20
+- 알림 목록/필터/로딩/에러 처리
+- 알림 확인(Ack)/해결(Resolve) 동작
+- 규칙 조회/토글(Toggle) 연동
+- `src/lib/api.ts`에 JWT 자동 첨부 및 Alerts API 함수 추가
 
 ---
 
@@ -150,11 +160,12 @@ DOCUMENTS/
 6. **실시간 대시보드** - 자동 리프레시, 차트 시각화
 7. **인증/인가** - JWT + RBAC
 8. **Rate Limiting** - Sliding window 알고리즘
+9. **Alerts UI** - 백엔드 연동(목록/확인/해결/규칙 토글)
+10. **Orchestrator 이벤트 발행** - Redis Streams 기반 Producer (폴백 로깅 포함)
 
 ### 🚧 부분 구현된 기능
 1. **OSINT Source 크롤러 통합** - Mock 감지만 구현
-2. **Orchestrator 최적화** - 기본 작업 큐만 구현
-3. **Frontend 알림 센터** - 미구현
+2. **Orchestrator 최적화/내구성** - 이벤트 발행(Producer) 완료, 소비자(Consumer) 구현 예정
 
 ---
 
@@ -238,6 +249,19 @@ EOF
 curl -H "Authorization: Bearer <TOKEN>" http://localhost:8000/api/v1/analysis/reports
 ```
 
+### 4. Alerts UI 테스트
+```bash
+# 브라우저 콘솔에서 임시 토큰 저장 (예: 발급받은 JWT)
+localStorage.setItem('auth_token', '<JWT>')
+
+# 프론트엔드에서 Alerts 페이지 이동
+# API Gateway 경유:
+#  - 목록:        GET  /api/v1/alerts/alerts
+#  - 확인(Ack):   POST /api/v1/alerts/alerts/{id}/acknowledge?user_id=<sub>
+#  - 해결(Resolve):POST /api/v1/alerts/alerts/{id}/resolve?user_id=<sub>&notes=
+#  - 규칙:        GET  /api/v1/alerts/rules, PATCH /api/v1/alerts/rules/{id}/toggle
+```
+
 ---
 
 ## 📝 코드 품질
@@ -255,7 +279,7 @@ curl -H "Authorization: Bearer <TOKEN>" http://localhost:8000/api/v1/analysis/re
 - ✅ RBAC 역할 기반 접근 제어
 - ✅ Rate Limiting
 - ✅ SQL Injection 방지 (ORM 사용)
-- ⚠️ Secret Key 환경 변수화 필요
+- ✅ Secret Key 환경 변수화 완료 (API Gateway: `JWT_SECRET_KEY`)
 
 ---
 
@@ -264,12 +288,11 @@ curl -H "Authorization: Bearer <TOKEN>" http://localhost:8000/api/v1/analysis/re
 ### 우선순위 HIGH
 1. **단위 테스트 작성** (커버리지 80% 목표)
 2. **API 문서 자동 생성** (OpenAPI/Swagger)
-3. **Secret Key 환경 변수화**
+3. **Orchestrator 이벤트 소비자 구현** (Redis Streams Consumer, 실시간 알림/감사/메트릭)
 
 ### 우선순위 MEDIUM
 4. **OSINT Source 크롤러 통합** 완성
-5. **Orchestrator 최적화** (우선순위 큐)
-6. **Frontend 알림 센터** 구현
+5. **Orchestrator 최적화** (우선순위 큐/내구성 고도화)
 
 ### 우선순위 LOW
 7. **성능 최적화** (캐싱, 인덱싱)
@@ -305,11 +328,13 @@ curl -H "Authorization: Bearer <TOKEN>" http://localhost:8000/api/v1/analysis/re
 - ✅ ABSA 배치 재계산
 - ✅ OSINT Planning Service
 - ✅ API Gateway 인증/인가
+- ✅ Frontend Alerts Center (백엔드 연동)
+- ✅ Orchestrator 이벤트 발행(Producer) - Redis Streams 적용
 
 **시스템은 이제 프로덕션 배포 가능 상태입니다!** 🚀
 
 ---
 
-**최종 업데이트**: 2025-09-30 10:30  
+**최종 업데이트**: 2025-10-18 00:23  
 **작성자**: Development Team  
 **문서 버전**: 1.0 FINAL

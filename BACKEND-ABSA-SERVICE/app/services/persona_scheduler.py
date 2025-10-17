@@ -9,6 +9,7 @@ Persona Batch Recalculation Scheduler
 """
 
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, func
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass
@@ -100,17 +101,65 @@ class PersonaScheduler:
         
         cutoff_time = datetime.now() - timedelta(hours=threshold_hours)
         
-        # 실제 구현에서는 DB 쿼리
-        # Example: 
-        # stale_personas = self.db.query(UserPersona).filter(
-        #     UserPersona.last_calculated_at < cutoff_time
-        # ).all()
+        # DB 모델 로컬 임포트 (순환 의존성 방지)
+        from app.models import UserPersona, UserActivity
         
-        # 현재는 시뮬레이션
-        logger.info(f"Stale 페르소나 검색: {threshold_hours}시간 이상 업데이트 안됨")
+        logger.info(f"Stale 페르소나 검색: 기준={threshold_hours}h, cutoff={cutoff_time.isoformat()}")
         
-        # TODO: 실제 DB 연동
-        return []
+        # Stale 조건: last_calculated_at이 없거나 cutoff 이전
+        personas = (
+            self.db.query(UserPersona)
+            .filter(
+                or_(
+                    UserPersona.last_calculated_at == None,  # noqa: E711
+                    UserPersona.last_calculated_at < cutoff_time
+                )
+            )
+            .order_by(UserPersona.last_calculated_at.asc().nullsfirst())
+            .limit(1000)
+            .all()
+        )
+        
+        results: List[Dict[str, Any]] = []
+        
+        # 최근 활동 집계 기간(동일 cutoff 사용)
+        activity_cutoff = cutoff_time
+        
+        for p in personas:
+            influence_score = 0.0
+            try:
+                # profile_data에서 influence.score 추출 시도
+                if p.profile_data and isinstance(p.profile_data, dict):
+                    influence = p.profile_data.get("influence") or {}
+                    influence_score = float(influence.get("score", 0.0))
+            except Exception:
+                influence_score = 0.0
+            
+            # 최근 활동 수 (cutoff 이후)
+            try:
+                recent_activity_count = (
+                    self.db.query(func.count(UserActivity.id))
+                    .filter(
+                        UserActivity.user_id == p.user_id,
+                        UserActivity.tracked_at != None,  # noqa: E711
+                        UserActivity.tracked_at > activity_cutoff
+                    )
+                    .scalar()
+                ) or 0
+            except Exception:
+                recent_activity_count = 0
+            
+            results.append({
+                "id": p.id,
+                "user_id": p.user_id,
+                "username": p.username,
+                "last_calculated_at": p.last_calculated_at,
+                "influence_score": influence_score,
+                "recent_activity_count": int(recent_activity_count)
+            })
+        
+        logger.info(f"Stale 페르소나 후보 {len(results)}건 발견")
+        return results
     
     def calculate_priority(self, persona: Dict[str, Any]) -> int:
         """

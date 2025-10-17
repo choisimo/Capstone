@@ -14,13 +14,19 @@ from datetime import datetime, timedelta
 import jwt
 import logging
 from enum import Enum
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-# JWT 설정 (환경 변수에서 로드해야 함)
-SECRET_KEY = "your-secret-key-change-in-production"  # TODO: 환경 변수로 변경
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# JWT 설정 (환경 변수에서 로드)
+SECRET_KEY = settings.JWT_SECRET_KEY
+ALGORITHM = settings.JWT_ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = int(settings.JWT_EXPIRATION_HOURS * 60) if settings.JWT_EXPIRATION_HOURS else 60
+
+# 시크릿 미설정 시 경고 (개발 편의용 임시 키 사용)
+if not SECRET_KEY:
+    logger.warning("JWT_SECRET_KEY is not set. Using an insecure development placeholder. Set JWT_SECRET_KEY in the environment for production.")
+    SECRET_KEY = "dev-only-placeholder"
 
 
 class Role(str, Enum):

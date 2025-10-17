@@ -17,6 +17,7 @@ from enum import Enum
 import logging
 import uuid
 import json
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -446,31 +447,57 @@ class PlanningService:
         Returns:
             등록된 작업 정보 목록
         """
-        registered = []
-        
-        for task in tasks:
-            # Orchestrator API 호출 시뮬레이션
-            # 실제 구현에서는 HTTP 요청
-            task_data = {
-                "task_id": task.task_id,
-                "task_type": "collection",
-                "keywords": ["국민연금"],  # 실제로는 소스 설정에서 가져옴
-                "sources": [task.source_spec.url],
-                "priority": task.source_spec.priority.value,
-                "metadata": {
-                    "plan_task_id": task.task_id,
-                    "source_type": task.source_spec.source_type,
-                    "scheduled_time": task.scheduled_time.isoformat()
-                },
-                "dependencies": task.dependencies,
-                "timeout_seconds": task.source_spec.timeout_seconds,
-                "max_retries": task.source_spec.max_retries
-            }
-            
-            registered.append(task_data)
-            
-            logger.debug(f"작업 등록: {task.task_id}")
-        
+        registered: List[Dict[str, Any]] = []
+        tasks_url = f"{self.orchestrator_url.rstrip('/')}/api/v1/osint/tasks"
+
+        timeout = httpx.Timeout(30.0)
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            for task in tasks:
+                payload = {
+                    "task_type": "collection",
+                    "keywords": ["국민연금"],  # TODO: 소스별/플랜별 키워드 연결
+                    "sources": [task.source_spec.url],
+                    "priority": task.source_spec.priority.value,
+                    "metadata": {
+                        "plan_task_id": task.task_id,
+                        "source_type": task.source_spec.source_type,
+                        "scheduled_time": task.scheduled_time.isoformat()
+                    },
+                    "dependencies": task.dependencies,
+                    "timeout_seconds": task.source_spec.timeout_seconds,
+                    "expected_results": 0
+                }
+
+                try:
+                    resp = await client.post(tasks_url, json=payload)
+                    if resp.status_code in (200, 201):
+                        data = resp.json()
+                        task_id = data.get("task_id")
+                        registered.append({
+                            **payload,
+                            "created_task_id": task_id
+                        })
+                        logger.debug(f"작업 등록 성공: {task.task_id} -> {task_id}")
+                    else:
+                        text = resp.text
+                        logger.error(
+                            f"Orchestrator 작업 등록 실패: {task.task_id} status={resp.status_code} body={text}"
+                        )
+                        registered.append({
+                            **payload,
+                            "error": f"HTTP {resp.status_code}",
+                            "error_body": text
+                        })
+                except httpx.ConnectError as e:
+                    logger.error(f"Orchestrator 연결 실패: {e}")
+                    registered.append({**payload, "error": "connect_error", "error_body": str(e)})
+                except httpx.TimeoutException as e:
+                    logger.error(f"Orchestrator 타임아웃: {e}")
+                    registered.append({**payload, "error": "timeout", "error_body": str(e)})
+                except Exception as e:
+                    logger.exception(f"작업 등록 중 예외: {e}")
+                    registered.append({**payload, "error": "exception", "error_body": str(e)})
+
         return registered
     
     def get_plan(self, plan_id: str) -> Optional[Plan]:

@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     
     # Rate Limiting 설정 (분당 요청 수)
     RATE_LIMIT_PER_MINUTE: int = 100  # IP당 분당 최대 100개 요청 허용
+    RATE_LIMIT_REDIS_URL: Optional[str] = None  # Redis URL (예: redis://redis:6379/0)
     
     # JWT 인증 설정 (향후 구현 예정)
     JWT_SECRET_KEY: Optional[str] = None  # JWT 시크릿 키 (필수 설정)

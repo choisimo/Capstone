@@ -212,7 +212,7 @@ tasks/
 !FRONTEND-DASHBOARD/src/lib/**
  
 # Allow environment templates while still ignoring actual env files
-  !.env.example
+!.env.example
 !FRONTEND-DASHBOARD/.env.example
 !FRONTEND-DASHBOARD/.env.development.example
 !FRONTEND-DASHBOARD/.env.production.example

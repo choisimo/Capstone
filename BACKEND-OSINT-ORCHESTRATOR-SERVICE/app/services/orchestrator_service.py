@@ -4,6 +4,11 @@ import uuid
 import json
 import heapq
 from app.models import OsintTask, TaskResult, TaskQueue, TaskDependency, WorkerNode, TaskStatus, TaskPriority, TaskType
+from app.config import settings
+try:
+    import redis.asyncio as aioredis
+except Exception:
+    aioredis = None
 
 class PriorityCalculator:
     @staticmethod
@@ -39,6 +44,16 @@ class TaskOrchestrator:
         self.workers = {}
         self.results = {}
         self.dependencies = {}
+        self._redis = None
+
+    async def _get_redis(self):
+        if self._redis is not None:
+            return self._redis
+        if not settings.redis_url or not aioredis:
+            return None
+        # decode_responses=True to work with str payloads
+        self._redis = aioredis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
+        return self._redis
         
     async def create_task(self, task_type: str, keywords: List[str], sources: List[str],
                          priority: str = "medium", metadata: Optional[Dict[str, Any]] = None,
@@ -350,13 +365,33 @@ class TaskOrchestrator:
             })
     
     async def _publish_event(self, event_type: str, data: Dict[str, Any]):
-        # Event publishing stub - integrate with Kafka/NATS in production
+        # Publish to Redis Streams if configured; fallback to stdout
         event = {
             "event_type": event_type,
             "timestamp": datetime.utcnow().isoformat(),
-            "data": data
+            "data": data,
         }
-        print(f"Event published: {json.dumps(event)}")
+        try:
+            client = await self._get_redis()
+            if client is not None:
+                # Keep payload small: put data as JSON string in 'payload'
+                fields = {
+                    "event_type": event_type,
+                    "timestamp": event["timestamp"],
+                    "payload": json.dumps(data, ensure_ascii=False),
+                }
+                await client.xadd(
+                    name="orchestrator:events",
+                    fields=fields,
+                    maxlen=10000,
+                    approximate=True,
+                )
+                return
+        except Exception:
+            # Fall through to stdout for resilience
+            pass
+        # Fallback logging to stdout
+        print(f"Event published: {json.dumps(event, ensure_ascii=False)}")
 
 # Global orchestrator instance
 orchestrator = TaskOrchestrator()
