@@ -1,7 +1,7 @@
 ---
 docsync: true
-last_synced: 2025-09-30T16:20:53+0000
-source_sha: eda54a3bd6243ead850a5500ebc124e5ff92980f
+last_synced: 2025-10-17T17:52:02+0000
+source_sha: 6c9557f08e7a87d0d89d16ed5154bb8498acae53
 coverage: 1.0
 ---
 # 알림 및 이벤트 관리 서비스 PRD
