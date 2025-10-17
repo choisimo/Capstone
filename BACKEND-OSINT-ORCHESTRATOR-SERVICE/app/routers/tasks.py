@@ -1,13 +1,54 @@
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from app.services.orchestrator_service import orchestrator
 from app.schemas import (
     TaskCreateRequest, TaskUpdateRequest, TaskResponse, 
     TaskResultRequest, TaskResultResponse, QueueStatsResponse,
-    WorkerRegistrationRequest, WorkerResponse, TaskAssignmentRequest, TaskAssignmentResponse
+    WorkerRegistrationRequest, WorkerResponse, TaskAssignmentRequest, TaskAssignmentResponse,
+    TaskListResponse
 )
 
-router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
+router = APIRouter(prefix="/api/v1/osint/tasks", tags=["tasks"])
+
+@router.get("/")
+async def list_tasks(
+    status: Optional[str] = Query(default=None, description="Task status filter"),
+    priority: Optional[str] = Query(default=None, description="Task priority filter"),
+    assigned_to: Optional[str] = Query(default=None, description="Assigned worker ID"),
+    limit: int = Query(default=100, ge=1, le=500, description="Maximum tasks to return"),
+    offset: int = Query(default=0, ge=0, description="Pagination offset"),
+) -> TaskListResponse:
+    tasks = await orchestrator.list_tasks(status=status, priority=priority, assigned_to=assigned_to)
+    total = len(tasks)
+    sliced = tasks[offset: offset + limit]
+
+    return TaskListResponse(
+        total=total,
+        limit=limit,
+        offset=offset,
+        items=[
+            TaskResponse(
+                id=task.id,
+                task_type=task.task_type.value,
+                keywords=task.keywords,
+                sources=task.sources,
+                priority=task.priority.value,
+                status=task.status.value,
+                assigned_to=task.assigned_to,
+                metadata=task.metadata,
+                dependencies=task.dependencies,
+                retry_count=task.retry_count,
+                max_retries=task.max_retries,
+                timeout_seconds=task.timeout_seconds,
+                expected_results=task.expected_results,
+                created_at=task.created_at,
+                updated_at=task.updated_at,
+                started_at=task.started_at,
+                completed_at=task.completed_at,
+                error_message=task.error_message
+            ) for task in sliced
+        ]
+    )
 
 @router.post("/")
 async def create_task(request: TaskCreateRequest) -> Dict[str, str]:

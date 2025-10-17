@@ -12,6 +12,9 @@ from app.config import settings
 
 # 라우터 인스턴스 생성
 router = APIRouter()
+sources_alias_router = APIRouter()
+
+SOURCES_BASE_PATH = "api/v1/sources"
 
 async def proxy_request(request: Request, path: str = ""):
     """
@@ -20,7 +23,15 @@ async def proxy_request(request: Request, path: str = ""):
     들어온 요청을 그대로 OSINT Source Service로 전달하고,
     응답을 클라이언트에게 반환합니다.
     """
-    target_path = path if path else ""
+    # Backend expects /api/v1 for most OSINT source endpoints
+    if not path:
+        target_path = ""
+    elif path == "health":
+        target_path = "health"
+    elif path.startswith("api/"):
+        target_path = path
+    else:
+        target_path = f"api/v1/{path}"
     target_url = f"{settings.OSINT_SOURCE_SERVICE_URL}/{target_path}"
     
     method = request.method
@@ -72,3 +83,16 @@ async def root(request: Request):
 async def catch_all(path: str, request: Request):
     """Catch-all 라우트"""
     return await proxy_request(request, path)
+
+
+@sources_alias_router.api_route("/sources", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def sources_root_alias(request: Request):
+    """/api/v1/osint/sources 표준 경로 alias"""
+    return await proxy_request(request, SOURCES_BASE_PATH)
+
+
+@sources_alias_router.api_route("/sources/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def sources_alias_catch_all(path: str, request: Request):
+    """/api/v1/osint/sources/* 경로 alias"""
+    forward_path = f"{SOURCES_BASE_PATH}/{path}" if path else SOURCES_BASE_PATH
+    return await proxy_request(request, forward_path)

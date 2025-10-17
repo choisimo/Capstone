@@ -10,6 +10,42 @@ from typing import List, Dict, Any
 from app.db import get_db, AspectModel
 import json
 
+from pydantic import BaseModel, Field
+
+# Optional: use shared pagination schema if available
+try:
+    from shared.schemas import PaginationMeta as SharedPaginationMeta  # type: ignore
+except Exception:
+    SharedPaginationMeta = None  # Fallback defined below
+
+
+class PaginationMeta(BaseModel):
+    total: int = Field(..., ge=0)
+    limit: int = Field(..., ge=1)
+    offset: int = Field(..., ge=0)
+
+
+# If shared PaginationMeta exists, alias to it to keep one definition
+if SharedPaginationMeta is not None:
+    PaginationMeta = SharedPaginationMeta  # type: ignore
+
+
+class AspectItem(BaseModel):
+    id: str
+    name: str
+    description: str | None = None
+    keywords: List[str] | None = None
+    model_version: str | None = None
+
+
+class AspectListResponse(BaseModel):
+    aspects: List[AspectItem]
+    total: int
+    limit: int | None = None
+    offset: int = 0
+    pagination: PaginationMeta | None = None
+
+
 router = APIRouter()
 
 
@@ -73,10 +109,10 @@ async def extract_aspects(
     }
 
 
-@router.get("/list")
+@router.get("/list", response_model=AspectListResponse)
 async def list_aspects(
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+) -> AspectListResponse:
     """
     사용 가능한 속성 목록 조회
     
@@ -86,20 +122,27 @@ async def list_aspects(
     aspects = db.query(AspectModel).filter(
         AspectModel.is_active == 1
     ).all()
-    
-    return {
-        "aspects": [
-            {
-                "id": aspect.id,
-                "name": aspect.name,
-                "description": aspect.description,
-                "keywords": aspect.keywords,
-                "model_version": aspect.model_version
-            }
-            for aspect in aspects
-        ],
-        "total": len(aspects)
-    }
+
+    items = [
+        AspectItem(
+            id=aspect.id,
+            name=aspect.name,
+            description=aspect.description,
+            keywords=aspect.keywords,
+            model_version=aspect.model_version,
+        )
+        for aspect in aspects
+    ]
+
+    total = len(items)
+    # No limit/offset params in this endpoint; keep backward-compatible shape
+    return AspectListResponse(
+        aspects=items,
+        total=total,
+        limit=None,
+        offset=0,
+        pagination=None,
+    )
 
 
 @router.post("/create")

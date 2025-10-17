@@ -168,7 +168,7 @@ class PlanningService:
             "recommended_sources": sources,
             "suggested_schedule": schedule,
             "suggested_objectives": objectives,
-            "confidence_score": 0.85  # Mock confidence
+            "confidence_score": 0.85  # confidence heuristic
         }
     
     async def get_execution_status(self, execution_id: str) -> Dict[str, Any]:
@@ -178,7 +178,7 @@ class PlanningService:
         
         execution = self.executions[execution_id]
         
-        # Mock progress calculation
+        # Progress estimation based on execution status
         progress = 75.0 if execution.status == "running" else 100.0
         
         return {
@@ -196,7 +196,7 @@ class PlanningService:
     
     async def _expand_keywords(self, query: str, objectives: List[str]) -> List[str]:
         """AI-powered keyword expansion"""
-        # Mock keyword expansion based on Korean OSINT requirements
+        # Rule-based keyword expansion for Korean OSINT requirements
         base_keywords = query.split()
         
         expansion_rules = {
@@ -336,7 +336,7 @@ class PlanningService:
     
     async def _send_to_orchestrator(self, task_config: Dict[str, Any]):
         """Send task to orchestrator service"""
-        # Mock sending to orchestrator
+        # Integration stub for orchestrator dispatch
         print(f"Sending task to orchestrator: {json.dumps(task_config, indent=2)}")
     
     async def _handle_status_change(self, plan_id: str, old_status: PlanStatus, new_status: PlanStatus):

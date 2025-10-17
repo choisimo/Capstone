@@ -174,7 +174,7 @@ async def test_alert_rule(
     test_request: TestRuleRequest,
     db: Session = Depends(get_db)
 ):
-    """Test an alert rule with sample data"""
+    """Test an alert rule with validation data"""
     rule_service = RuleService(db)
     
     rule = rule_service.get_rule(rule_id)

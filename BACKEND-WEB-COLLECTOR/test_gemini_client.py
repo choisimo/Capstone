@@ -124,7 +124,7 @@ class TestGeminiClient(unittest.TestCase):
         }
         mock_post.return_value = mock_response
 
-        result = self.client.analyze_pension_content(self.sample_content, "http://test.com")
+        result = self.client.analyze_pension_content(self.sample_content, "https://www.nps.or.kr")
         
         self.assertEqual(result["sentiment"], "negative")
         self.assertEqual(result["confidence"], 0.75)
@@ -243,12 +243,12 @@ class TestGeminiClient(unittest.TestCase):
         sources = [
             {
                 "title": "연금 개혁안 발표",
-                "url": "http://test1.com",
+                "url": "https://www.nps.or.kr",
                 "content": "정부가 연금 개혁안을 발표했습니다."
             },
             {
                 "title": "시민 반응",
-                "url": "http://test2.com", 
+                "url": "https://www.mohw.go.kr", 
                 "content": "시민들은 연금 개혁에 대해 우려를 표명했습니다."
             }
         ]
@@ -291,7 +291,7 @@ class TestGeminiClient(unittest.TestCase):
     @patch('requests.Session.post')
     def test_summarize_multiple_sources_error_handling(self, mock_post):
         """Test multi-source summarization error handling"""
-        sources = [{"title": "Test", "url": "http://test.com", "content": "Test content"}]
+        sources = [{"title": "Test", "url": "https://www.nps.or.kr", "content": "Test content"}]
         
         mock_post.side_effect = Exception("API Error")
 

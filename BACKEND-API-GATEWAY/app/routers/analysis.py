@@ -31,7 +31,15 @@ async def proxy_request(request: Request, path: str = ""):
         HTTPException: 프록시 요청 실패 시
     """
     # /api/v1/analysis 프리픽스 제거 (이미 라우터에서 처리됨)
-    target_path = path if path else ""
+    # Backend expects /api/v1 prefix for all analysis routes except root/health
+    if not path:
+        target_path = ""
+    elif path == "health":
+        target_path = "health"
+    elif path.startswith("api/"):
+        target_path = path
+    else:
+        target_path = f"api/v1/{path}"
     
     # 목적지 URL 구성
     target_url = f"{settings.ANALYSIS_SERVICE_URL}/{target_path}"

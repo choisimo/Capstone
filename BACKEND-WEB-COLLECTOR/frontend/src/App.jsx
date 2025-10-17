@@ -56,7 +56,7 @@ export default function App() {
   }, [])
 
   // Generate steps state
-  const [url, setUrl] = useState('https://example.com')
+  const [url, setUrl] = useState('https://www.nps.or.kr')
   const [instruction, setInstruction] = useState('Click element containing text "More". Scroll down. Wait 1 seconds.')
   const [gen, setGen] = useState({steps: [], notes: ''})
 

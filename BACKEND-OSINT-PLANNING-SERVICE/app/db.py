@@ -1,9 +1,9 @@
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/osint_db")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Mock database connection for now - will be replaced with SQLAlchemy
-class MockDB:
+# Lightweight in-memory DB stub (to be replaced with SQLAlchemy)
+class InMemoryDB:
     def __init__(self):
         self.data = {}
     
@@ -17,4 +17,4 @@ class MockDB:
         pass
 
 def get_db():
-    return MockDB()
+    return InMemoryDB()

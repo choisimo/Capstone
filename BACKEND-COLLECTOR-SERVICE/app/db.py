@@ -4,7 +4,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 from app.config import settings
 
-engine = create_engine(settings.database_url)
+connection_url = settings.database_url
+if connection_url.startswith("postgresql"):
+    engine = create_engine(connection_url, pool_pre_ping=True)
+else:
+    engine = create_engine("sqlite:///./collector.db", connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

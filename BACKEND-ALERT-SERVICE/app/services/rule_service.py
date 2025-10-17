@@ -115,7 +115,7 @@ class RuleService:
 
     @staticmethod
     def test_rule(db: Session, request: TestRuleRequest) -> TestRuleResponse:
-        """Test an alert rule against sample data"""
+        """Test an alert rule against validation data"""
         try:
             # Get the rule if rule_id is provided, otherwise use the test conditions
             if request.rule_id:
@@ -142,7 +142,7 @@ class RuleService:
                     error=f"Invalid conditions: {str(e)}"
                 )
             
-            # Test the conditions against sample data
+            # Test the conditions against validation data
             would_trigger = RuleService._evaluate_conditions(conditions, request.validation_data)
             
             # Generate explanation

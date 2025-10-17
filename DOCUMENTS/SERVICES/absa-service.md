@@ -7,7 +7,7 @@
 
 ## 인터페이스
 - **REST (FastAPI)**:
-  - `POST /analysis/analyze` (`app/routers/analysis.py::analyze_absa`): 요청 `{"text": str, "aspects": [str]?, "content_id": str?}`. 규칙 기반 스코어 계산 후 `absa_analyses` 테이블에 저장. `confidence`는 현재 난수 기반(`random.uniform`).
+  - `POST /analysis/analyze` (`app/routers/analysis.py::analyze_absa`): 요청 `{"text": str, "aspects": [str]?, "content_id": str?}`. 규칙 기반 스코어 계산 후 `absa_analyses` 테이블에 저장. `confidence`는 |score| 기반 결정론적 계산(0.5~1.0).
   - `GET /analysis/history/{content_id}` (`get_analysis_history`): 특정 `content_id`의 분석 이력 반환.
   - `POST /analysis/batch` (`batch_analyze`): 여러 요청을 순차 실행. 내부에서 `analyze_absa` 호출.
   - `POST /aspects/extract` (`app/routers/aspects.py::extract_aspects`): 등록된 키워드 기반 속성 후보 반환. 키워드 매칭 실패 시 기본 속성 세트 반환.
@@ -22,6 +22,11 @@
   - `GET /api/v1/personas/trending` (`get_trending_personas`): 최근 활동량 기준 트렌딩 페르소나 조회.
   - `GET /health` (`app/main.py::health_check`): 서비스 상태 확인.
   - `GET /` (`app/main.py::root`): 지원 엔드포인트 나열.
+
+### 응답 스키마 및 페이지네이션
+- **`GET /models/`**: `ModelListResponse` 반환. 필드: `models`, `total`, `skip`, `limit`, `pagination(PaginationMeta{total, limit, offset})`.
+- **`GET /analysis/history/{content_id}`**: `HistoryResponse` 반환. 필드: `analyses`, `total`, `limit`, `pagination(PaginationMeta)`.
+- **`GET /aspects/list`**: `AspectListResponse` 반환. 필드: `aspects`, `total` 유지. `limit/offset/pagination`은 선택(Optional) 필드로 BC 유지.
 
 ## 데이터/스토리지
 - **주 저장소**: PostgreSQL (`app/db.py`, `app/models.py`).
@@ -65,7 +70,7 @@
 
 ## SLO/성능
 - **목표**: 공식 SLO 미정.
-- **현재 구현 특징**: 감성 스코어는 규칙 및 사전 기반(`ABSAService`)이며 `confidence`는 난수 가중치. 대량 요청은 순차 처리하므로 CPU 부하에 주의.
+- **현재 구현 특징**: 감성 스코어는 규칙 및 사전 기반(`ABSAService`)이며 `confidence`는 |score| 기반 결정론적 계산(0.5~1.0). 대량 요청은 순차 처리하므로 CPU 부하에 주의.
 
 ## 운영/장애 대응
 - **시작 시 처리**: `Base.metadata.create_all`로 필요한 테이블 자동 생성.

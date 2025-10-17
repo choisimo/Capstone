@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HelpCircle, Search, BookOpen, AlertCircle, Shield, FileText, ExternalLink, Phone, Mail } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 const faqs = [
   {
@@ -395,8 +396,8 @@ export default function Help() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">내용</label>
-                    <textarea 
-                      className="w-full p-2 border border-border rounded-md bg-background min-h-[100px] text-sm"
+                    <Textarea 
+                      className="min-h-[120px]"
                       placeholder="상세한 문의 내용을 입력하세요"
                     />
                   </div>

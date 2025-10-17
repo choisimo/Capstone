@@ -18,6 +18,10 @@
 - **WebSocket/SSE**: 구현 없음.
 - **내부 통신**: 각 라우터가 `httpx.AsyncClient`로 하위 서비스 REST 호출.
 
+### 라우팅 특이 사항
+- **ABSA Personas 리라이트**: ABSA 서비스의 페르소나 엔드포인트는 백엔드에서 `/api/v1/personas/*`로 마운트되어 있으며, 게이트웨이는 `/api/v1/absa/personas/*` 요청을 백엔드의 `api/v1/personas/*`로 프록시합니다.
+- **타임아웃 처리**: 프록시 요청은 기본 30초 타임아웃을 사용하며, `httpx.TimeoutException`은 504, `httpx.ConnectError`는 503으로 매핑됩니다.
+
 ## 데이터/스토리지
 - **캐시 계층**: 구현 없음. 응답 캐싱·Redis 미사용.
 - **내부 상태**: FastAPI lifespan에서 `app.state.http_client` 초기화만 수행.

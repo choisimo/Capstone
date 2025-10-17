@@ -1,5 +1,4 @@
 from flask import Blueprint, request, make_response
-import random
 from loguru import logger
 
 from changedetectionio.store import ChangeDetectionStore
@@ -27,11 +26,13 @@ def construct_blueprint(datastore: ChangeDetectionStore):
         is_global_settings_form = request.args.get('mode', '') == 'global-settings'
         is_group_settings_form = request.args.get('mode', '') == 'group-settings'
 
-        # Use an existing random one on the global/main settings form
+        # Choose a deterministic watch UUID on the global/group settings form
         if not watch_uuid and (is_global_settings_form or is_group_settings_form) \
                 and datastore.data.get('watching'):
-            logger.debug(f"Send test notification - Choosing random Watch {watch_uuid}")
-            watch_uuid = random.choice(list(datastore.data['watching'].keys()))
+            keys = list(datastore.data['watching'].keys())
+            if keys:
+                watch_uuid = sorted(keys)[0]
+                logger.debug(f"Send test notification - Choosing first Watch {watch_uuid}")
 
         if not watch_uuid:
             return make_response("Error: You must have atleast one watch configured for 'test notification' to work", 400)

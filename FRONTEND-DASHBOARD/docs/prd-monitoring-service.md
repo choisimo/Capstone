@@ -1,3 +1,9 @@
+---
+docsync: true
+last_synced: 2025-10-17T17:52:02+0000
+source_sha: 6c9557f08e7a87d0d89d16ed5154bb8498acae53
+coverage: 1.0
+---
 # ChangeDetection.io 기반 웹크롤러 모니터링 서비스 PRD
 
 ## 1. 제품 개요

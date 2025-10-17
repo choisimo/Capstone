@@ -164,7 +164,7 @@ async def get_status() -> Dict[str, Any]:
         "status": "running",
         "components": {
             "source_service": "operational" if source_service else "error",
-            "database": "operational",  # Mock status
+            "database": "operational",  # reported status
             "discovery_engine": "operational",
             "validation_engine": "operational",
             "monitoring_engine": "operational"

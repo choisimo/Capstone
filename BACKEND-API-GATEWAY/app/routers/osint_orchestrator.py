@@ -12,6 +12,12 @@ from app.config import settings
 
 # 라우터 인스턴스 생성
 router = APIRouter()
+tasks_alias_router = APIRouter()
+dashboard_alias_router = APIRouter()
+
+TASKS_BASE_PATH = "api/v1/osint/tasks"
+DASHBOARD_OVERVIEW_PATH = "dashboard/overview"
+ISSUES_TOP_PATH = "issues/top"
 
 async def proxy_request(request: Request, path: str = ""):
     """
@@ -146,10 +152,34 @@ async def catch_all(path: str, request: Request):
     Gateway 코드 수정 없이 사용할 수 있습니다.
     
     Args:
-        path: 요청 경로
         request: HTTP 요청 객체
     
     Returns:
         OSINT Orchestrator Service의 응답
     """
     return await proxy_request(request, path)
+
+
+@tasks_alias_router.api_route("/tasks", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def tasks_root_alias(request: Request):
+    """/api/v1/osint/tasks 루트 경로 표준화 alias"""
+    # Ensure trailing slash to match FastAPI route registered at "/api/v1/osint/tasks/"
+    return await proxy_request(request, f"{TASKS_BASE_PATH}/")
+
+@tasks_alias_router.api_route("/tasks/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def tasks_alias_catch_all(path: str, request: Request):
+    """/api/v1/osint/tasks/* 경로 alias"""
+    target = f"{TASKS_BASE_PATH}/{path}" if path else TASKS_BASE_PATH
+    return await proxy_request(request, target)
+
+
+@dashboard_alias_router.get("/overview")
+async def dashboard_overview_alias(request: Request):
+    """/api/v1/dashboard/overview → orchestrator /dashboard/overview"""
+    return await proxy_request(request, DASHBOARD_OVERVIEW_PATH)
+
+
+@dashboard_alias_router.get("/issues/top")
+async def issues_top_alias(request: Request):
+    """/api/v1/osint/issues/top → /issues/top"""
+    return await proxy_request(request, ISSUES_TOP_PATH)

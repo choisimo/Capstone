@@ -21,12 +21,11 @@ class Settings(BaseSettings):
     PORT: int = 8000  # API Gateway 서버 포트
     DEBUG: bool = True  # 디버그 모드 (개발 환경에서 True, 프로덕션에서 False)
     
-    # 마이크로서비스 URL 설정
-    # Docker Compose 환경에서는 서비스명을 호스트명으로 사용
-    ANALYSIS_SERVICE_URL: str = "http://localhost:8001"  # 분석 서비스 URL
-    COLLECTOR_SERVICE_URL: str = "http://localhost:8002"  # 수집 서비스 URL
-    ABSA_SERVICE_URL: str = "http://localhost:8003"  # ABSA 서비스 URL
-    ALERT_SERVICE_URL: str = "http://localhost:8004"  # 알림 서비스 URL
+    # 마이크로서비스 URL 설정 (Compose 서비스 DNS 사용)
+    ANALYSIS_SERVICE_URL: str = "http://analysis-service:8001"  # 분석 서비스 URL
+    COLLECTOR_SERVICE_URL: str = "http://collector-service:8002"  # 수집 서비스 URL
+    ABSA_SERVICE_URL: str = "http://absa-service:8003"  # ABSA 서비스 URL
+    ALERT_SERVICE_URL: str = "http://alert-service:8004"  # 알림 서비스 URL
     OSINT_ORCHESTRATOR_SERVICE_URL: str = "http://osint-orchestrator:8005"  # OSINT 오케스트레이터 서비스 URL
     OSINT_PLANNING_SERVICE_URL: str = "http://osint-planning:8006"  # OSINT 계획 서비스 URL
     OSINT_SOURCE_SERVICE_URL: str = "http://osint-source:8007"  # OSINT 소스 서비스 URL
@@ -37,6 +36,7 @@ class Settings(BaseSettings):
     
     # Rate Limiting 설정 (분당 요청 수)
     RATE_LIMIT_PER_MINUTE: int = 100  # IP당 분당 최대 100개 요청 허용
+    RATE_LIMIT_REDIS_URL: Optional[str] = None  # Redis URL (예: redis://redis:6379/0)
     
     # JWT 인증 설정 (향후 구현 예정)
     JWT_SECRET_KEY: Optional[str] = None  # JWT 시크릿 키 (필수 설정)

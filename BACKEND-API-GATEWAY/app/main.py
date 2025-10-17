@@ -19,6 +19,8 @@ from contextlib import asynccontextmanager
 
 from app.config import settings
 from app.routers import analysis, collector, absa, alerts, osint_orchestrator, osint_planning, osint_source
+from app.middleware.auth import auth_middleware, rbac_middleware
+from app.middleware.rate_limit import rate_limit_middleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -59,6 +61,12 @@ app.add_middleware(
     allow_methods=["*"],  # 모든 HTTP 메서드 허용 (GET, POST, PUT, DELETE 등)
     allow_headers=["*"],  # 모든 헤더 허용
 )
+
+# Function-based middlewares
+# 순서: 인증 → RBAC → Rate Limit (인증 정보를 기반으로 역할별 제한 적용)
+app.middleware("http")(auth_middleware)
+app.middleware("http")(rbac_middleware)
+app.middleware("http")(rate_limit_middleware)
 
 @app.get("/health")
 async def health_check():
@@ -190,6 +198,32 @@ app.include_router(
     tags=["OSINT Orchestrator Service"]  # Swagger UI에서의 그룹 태그
 )
 
+app.include_router(
+    osint_orchestrator.tasks_alias_router,
+    prefix="/api/v1/osint",
+    tags=["OSINT Orchestrator Service"]
+)
+
+# Legacy alias for /api/v1/tasks
+app.include_router(
+    osint_orchestrator.tasks_alias_router,
+    prefix="/api/v1",
+    tags=["OSINT Orchestrator Service"]
+)
+
+# Dashboard alias (overview, issues top)
+app.include_router(
+    osint_orchestrator.dashboard_alias_router,
+    prefix="/api/v1/dashboard",
+    tags=["OSINT Orchestrator Service"]
+)
+
+app.include_router(
+    osint_orchestrator.dashboard_alias_router,
+    prefix="/api/v1/osint",
+    tags=["OSINT Orchestrator Service"]
+)
+
 # OSINT 계획 서비스 라우터 등록
 app.include_router(
     osint_planning.router,
@@ -197,11 +231,23 @@ app.include_router(
     tags=["OSINT Planning Service"]  # Swagger UI에서의 그룹 태그
 )
 
+app.include_router(
+    osint_planning.plans_alias_router,
+    prefix="/api/v1/osint",
+    tags=["OSINT Planning Service"]
+)
+
 # OSINT 소스 서비스 라우터 등록
 app.include_router(
     osint_source.router,
     prefix="/api/v1/osint-source",  # URL 접두사
     tags=["OSINT Source Service"]  # Swagger UI에서의 그룹 태그
+)
+
+app.include_router(
+    osint_source.sources_alias_router,
+    prefix="/api/v1/osint",
+    tags=["OSINT Source Service"]
 )
 
 # 전역 예외 처리기
