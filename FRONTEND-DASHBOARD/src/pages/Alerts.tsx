@@ -207,7 +207,7 @@ export default function Alerts() {
             <TabsTrigger value="alerts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               현재 알림 ({filteredAlerts.length})
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="history" className="inline-flex items-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground after:hidden data-[state=active]:after:inline-block data-[state=active]:after:bg-primary-foreground after:ml-2 after:h-1.5 after:w-1.5 after:rounded-full">
               알림 기록
             </TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">

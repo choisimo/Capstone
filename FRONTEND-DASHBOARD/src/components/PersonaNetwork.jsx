@@ -272,7 +272,7 @@ const PersonaNetwork = ({ userId, onNodeClick }) => {
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="overview">개요</TabsTrigger>
                   <TabsTrigger value="topics">주제</TabsTrigger>
-                  <TabsTrigger value="history">활동</TabsTrigger>
+                  <TabsTrigger value="history" className="inline-flex items-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground after:hidden data-[state=active]:after:inline-block data-[state=active]:after:bg-primary-foreground after:ml-2 after:h-1.5 after:w-1.5 after:rounded-full">활동</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-4">
