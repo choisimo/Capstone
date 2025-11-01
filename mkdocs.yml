@@ -1,0 +1,76 @@
+# MkDocs configuration for Capstone project documentation
+# Auto-generated nav can be inserted under the 'nav:' key using
+# `python scripts/generate_wiki_manifest.py --format yaml`
+
+site_name: "Capstone Project WIKI"
+site_description: "프로젝트 문서 중앙 저장소"
+site_author: "nodove"
+site_url: ""
+
+repo_url: ""
+repo_name: "Capstone"
+
+theme:
+  name: material
+  language: ko
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - codehilite
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Backend Web Collector:
+    - Api Documentation: BACKEND-WEB-COLLECTOR/API_DOCUMENTATION.md
+    - Readme: BACKEND-WEB-COLLECTOR/README.md
+  - Backend Web Crawler:
+    - Changedetectionio:
+      - Blueprint:
+        - Tags:
+          - Readme: BACKEND-WEB-CRAWLER/changedetectionio/blueprint/tags/README.md
+      - Processors:
+        - Readme: BACKEND-WEB-CRAWLER/changedetectionio/processors/README.md
+      - Realtime:
+        - Readme: BACKEND-WEB-CRAWLER/changedetectionio/realtime/README.md
+      - Templates:
+        - Important: BACKEND-WEB-CRAWLER/changedetectionio/templates/IMPORTANT.md
+      - Tests:
+        - Itemprop Test Examples:
+          - Readme: BACKEND-WEB-CRAWLER/changedetectionio/tests/itemprop_test_examples/README.md
+        - Unit:
+          - Test Content:
+            - Readme: BACKEND-WEB-CRAWLER/changedetectionio/tests/unit/test-content/README.md
+      - Plugin Readme: BACKEND-WEB-CRAWLER/changedetectionio/PLUGIN_README.md
+    - Docs:
+      - Readme: BACKEND-WEB-CRAWLER/docs/README.md
+    - Commercial Licence: BACKEND-WEB-CRAWLER/COMMERCIAL_LICENCE.md
+    - Contributing: BACKEND-WEB-CRAWLER/CONTRIBUTING.md
+    - Readme Pip: BACKEND-WEB-CRAWLER/README-pip.md
+    - Readme: BACKEND-WEB-CRAWLER/README.md
+  - Docker:
+    - Readme: DOCKER/README.md
+  - Documents:
+    - Architecture:
+      - Frontend Integration: DOCUMENTS/ARCHITECTURE/frontend-integration.md
+      - Gcp Architecture: DOCUMENTS/ARCHITECTURE/gcp-architecture.md
+      - Mas Architecture: DOCUMENTS/ARCHITECTURE/mas-architecture.md
+      - Observability Alert Pipeline: DOCUMENTS/ARCHITECTURE/observability-alert-pipeline.md
+      - System Architecture: DOCUMENTS/ARCHITECTURE/system-architecture.md

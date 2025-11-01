@@ -1,0 +1,143 @@
+# This is an auto-generated navigation structure for mkdocs.yml.
+# Run 'python scripts/generate_wiki_manifest.py --format yaml' to regenerate.
+- Backend Web Collector:
+  - Api Documentation: BACKEND-WEB-COLLECTOR/API_DOCUMENTATION.md
+  - Readme: BACKEND-WEB-COLLECTOR/README.md
+- Backend Web Crawler:
+  - Changedetectionio:
+    - Blueprint:
+      - Tags:
+        - Readme: BACKEND-WEB-CRAWLER/changedetectionio/blueprint/tags/README.md
+    - Processors:
+      - Readme: BACKEND-WEB-CRAWLER/changedetectionio/processors/README.md
+    - Realtime:
+      - Readme: BACKEND-WEB-CRAWLER/changedetectionio/realtime/README.md
+    - Templates:
+      - Important: BACKEND-WEB-CRAWLER/changedetectionio/templates/IMPORTANT.md
+    - Tests:
+      - Itemprop Test Examples:
+        - Readme: BACKEND-WEB-CRAWLER/changedetectionio/tests/itemprop_test_examples/README.md
+      - Unit:
+        - Test Content:
+          - Readme: BACKEND-WEB-CRAWLER/changedetectionio/tests/unit/test-content/README.md
+    - Plugin Readme: BACKEND-WEB-CRAWLER/changedetectionio/PLUGIN_README.md
+  - Docs:
+    - Readme: BACKEND-WEB-CRAWLER/docs/README.md
+  - Commercial Licence: BACKEND-WEB-CRAWLER/COMMERCIAL_LICENCE.md
+  - Contributing: BACKEND-WEB-CRAWLER/CONTRIBUTING.md
+  - Readme Pip: BACKEND-WEB-CRAWLER/README-pip.md
+  - Readme: BACKEND-WEB-CRAWLER/README.md
+- Docker:
+  - Readme: DOCKER/README.md
+- Documents:
+  - Architecture:
+    - Frontend Integration: DOCUMENTS/ARCHITECTURE/frontend-integration.md
+    - Gcp Architecture: DOCUMENTS/ARCHITECTURE/gcp-architecture.md
+    - Mas Architecture: DOCUMENTS/ARCHITECTURE/mas-architecture.md
+    - Observability Alert Pipeline: DOCUMENTS/ARCHITECTURE/observability-alert-pipeline.md
+    - System Architecture: DOCUMENTS/ARCHITECTURE/system-architecture.md
+  - Contracts:
+    - Api And Events: DOCUMENTS/CONTRACTS/api-and-events.md
+  - Development:
+    - Collector Service Tasks: DOCUMENTS/DEVELOPMENT/collector-service-tasks.md
+    - Deployment Command Inventory: DOCUMENTS/DEVELOPMENT/deployment-command-inventory.md
+    - Development Guide: DOCUMENTS/DEVELOPMENT/development-guide.md
+    - Frontend Dashboard Tasks Continued: DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks-continued.md
+    - Frontend Dashboard Tasks: DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks.md
+    - Gcp Deployment Runbook: DOCUMENTS/DEVELOPMENT/gcp-deployment-runbook.md
+    - Linux Deployment Runbook: DOCUMENTS/DEVELOPMENT/linux-deployment-runbook.md
+    - Sentiment Service Tasks: DOCUMENTS/DEVELOPMENT/sentiment-service-tasks.md
+  - Daily Done:
+    - 2025 09 16: DOCUMENTS/Daily-done/2025-09-16.md
+    - 2025 09 17: DOCUMENTS/Daily-done/2025-09-17.md
+    - 2025 09 18: DOCUMENTS/Daily-done/2025-09-18.md
+    - 2025 09 19: DOCUMENTS/Daily-done/2025-09-19.md
+    - 2025 09 20: DOCUMENTS/Daily-done/2025-09-20.md
+    - 2025 09 21: DOCUMENTS/Daily-done/2025-09-21.md
+    - 2025 09 22: DOCUMENTS/Daily-done/2025-09-22.md
+    - 2025 09 23: DOCUMENTS/Daily-done/2025-09-23.md
+    - 2025 09 24: DOCUMENTS/Daily-done/2025-09-24.md
+    - 2025 09 25: DOCUMENTS/Daily-done/2025-09-25.md
+    - 2025 09 26: DOCUMENTS/Daily-done/2025-09-26.md
+    - 2025 09 27: DOCUMENTS/Daily-done/2025-09-27.md
+    - 2025 09 28: DOCUMENTS/Daily-done/2025-09-28.md
+    - 2025 09 29: DOCUMENTS/Daily-done/2025-09-29.md
+    - 2025 09 30 Evening: DOCUMENTS/Daily-done/2025-09-30-evening.md
+    - 2025 09 30: DOCUMENTS/Daily-done/2025-09-30.md
+  - History:
+    - 20250929 011118 History: DOCUMENTS/HISTORY/20250929-011118-history.md
+    - 20250929 172733 History: DOCUMENTS/HISTORY/20250929-172733-history.md
+    - 20250929 172847 History: DOCUMENTS/HISTORY/20250929-172847-history.md
+    - 20250929 174613 History: DOCUMENTS/HISTORY/20250929-174613-history.md
+  - Noteforbreak:
+    - Usertrackingmethods: DOCUMENTS/NoteForBreak/UserTrackingMethods.md
+  - Prd:
+    - Readme: DOCUMENTS/PRD/README.md
+    - Absa Service Detailed Prd: DOCUMENTS/PRD/absa-service-detailed-prd.md
+    - Alert Service Detailed Prd: DOCUMENTS/PRD/alert-service-detailed-prd.md
+    - Analysis Service Detailed Prd: DOCUMENTS/PRD/analysis-service-detailed-prd.md
+    - Api Gateway Detailed Prd: DOCUMENTS/PRD/api-gateway-detailed-prd.md
+    - Cicd Pipeline Prd: DOCUMENTS/PRD/cicd-pipeline-prd.md
+    - Collector Service Detailed Prd: DOCUMENTS/PRD/collector-service-detailed-prd.md
+    - Frontend Prd: DOCUMENTS/PRD/frontend-prd.md
+    - Identity Linking Prd: DOCUMENTS/PRD/identity-linking-prd.md
+    - Implementation Tasks: DOCUMENTS/PRD/implementation-tasks.md
+    - Monitoring Observability Prd: DOCUMENTS/PRD/monitoring-observability-prd.md
+    - Osint Services Detailed Prd: DOCUMENTS/PRD/osint-services-detailed-prd.md
+    - Pensions Sentiment Prd: DOCUMENTS/PRD/pensions-sentiment-prd.md
+    - Persona Scheduler Prd: DOCUMENTS/PRD/persona-scheduler-prd.md
+    - Prd Implementation Status: DOCUMENTS/PRD/prd-implementation-status.md
+  - Services:
+    - Readme: DOCUMENTS/SERVICES/README.md
+    - Template: DOCUMENTS/SERVICES/_template.md
+    - Absa Service: DOCUMENTS/SERVICES/absa-service.md
+    - Alert Service: DOCUMENTS/SERVICES/alert-service.md
+    - Analysis Service: DOCUMENTS/SERVICES/analysis-service.md
+    - Api Gateway: DOCUMENTS/SERVICES/api-gateway.md
+    - Collector Service: DOCUMENTS/SERVICES/collector-service.md
+    - Crawler Implementation Guide: DOCUMENTS/SERVICES/crawler-implementation-guide.md
+    - Dashboard Web: DOCUMENTS/SERVICES/dashboard-web.md
+    - Dedup Anonymizer: DOCUMENTS/SERVICES/dedup-anonymizer.md
+    - Detailed Task Breakdown: DOCUMENTS/SERVICES/detailed-task-breakdown.md
+    - Event Analysis: DOCUMENTS/SERVICES/event-analysis.md
+    - Ingest Worker: DOCUMENTS/SERVICES/ingest-worker.md
+    - Master Task List: DOCUMENTS/SERVICES/master-task-list.md
+    - Mesh Aggregator: DOCUMENTS/SERVICES/mesh-aggregator.md
+    - Nlp Preprocess: DOCUMENTS/SERVICES/nlp-preprocess.md
+    - Osint Msa Guide: DOCUMENTS/SERVICES/osint-msa-guide.md
+    - Sentiment Service Tasks Continued: DOCUMENTS/SERVICES/sentiment-service-tasks-continued.md
+    - Sentiment Service: DOCUMENTS/SERVICES/sentiment-service.md
+    - Summarizer Rag: DOCUMENTS/SERVICES/summarizer-rag.md
+    - Tagging Service: DOCUMENTS/SERVICES/tagging-service.md
+    - Topic Modeler: DOCUMENTS/SERVICES/topic-modeler.md
+  - Verification:
+    - Mock Data Audit Report: DOCUMENTS/VERIFICATION/mock-data-audit-report.md
+    - Rules Compliance Report: DOCUMENTS/VERIFICATION/rules-compliance-report.md
+    - Stability Enhancement Report: DOCUMENTS/VERIFICATION/stability-enhancement-report.md
+  - Final Implementation Summary: DOCUMENTS/FINAL-IMPLEMENTATION-SUMMARY.md
+  - Integration Test Report: DOCUMENTS/INTEGRATION-TEST-REPORT.md
+  - Summary 2025 09 30: DOCUMENTS/SUMMARY-2025-09-30.md
+  - Test Status: DOCUMENTS/TEST-STATUS.md
+  - Implementation Progress: DOCUMENTS/implementation-progress.md
+  - Implementation Summary: DOCUMENTS/implementation-summary.md
+- Frontend Dashboard:
+  - Docs:
+    - Prd Ai Agent Crawling Service: FRONTEND-DASHBOARD/docs/prd-ai-agent-crawling-service.md
+    - Prd Analytics Visualization Service: FRONTEND-DASHBOARD/docs/prd-analytics-visualization-service.md
+    - Prd Data Exploration Service: FRONTEND-DASHBOARD/docs/prd-data-exploration-service.md
+    - Prd Monitoring Service: FRONTEND-DASHBOARD/docs/prd-monitoring-service.md
+    - Prd Notification Event Service: FRONTEND-DASHBOARD/docs/prd-notification-event-service.md
+    - Webcrawler Integration Plan: FRONTEND-DASHBOARD/docs/webcrawler-integration-plan.md
+  - Readme: FRONTEND-DASHBOARD/README.md
+- Data:
+  - Crawling Verification Report: data/CRAWLING_VERIFICATION_REPORT.md
+  - Real Data Sources: data/REAL_DATA_SOURCES.md
+- Docs:
+  - Final Production Result Report: docs/FINAL_PRODUCTION_RESULT_REPORT.md
+  - Production Stack Analysis Report: docs/PRODUCTION_STACK_ANALYSIS_REPORT.md
+  - Readme Production: docs/README-PRODUCTION.md
+  - Refactoring Completion Report: docs/REFACTORING_COMPLETION_REPORT.md
+- Scripts:
+  - Readme: scripts/README.md
+- Readme Testing: README-TESTING.md
+- Readme: README.md
