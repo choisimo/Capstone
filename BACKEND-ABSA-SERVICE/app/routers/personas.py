@@ -396,7 +396,7 @@ async def get_persona_details(
         if last_calc:
             # 기본 임계값: 24h
             from app.config import settings
-            threshold = timedelta(hours=settings.persona_staleness_hours_default)
+            threshold = timedelta(hours=settings.PERSONA_STALENESS_HOURS_DEFAULT)
             if datetime.utcnow() - last_calc > threshold:
                 stale = True
                 staleness_reason = "older_than_threshold"

@@ -1,82 +1,84 @@
-"""
-Alert Service 설정 모듈
+"""Alert Service configuration module backed by Consul."""
 
-알림 서비스의 모든 설정을 관리합니다.
-데이터베이스, 알림 채널, 외부 서비스 연동 등의 설정을 포함합니다.
-"""
+from __future__ import annotations
 
-import os
-from typing import List
-from pydantic_settings import BaseSettings
+from typing import Dict, List, Optional
+
+from pydantic import Field, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from shared.config_loader import load_settings
+
 
 class Settings(BaseSettings):
-    """
-    서비스 설정 클래스
-    
-    환경 변수에서 설정을 읽어오며, 기본값을 제공합니다.
-    """
-    
-    # 데이터베이스 설정 (환경 변수 필수)
-    database_url: str = os.getenv("DATABASE_URL")  # PostgreSQL URL
-    
-    # Redis 캐시 설정
-    redis_url: str = os.getenv("REDIS_URL", "redis://redis:6379")  # Redis 캐시 서버 URL
-    
-    # 서버 설정
-    port: int = 8004  # 서버 포트
-    
-    # 서비스 기본 설정
-    service_name: str = "alert-service"  # 서비스 이름
-    service_version: str = "1.0.0"  # 서비스 버전
-    debug: bool = False  # 디버그 모드
-    
-    # 외부 서비스 API 키
-    email_service_api_key: str = ""  # 이메일 서비스 API 키
-    slack_webhook_url: str = ""  # Slack 웹훅 URL
-    slack_bot_token: str = ""  # Slack 봇 토큰
-    twilio_account_sid: str = ""  # Twilio 계정 SID (SMS 전송)
-    twilio_auth_token: str = ""  # Twilio 인증 토큰
-    
-    # SMTP 설정 (이메일 전송)
-    smtp_server: str = "smtp.gmail.com"  # SMTP 서버 주소
-    smtp_port: int = 587  # SMTP 포트 (TLS)
-    smtp_username: str = ""  # SMTP 사용자명
-    smtp_password: str = ""  # SMTP 비밀번호
-    from_email: str = "alerts@pensionsentiment.com"  # 발신자 이메일
-    
-    # 알림 설정
-    max_retries: int = 3  # 최대 재시도 횟수
-    retry_delay_seconds: int = 300  # 재시도 대기 시간 (300초 = 5분)
-    batch_size: int = 100  # 배치 처리 크기
-    rate_limit_per_minute: int = 60  # 분당 최대 알림 수
-    
-    # 알림 임계값 및 제한
-    max_alerts_per_hour: int = 1000  # 시간당 최대 알림 수
-    cooldown_override_enabled: bool = False  # 쿨다운 무시 설정
-    
-    # 알림 채널
-    enabled_channels: List[str] = ["email", "slack", "webhook"]  # 활성화된 알림 채널
-    
-    # 웹훅 설정
-    webhook_timeout_seconds: int = 30  # 웹훅 타임아웃 (초)
-    webhook_retry_attempts: int = 3  # 웹훅 재시도 횟수
-    
-    # 보안 설정
-    api_key_header: str = "X-API-Key"  # API 키 헤더 이름
-    allowed_origins: List[str] = ["*"]  # CORS 허용 도메인
-    
-    # 모니터링 및 로깅
-    log_level: str = "INFO"  # 로그 레벨 (DEBUG, INFO, WARNING, ERROR)
-    enable_metrics: bool = True  # 메트릭 활성화
-    metrics_port: int = 9090  # Prometheus 메트릭 포트
-    
-    # 외부 서비스 URL
-    analysis_service_url: str = os.getenv("ANALYSIS_SERVICE_URL", "http://analysis-service:8001")  # 분석 서비스 URL
-    collector_service_url: str = os.getenv("COLLECTOR_SERVICE_URL", "http://collector-service:8002")  # 수집 서비스 URL
-    absa_service_url: str = os.getenv("ABSA_SERVICE_URL", "http://absa-service:8003")  # ABSA 서비스 URL
-    
-    # 템플릿 설정
-    default_email_template: str = """  # 기본 이메일 템플릿 (HTML 형식)
+    model_config = SettingsConfigDict(env_prefix="", case_sensitive=True)
+
+    # Core
+    PORT: int = Field(default=8004)
+    DEBUG: bool = Field(default=False)
+    SERVICE_NAME: str = Field(default="alert-service")
+    SERVICE_VERSION: str = Field(default="1.0.0")
+    ENVIRONMENT: str = Field(default="development")
+
+    # Dependencies (required)
+    DATABASE_URL: str = Field(...)
+    REDIS_URL: str = Field(...)
+
+    # External service URLs
+    ANALYSIS_SERVICE_URL: str = Field(...)
+    COLLECTOR_SERVICE_URL: str = Field(...)
+    ABSA_SERVICE_URL: str = Field(...)
+
+    # Eureka discovery (optional)
+    EUREKA_ENABLED: bool = Field(default=False)
+    EUREKA_SERVICE_URLS: Optional[str] = Field(default=None)
+    EUREKA_APP_NAME: str = Field(default="alert-service")
+    EUREKA_INSTANCE_HOST: Optional[str] = Field(default=None)
+    EUREKA_INSTANCE_IP: Optional[str] = Field(default=None)
+    EUREKA_METADATA: Optional[str] = Field(default=None)
+
+    # Secrets / credentials
+    EMAIL_SERVICE_API_KEY: SecretStr | None = Field(default=None)
+    SLACK_WEBHOOK_URL: SecretStr | None = Field(default=None)
+    SLACK_BOT_TOKEN: SecretStr | None = Field(default=None)
+    TWILIO_ACCOUNT_SID: SecretStr | None = Field(default=None)
+    TWILIO_AUTH_TOKEN: SecretStr | None = Field(default=None)
+    SMTP_USERNAME: SecretStr | None = Field(default=None)
+    SMTP_PASSWORD: SecretStr | None = Field(default=None)
+
+    # SMTP settings
+    SMTP_SERVER: str = Field(default="smtp.gmail.com")
+    SMTP_PORT: int = Field(default=587)
+    SMTP_USE_TLS: bool = Field(default=True)
+    SMTP_FROM_EMAIL: str = Field(default="alerts@pensionsentiment.com")
+
+    # Notification behaviour
+    MAX_RETRIES: int = Field(default=3)
+    RETRY_DELAY_SECONDS: int = Field(default=300)
+    BATCH_SIZE: int = Field(default=100)
+    RATE_LIMIT_PER_MINUTE: int = Field(default=60)
+    MAX_ALERTS_PER_HOUR: int = Field(default=1000)
+    COOLDOWN_OVERRIDE_ENABLED: bool = Field(default=False)
+    ENABLED_CHANNELS: List[str] = Field(default_factory=lambda: ["email", "slack", "webhook"])
+    SLACK_CHANNEL: Optional[str] = Field(default=None)
+
+    # Webhook
+    WEBHOOK_TIMEOUT_SECONDS: int = Field(default=30)
+    WEBHOOK_RETRY_ATTEMPTS: int = Field(default=3)
+
+    # Security/CORS
+    API_KEY_HEADER: str = Field(default="X-API-Key")
+    ALLOWED_ORIGINS: List[str] = Field(default_factory=lambda: ["*"])
+
+    # Monitoring
+    LOG_LEVEL: str = Field(default="INFO")
+    ENABLE_METRICS: bool = Field(default=True)
+    METRICS_PORT: int = Field(default=9090)
+
+    # Templates
+    DEFAULT_EMAIL_TEMPLATE: str = Field(
+        default=(
+            """
     <html>
         <body>
             <h2>{{alert_title}}</h2>
@@ -95,9 +97,12 @@ class Settings(BaseSettings):
             <p><small>연금 감성 분석 플랫폼에서 자동 발송된 알림입니다.</small></p>
         </body>
     </html>
-    """
-    
-    default_slack_template: str = """  # 기본 Slack 템플릿 (Markdown 형식)
+            """
+        )
+    )
+    DEFAULT_SLACK_TEMPLATE: str = Field(
+        default=(
+            """
     :warning: *{{alert_title}}*
     
     *심각도:* {{severity}}
@@ -109,26 +114,32 @@ class Settings(BaseSettings):
     {% if actual_value and threshold_value %}
     *현재 값:* {{actual_value}} (임계값: {{threshold_value}})
     {% endif %}
-    """
-    
-    # 방해 금지 시간 설정 (알림을 제한해야 하는 시간)
-    quiet_hours_enabled: bool = True  # 방해 금지 시간 활성화
-    quiet_hours_start: str = "22:00"  # 방해 금지 시작 시간
-    quiet_hours_end: str = "08:00"  # 방해 금지 종료 시간
-    quiet_hours_timezone: str = "UTC"  # 방해 금지 시간대
-    
-    # 방해 금지 시간에는 중요 알림만 전송
-    quiet_hours_critical_only: bool = True  # 중요 알림만 허용
-    
-    class Config:
-        """
-        설정 클래스 메타데이터
-        """
-        env_file = ".env"  # 환경 변수 파일
-        case_sensitive = False  # 대소문자 구분 안함
+            """
+        )
+    )
 
-# 전역 설정 인스턴스
-settings = Settings()
+    # Quiet hours
+    QUIET_HOURS_ENABLED: bool = Field(default=True)
+    QUIET_HOURS_START: str = Field(default="22:00")
+    QUIET_HOURS_END: str = Field(default="08:00")
+    QUIET_HOURS_TIMEZONE: str = Field(default="UTC")
+    QUIET_HOURS_CRITICAL_ONLY: bool = Field(default=True)
+
+    CONFIG_SYNC_TIMESTAMP: Optional[str] = None
+
+
+def _load_settings() -> Settings:
+    required = [
+        "DATABASE_URL",
+        "REDIS_URL",
+        "ANALYSIS_SERVICE_URL",
+        "COLLECTOR_SERVICE_URL",
+        "ABSA_SERVICE_URL",
+    ]
+    return load_settings("alert-service", settings_cls=Settings, require=required)
+
+
+settings = _load_settings()
 
 # 알림 타입 설정
 ALERT_TYPE_CONFIGS = {

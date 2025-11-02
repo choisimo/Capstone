@@ -23,10 +23,22 @@ import uvicorn
 from app.db import get_db, engine, Base
 from app.routers import sentiment, trends, reports, models as ml_models
 from app.config import settings
+from shared.eureka_client import create_manager_from_settings
 
 # 로깅 설정 - INFO 레벨로 설정하여 중요 이벤트만 기록
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)  # 현재 모듈명으로 로거 생성
+
+
+eureka_manager = create_manager_from_settings(
+    enabled=settings.EUREKA_ENABLED,
+    service_urls=settings.EUREKA_SERVICE_URLS,
+    app_name=settings.EUREKA_APP_NAME,
+    instance_port=settings.PORT,
+    instance_host=settings.EUREKA_INSTANCE_HOST,
+    instance_ip=settings.EUREKA_INSTANCE_IP,
+    metadata=settings.EUREKA_METADATA,
+)
 
 
 @asynccontextmanager
@@ -46,9 +58,13 @@ async def lifespan(app: FastAPI):
     # 애플리케이션 시작 시 - 데이터베이스 테이블 생성
     Base.metadata.create_all(bind=engine)  # SQLAlchemy 모델 기반 테이블 생성
     logger.info("Analysis Service starting up...")  # 시작 로그
-    yield  # 애플리케이션 실행
-    # 애플리케이션 종료 시
-    logger.info("Analysis Service shutting down...")  # 종료 로그
+    await eureka_manager.register()
+    try:
+        yield  # 애플리케이션 실행
+    finally:
+        # 애플리케이션 종료 시
+        logger.info("Analysis Service shutting down...")  # 종료 로그
+        await eureka_manager.deregister()
 
 
 # FastAPI 애플리케이션 인스턴스 생성
@@ -150,6 +166,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",  # 실행할 애플리케이션 경로
         host="0.0.0.0",  # 모든 네트워크 인터페이스에서 접속 허용
-        port=8001,  # Analysis Service 포트 (8001)
+        port=settings.PORT,  # Analysis Service 포트
         reload=settings.DEBUG  # DEBUG 모드에서만 자동 재시작 활성화
     )

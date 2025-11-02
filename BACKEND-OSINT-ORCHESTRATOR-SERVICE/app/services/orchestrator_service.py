@@ -49,10 +49,10 @@ class TaskOrchestrator:
     async def _get_redis(self):
         if self._redis is not None:
             return self._redis
-        if not settings.redis_url or not aioredis:
+        if not settings.REDIS_URL or not aioredis:
             return None
         # decode_responses=True to work with str payloads
-        self._redis = aioredis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
+        self._redis = aioredis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
         return self._redis
         
     async def create_task(self, task_type: str, keywords: List[str], sources: List[str],

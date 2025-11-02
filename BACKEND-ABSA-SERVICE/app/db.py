@@ -13,7 +13,7 @@ import uuid
 from datetime import datetime
 
 # SQLAlchemy 설정
-SQLALCHEMY_DATABASE_URL = settings.database_url
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # 데이터베이스 엔진 생성
 engine = create_engine(

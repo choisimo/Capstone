@@ -16,12 +16,23 @@ import uvicorn
 from app.db import engine, Base
 from app.routers import aspects, analysis, models
 from app.config import settings
+from shared.eureka_client import create_manager_from_settings
 
 # FastAPI 애플리케이션 인스턴스 생성
 app = FastAPI(
     title="Pension Sentiment ABSA Service",  # 서비스 제목
     description="Aspect-Based Sentiment Analysis for pension content",  # 서비스 설명
     version="1.0.0"  # API 버전
+)
+
+eureka_manager = create_manager_from_settings(
+    enabled=settings.EUREKA_ENABLED,
+    service_urls=settings.EUREKA_SERVICE_URLS,
+    app_name=settings.EUREKA_APP_NAME,
+    instance_port=settings.PORT,
+    instance_host=settings.EUREKA_INSTANCE_HOST,
+    instance_ip=settings.EUREKA_INSTANCE_IP,
+    metadata=settings.EUREKA_METADATA,
 )
 
 # CORS 미들웨어 추가 - 크로스 오리진 요청 허용
@@ -69,6 +80,12 @@ async def startup_event():
     except Exception:
         # Ignore if DB does not support IF NOT EXISTS or lacks permissions
         pass
+    await eureka_manager.register()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await eureka_manager.deregister()
 
 @app.get("/health")
 async def health_check():
@@ -118,5 +135,5 @@ if __name__ == "__main__":
     uvicorn.run(
         app,  # FastAPI 애플리케이션 인스턴스
         host="0.0.0.0",  # 모든 네트워크 인터페이스에서 접속 허용
-        port=8003  # ABSA 서비스 포트 (8003)
+        port=settings.PORT  # ABSA 서비스 포트
     )

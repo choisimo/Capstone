@@ -1,44 +1,69 @@
-import os
+"""OSINT Orchestrator configuration backed by Consul KV."""
+
+from __future__ import annotations
+
 from typing import Optional
 
-class Settings:
-    def __init__(self):
-        # 서버 설정
-        self.port = int(os.getenv("PORT", 8005))
-        self.debug = os.getenv("DEBUG", "true").lower() == "true"
-        
-        # 데이터베이스 설정 (환경 변수 필수, 기본값 없음)
-        self.database_url = os.getenv("DATABASE_URL")
-        self.redis_url = os.getenv("REDIS_URL")
-        self.secret_key = os.getenv("SECRET_KEY", "osint-orchestrator-secret-key")
-        self.environment = os.getenv("ENVIRONMENT", "development")
-        self.log_level = os.getenv("LOG_LEVEL", "INFO")
-        
-        # Task orchestrator specific settings
-        self.max_queue_size = int(os.getenv("MAX_QUEUE_SIZE", "10000"))
-        self.task_timeout_default = int(os.getenv("TASK_TIMEOUT_DEFAULT", "3600"))  # 1 hour
-        self.max_retries_default = int(os.getenv("MAX_RETRIES_DEFAULT", "3"))
-        self.worker_heartbeat_timeout = int(os.getenv("WORKER_HEARTBEAT_TIMEOUT", "300"))  # 5 minutes
-        self.priority_recalc_interval = int(os.getenv("PRIORITY_RECALC_INTERVAL", "60"))  # 1 minute
-        
-        # Queue management
-        self.high_priority_threshold = float(os.getenv("HIGH_PRIORITY_THRESHOLD", "100"))
-        self.critical_priority_threshold = float(os.getenv("CRITICAL_PRIORITY_THRESHOLD", "1000"))
-        self.max_workers_per_task_type = int(os.getenv("MAX_WORKERS_PER_TASK_TYPE", "10"))
-        
-        # Event publishing (환경 변수 사용 권장)
-        self.kafka_bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
-        self.nats_url = os.getenv("NATS_URL")
-        self.event_publisher = os.getenv("EVENT_PUBLISHER", "kafka")  # kafka or nats
-        
-        # Alert routing
-        self.alert_service_url = os.getenv("ALERT_SERVICE_URL", "http://alert-service:8004")
-        self.system_alert_rule_id = os.getenv("SYSTEM_ALERT_RULE_ID")  # optional rule id for system-generated alerts
-        
-        # Service discovery (Compose 서비스 DNS 사용)
-        self.planning_service_url = os.getenv("PLANNING_SERVICE_URL", "http://osint-planning:8006")
-        self.source_service_url = os.getenv("SOURCE_SERVICE_URL", "http://osint-source:8007")
-        self.collector_service_url = os.getenv("COLLECTOR_SERVICE_URL", "http://collector-service:8002")
-        self.analysis_service_url = os.getenv("ANALYSIS_SERVICE_URL", "http://analysis-service:8001")
+from pydantic import Field, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-settings = Settings()
+from shared.config_loader import load_settings
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="", case_sensitive=True)
+
+    # Core
+    PORT: int = Field(default=8005)
+    DEBUG: bool = Field(default=False)
+    ENVIRONMENT: str = Field(default="development")
+    LOG_LEVEL: str = Field(default="INFO")
+
+    # Dependencies (required)
+    DATABASE_URL: str = Field(...)
+    REDIS_URL: str = Field(...)
+    SECRET_KEY: SecretStr = Field(...)
+
+    # Task orchestrator specifics
+    MAX_QUEUE_SIZE: int = Field(default=10000)
+    TASK_TIMEOUT_DEFAULT: int = Field(default=3600)
+    MAX_RETRIES_DEFAULT: int = Field(default=3)
+    WORKER_HEARTBEAT_TIMEOUT: int = Field(default=300)
+    PRIORITY_RECALC_INTERVAL: int = Field(default=60)
+
+    HIGH_PRIORITY_THRESHOLD: float = Field(default=100.0)
+    CRITICAL_PRIORITY_THRESHOLD: float = Field(default=1000.0)
+    MAX_WORKERS_PER_TASK_TYPE: int = Field(default=10)
+
+    # Event publishing
+    KAFKA_BOOTSTRAP_SERVERS: Optional[str] = Field(default=None)
+    NATS_URL: Optional[str] = Field(default=None)
+    EVENT_PUBLISHER: str = Field(default="kafka")
+
+    # Alert routing
+    ALERT_SERVICE_URL: str = Field(default="http://alert-service:8004")
+    SYSTEM_ALERT_RULE_ID: Optional[int] = Field(default=None)
+
+    # Service discovery
+    PLANNING_SERVICE_URL: str = Field(default="http://osint-planning:8006")
+    SOURCE_SERVICE_URL: str = Field(default="http://osint-source:8007")
+    COLLECTOR_SERVICE_URL: str = Field(default="http://collector-service:8002")
+    ANALYSIS_SERVICE_URL: str = Field(default="http://analysis-service:8001")
+
+    # Eureka discovery (optional)
+    EUREKA_ENABLED: bool = Field(default=False)
+    EUREKA_SERVICE_URLS: Optional[str] = Field(default=None)
+    EUREKA_APP_NAME: str = Field(default="osint-orchestrator")
+    EUREKA_INSTANCE_HOST: Optional[str] = Field(default=None)
+    EUREKA_INSTANCE_IP: Optional[str] = Field(default=None)
+    EUREKA_METADATA: Optional[str] = Field(default=None)
+
+    CONFIG_SYNC_TIMESTAMP: Optional[str] = None
+
+
+def _load_settings() -> Settings:
+    required = ["DATABASE_URL", "REDIS_URL", "SECRET_KEY"]
+    return load_settings("osint-orchestrator", settings_cls=Settings, require=required)
+
+
+settings = _load_settings()
