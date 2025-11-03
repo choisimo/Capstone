@@ -25,9 +25,9 @@ class Settings(BaseSettings):
     REDIS_URL: str = Field(...)
 
     # External service URLs
-    ANALYSIS_SERVICE_URL: str = Field(...)
-    COLLECTOR_SERVICE_URL: str = Field(...)
-    ABSA_SERVICE_URL: str = Field(...)
+    ANALYSIS_SERVICE_URL: str = Field(default="http://analysis-service:8001")
+    COLLECTOR_SERVICE_URL: str = Field(default="http://collector-service:8002")
+    ABSA_SERVICE_URL: str = Field(default="http://absa-service:8003")
 
     # Eureka discovery (optional)
     EUREKA_ENABLED: bool = Field(default=False)
@@ -132,9 +132,6 @@ def _load_settings() -> Settings:
     required = [
         "DATABASE_URL",
         "REDIS_URL",
-        "ANALYSIS_SERVICE_URL",
-        "COLLECTOR_SERVICE_URL",
-        "ABSA_SERVICE_URL",
     ]
     return load_settings("alert-service", settings_cls=Settings, require=required)
 

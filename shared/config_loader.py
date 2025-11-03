@@ -24,8 +24,7 @@ _DEFAULT_TTL_SECONDS = float(os.getenv("CONSUL_CACHE_TTL", "60"))
 
 
 def _normalize_key(raw: str) -> str:
-    token = raw.split("/")[-1]
-    cleaned = "".join(ch if ch.isalnum() else "_" for ch in token)
+    cleaned = "".join(ch if ch.isalnum() else "_" for ch in raw)
     return cleaned.upper()
 
 
@@ -33,8 +32,8 @@ def _decode_value(value_b64: Optional[str]) -> Optional[str]:
     if value_b64 in (None, ""):
         return None
     try:
-        decoded = base64.b64decode(value_b64).decode("utf-8")
-    except (ValueError, UnicodeDecodeError) as exc:
+        decoded = base64.b64decode(value_b64, validate=True).decode("utf-8")
+    except Exception as exc:
         raise ConsulClientError(f"Invalid base64 payload: {exc}") from exc
     return decoded.strip()
 

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # Dependencies (required)
     DATABASE_URL: str = Field(...)
     REDIS_URL: str = Field(...)
-    ANALYSIS_SERVICE_URL: str = Field(...)
+    ANALYSIS_SERVICE_URL: str = Field(default="http://analysis-service:8001")
 
     # Eureka discovery (optional)
     EUREKA_ENABLED: bool = Field(default=False)
@@ -55,7 +55,6 @@ def _load_settings() -> Settings:
     required = [
         "DATABASE_URL",
         "REDIS_URL",
-        "ANALYSIS_SERVICE_URL",
     ]
     return load_settings("absa-service", settings_cls=Settings, require=required)
 

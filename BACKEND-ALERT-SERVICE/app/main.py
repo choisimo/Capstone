@@ -11,6 +11,8 @@ Alert Service 메인 모듈
 - 알림 히스토리 관리
 """
 
+import logging
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -18,6 +20,8 @@ from app.db import engine, Base
 from app.routers import alerts, rules, notifications
 from app.config import settings
 from shared.eureka_client import create_manager_from_settings
+
+logger = logging.getLogger(__name__)
 
 # FastAPI 애플리케이션 인스턴스 생성
 app = FastAPI(
@@ -58,7 +62,11 @@ async def startup_event():
     서비스 시작 시 데이터베이스 테이블을 생성합니다.
     """
     Base.metadata.create_all(bind=engine)  # SQLAlchemy 모델 기반 테이블 생성
-    await eureka_manager.register()
+    if eureka_manager.is_enabled:
+        try:
+            await eureka_manager.register()
+        except Exception:
+            logger.warning("Eureka registration failed; continuing without discovery", exc_info=True)
 
 @app.get("/health")
 async def health_check():
@@ -102,7 +110,11 @@ async def root():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await eureka_manager.deregister()
+    if eureka_manager.is_enabled:
+        try:
+            await eureka_manager.deregister()
+        except Exception:
+            logger.warning("Eureka deregistration failed", exc_info=True)
 
 
 if __name__ == "__main__":

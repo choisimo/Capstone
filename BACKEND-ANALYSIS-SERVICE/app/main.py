@@ -58,13 +58,21 @@ async def lifespan(app: FastAPI):
     # 애플리케이션 시작 시 - 데이터베이스 테이블 생성
     Base.metadata.create_all(bind=engine)  # SQLAlchemy 모델 기반 테이블 생성
     logger.info("Analysis Service starting up...")  # 시작 로그
-    await eureka_manager.register()
+    if eureka_manager.is_enabled:
+        try:
+            await eureka_manager.register()
+        except Exception:
+            logger.warning("Eureka registration failed; continuing without discovery", exc_info=True)
     try:
         yield  # 애플리케이션 실행
     finally:
         # 애플리케이션 종료 시
         logger.info("Analysis Service shutting down...")  # 종료 로그
-        await eureka_manager.deregister()
+        if eureka_manager.is_enabled:
+            try:
+                await eureka_manager.deregister()
+            except Exception:
+                logger.warning("Eureka deregistration failed", exc_info=True)
 
 
 # FastAPI 애플리케이션 인스턴스 생성
