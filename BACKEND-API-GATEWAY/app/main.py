@@ -15,12 +15,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 import httpx
+import logging
 from contextlib import asynccontextmanager
 
 from app.config import settings
 from app.routers import analysis, collector, absa, alerts, osint_orchestrator, osint_planning, osint_source
 from app.middleware.auth import auth_middleware, rbac_middleware
 from app.middleware.rate_limit import rate_limit_middleware
+from shared.eureka_client import create_manager_from_settings
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,7 +32,8 @@ async def lifespan(app: FastAPI):
     애플리케이션 생명주기 관리 함수
     
     애플리케이션 시작 시 HTTP 클라이언트를 초기화하고,
-    종료 시 리소스를 정리합니다.
+    선택적으로 Eureka에 등록한 뒤,
+    종료 시 Eureka 등록 해제와 리소스 정리를 수행합니다.
     
     Args:
         app: FastAPI 애플리케이션 인스턴스
@@ -39,9 +44,33 @@ async def lifespan(app: FastAPI):
     # 애플리케이션 시작 시 - HTTP 클라이언트 초기화
     # 30초 타임아웃으로 설정하여 느린 서비스 응답도 처리 가능
     app.state.http_client = httpx.AsyncClient(timeout=30.0)
-    yield
-    # 애플리케이션 종료 시 - HTTP 클라이언트 정리
-    await app.state.http_client.aclose()
+
+    eureka_manager = create_manager_from_settings(
+        enabled=settings.EUREKA_ENABLED,
+        service_urls=settings.EUREKA_SERVICE_URLS,
+        app_name=settings.EUREKA_APP_NAME,
+        instance_port=settings.PORT,
+        instance_host=settings.EUREKA_INSTANCE_HOST,
+        instance_ip=settings.EUREKA_INSTANCE_IP,
+        metadata=settings.EUREKA_METADATA,
+    )
+    if eureka_manager.is_enabled:
+        try:
+            await eureka_manager.register()
+        except Exception:
+            logger.warning("Eureka registration failed; continuing without discovery", exc_info=True)
+
+    try:
+        yield
+    finally:
+        if eureka_manager.is_enabled:
+            try:
+                await eureka_manager.deregister()
+            except Exception:
+                logger.warning("Eureka deregistration failed", exc_info=True)
+        # 애플리케이션 종료 시 - HTTP 클라이언트 정리
+        await app.state.http_client.aclose()
+
 
 # FastAPI 애플리케이션 인스턴스 생성
 # lifespan 파라미터를 통해 생명주기 관리 함수 연결
