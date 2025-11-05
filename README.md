@@ -1,7 +1,7 @@
 ---
 docsync: true
-last_synced: 2025-11-03T00:31:06+0000
-source_sha: 847245835d76f5aa9e838ae26052a31f4ae81840
+last_synced: 2025-11-05T01:26:03+0000
+source_sha: a96d47d4d3d8918b1e2890dfde200f76f1651b14
 coverage: 1.0
 ---
 # 국민연금 온라인 여론 분석·정책 피드백 시스템
