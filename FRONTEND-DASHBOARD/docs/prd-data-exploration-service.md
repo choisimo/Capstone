@@ -1,7 +1,7 @@
 ---
 docsync: true
-last_synced: 2025-11-02T13:22:08+0000
-source_sha: 6801571a3708f17681de4426d3ea0781fdd5c757
+last_synced: 2025-11-03T00:31:06+0000
+source_sha: 847245835d76f5aa9e838ae26052a31f4ae81840
 coverage: 1.0
 ---
 # AI 기반 데이터 수집 및 탐색 서비스 PRD
