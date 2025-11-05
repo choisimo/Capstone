@@ -5,6 +5,7 @@ from fastapi import FastAPI, Response
 from app.config import settings
 from app.routers import tasks
 from app.routers import dashboard
+from shared.eureka_client import create_manager_from_settings
 import httpx
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 try:
@@ -22,6 +23,16 @@ app = FastAPI(
     title="OSINT Task Orchestrator Service",
     description="Orchestrates OSINT tasks with priority-based queue management and worker coordination",
     version="1.0.0"
+)
+
+eureka_manager = create_manager_from_settings(
+    enabled=settings.EUREKA_ENABLED,
+    service_urls=settings.EUREKA_SERVICE_URLS,
+    app_name=settings.EUREKA_APP_NAME,
+    instance_port=settings.PORT,
+    instance_host=settings.EUREKA_INSTANCE_HOST,
+    instance_ip=settings.EUREKA_INSTANCE_IP,
+    metadata=settings.EUREKA_METADATA,
 )
 
 app.include_router(tasks.router)
@@ -49,9 +60,9 @@ async def _ensure_group(client):
         raise
 
 async def _init_audit():
-    if not settings.database_url or not asyncpg:
+    if not settings.DATABASE_URL or not asyncpg:
         return None
-    pool = await asyncpg.create_pool(dsn=settings.database_url, min_size=1, max_size=5)
+    pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL, min_size=1, max_size=5)
     async with pool.acquire() as conn:
         await conn.execute(
             """
@@ -83,10 +94,10 @@ async def _write_audit(pool, event_type: str, entry_id: str, timestamp_str: str,
         pass
 
 async def _consume_events():
-    if not settings.redis_url or not aioredis:
+    if not settings.REDIS_URL or not aioredis:
         # Redis 미설정 또는 의존성 없음: 소비자 비활성화
         return
-    client = aioredis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
+    client = aioredis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
     await _ensure_group(client)
     audit_pool = await _init_audit()
     http_timeout = httpx.Timeout(10.0)
@@ -157,7 +168,7 @@ async def _consume_events():
                         if should_alert:
                             rule_id = None
                             try:
-                                rule_id_env = getattr(settings, "system_alert_rule_id", None)
+                                rule_id_env = getattr(settings, "SYSTEM_ALERT_RULE_ID", None)
                             except Exception:
                                 rule_id_env = None
                             if rule_id_env:
@@ -165,7 +176,7 @@ async def _consume_events():
                             # rule_id 없는 경우, Alert Service와의 계약상 생성 불가할 수 있어 건너뜀
                             if rule_id:
                                 try:
-                                    alert_url_base = getattr(settings, "alert_service_url", None) or "http://alert-service:8004"
+                                    alert_url_base = getattr(settings, "ALERT_SERVICE_URL", None) or "http://alert-service:8004"
                                     alert_url = f"{alert_url_base.rstrip('/')}/alerts"
                                     body = {
                                         "rule_id": rule_id,
@@ -211,6 +222,8 @@ async def _consume_events():
 async def on_startup():
     # 백그라운드 소비자 태스크 시작
     app.state.consumer_task = asyncio.create_task(_consume_events())
+    await eureka_manager.register()
+
 
 @app.on_event("shutdown")
 async def on_shutdown():
@@ -222,6 +235,7 @@ async def on_shutdown():
             await task
         except Exception:
             pass
+    await eureka_manager.deregister()
 
 @app.get("/health")
 async def health_check():

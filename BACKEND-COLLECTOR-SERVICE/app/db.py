@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 from app.config import settings
 
-connection_url = settings.database_url
+connection_url = settings.DATABASE_URL
 if connection_url.startswith("postgresql"):
     engine = create_engine(connection_url, pool_pre_ping=True)
 else:

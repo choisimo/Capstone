@@ -49,7 +49,7 @@ class Database:
 
 # Initialize database with config
 from app.config import settings
-database = Database(settings.database_url)
+database = Database(settings.DATABASE_URL)
 
 # Dependency for FastAPI
 async def get_db():
