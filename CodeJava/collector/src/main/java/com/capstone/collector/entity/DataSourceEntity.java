@@ -1,6 +1,8 @@
 package com.capstone.collector.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
@@ -16,7 +18,7 @@ public class DataSourceEntity {
     private Boolean isActive;
     private OffsetDateTime lastCollected;
     private Integer collectionFrequency;
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "metadata_json", columnDefinition = "TEXT")
     private String metadataJson; // store as JSON string; map in service
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

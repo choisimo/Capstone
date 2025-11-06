@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: absa-service
+          uri: lb://absa-service
+          predicates:
+            - Path=/absa/**
+          filters:
+            - StripPrefix=1
+        - id: alert-service
+          uri: lb://alert-service
+          predicates:
+            - Path=/alerts/**
+          filters:
+            - StripPrefix=1
+        - id: analysis-service
+          uri: lb://analysis-service
+          predicates:
+            - Path=/analysis/**
+          filters:
+            - StripPrefix=1
+        - id: collector-service
+          uri: lb://collector-service
+          predicates:
+            - Path=/collector/**
+          filters:
+            - StripPrefix=1
+        - id: osint-orchestrator
+          uri: lb://osint-orchestrator-service
+          predicates:
+            - Path=/osint/orchestrator/**
+          filters:
+            - StripPrefix=2
+        - id: osint-planning
+          uri: lb://osint-planning-service
+          predicates:
+            - Path=/osint/planning/**
+          filters:
+            - StripPrefix=2
+        - id: osint-source
+          uri: lb://osint-source-service
+          predicates:
+            - Path=/osint/source/**
+          filters:
+            - StripPrefix=2
+server:
+  port: ${PORT:8080}
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:false}
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URLS:http://localhost:8761/eureka/}

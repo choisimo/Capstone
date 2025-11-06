@@ -6,7 +6,6 @@ import com.capstone.analysis.repository.TrendDataRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,16 +40,13 @@ public class TrendService {
             OffsetDateTime startDate, 
             OffsetDateTime endDate) {
         // Query trend data from database
-        LocalDate start = startDate.toLocalDate();
-        LocalDate end = endDate.toLocalDate();
-        
         List<TrendDataEntity> trendEntities = trendDataRepository
-                .findByEntityAndPeriodAndDateBetweenOrderByDateAsc(entity, period, start, end);
+                .findByEntityAndPeriodAndDateBetweenOrderByDateAsc(entity, period, startDate, endDate);
         
         // Convert to TrendItem DTOs
         List<TrendItem> dataPoints = trendEntities.stream()
                 .map(e -> new TrendItem(
-                        e.getDate().atStartOfDay().atOffset(OffsetDateTime.now().getOffset()),
+                        e.getDate(),
                         e.getSentimentScore(),
                         e.getVolume(),
                         e.getKeywords() != null ? List.of(e.getKeywords()) : List.of()
@@ -124,13 +120,15 @@ public class TrendService {
      * @return List<TrendItem> 트렌드 데이터 목록
      */
     public List<TrendItem> getEntityTrends(String entity, String period, int limit) {
-        // Query latest trends for entity
+        // Query latest trends for entity - using Pageable only as per repository signature
         List<TrendDataEntity> trendEntities = trendDataRepository
-                .findLatestTrendsPerEntity(entity, period, PageRequest.of(0, limit));
+                .findLatestTrendsPerEntity(PageRequest.of(0, limit));
         
+        // Filter by entity and period in memory (could be optimized with custom query)
         return trendEntities.stream()
+                .filter(e -> e.getEntity().equals(entity) && e.getPeriod().equals(period))
                 .map(e -> new TrendItem(
-                        e.getDate().atStartOfDay().atOffset(OffsetDateTime.now().getOffset()),
+                        e.getDate(),
                         e.getSentimentScore(),
                         e.getVolume(),
                         e.getKeywords() != null ? List.of(e.getKeywords()) : List.of()
@@ -146,9 +144,13 @@ public class TrendService {
      * @return List<PopularTrend> 인기 트렌드 목록
      */
     public List<PopularTrend> getPopularTrends(String period, int limit) {
+        // Calculate date range based on period
+        OffsetDateTime endDate = OffsetDateTime.now();
+        OffsetDateTime startDate = calculateStartDate(endDate, period);
+        
         // Query popular trends by volume
         List<TrendDataEntity> popularEntities = trendDataRepository
-                .findPopularTrends(period, PageRequest.of(0, limit));
+                .findPopularTrends(startDate, endDate, PageRequest.of(0, limit));
         
         return popularEntities.stream()
                 .map(e -> new PopularTrend(
@@ -169,9 +171,13 @@ public class TrendService {
      * @return List<TrendingKeyword> 트렌딩 키워드 목록
      */
     public List<TrendingKeyword> getTrendingKeywords(String period, int limit) {
+        // Calculate date range based on period
+        OffsetDateTime endDate = OffsetDateTime.now();
+        OffsetDateTime startDate = calculateStartDate(endDate, period);
+        
         // Query trends and extract keywords
         List<TrendDataEntity> trends = trendDataRepository
-                .findPopularTrends(period, PageRequest.of(0, limit * 3));
+                .findPopularTrends(startDate, endDate, PageRequest.of(0, limit * 3));
         
         // Aggregate keywords across trends
         List<TrendingKeyword> keywords = new ArrayList<>();
@@ -200,5 +206,17 @@ public class TrendService {
         return keywords.stream()
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * Calculate start date based on period
+     */
+    private OffsetDateTime calculateStartDate(OffsetDateTime endDate, String period) {
+        return switch (period.toLowerCase()) {
+            case "daily" -> endDate.minusDays(1);
+            case "weekly" -> endDate.minusWeeks(1);
+            case "monthly" -> endDate.minusMonths(1);
+            default -> endDate.minusDays(7); // Default to week
+        };
     }
 }

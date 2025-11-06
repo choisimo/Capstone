@@ -1,0 +1,3 @@
+rootProject.name = 'capstone-codejava'
+
+include 'gateway', 'collector', 'analysis', 'absa', 'alert', 'osint-orchestrator', 'osint-planning', 'osint-source'

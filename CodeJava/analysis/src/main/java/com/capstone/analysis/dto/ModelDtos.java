@@ -25,6 +25,7 @@ public class ModelDtos {
     
     public record ModelTrainingRequest(
             String model_name,
+            String model_type,
             String training_data_path,
             Map<String, Object> hyperparameters,
             double validation_split
