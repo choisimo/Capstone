@@ -210,6 +210,10 @@ tasks/
 # --- Frontend exceptions (allow tracked sources and env templates) ---
 # Allow nested src/lib even though generic 'lib/' is ignored above
 !FRONTEND-DASHBOARD/src/lib/**
+ ./docker-test-and-stability.sh
+ gradle.zip
+ tasks-refactor-envmanage.json
+ validate_project.sh
  
 # Allow environment templates while still ignoring actual env files
 !.env.example
