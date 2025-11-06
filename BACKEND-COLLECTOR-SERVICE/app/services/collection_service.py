@@ -58,7 +58,7 @@ def compute_content_hash(url: Optional[str], title: Optional[str], content: Opti
 def semantic_consistency_score(text: str) -> float:
     if not text:
         return 0.0
-    expected = getattr(settings, "qa_expected_keywords", []) or []
+    expected = getattr(settings, "QA_EXPECTED_KEYWORDS", None) or []
     total = len(expected)
     if total == 0:
         return 0.5
@@ -71,13 +71,23 @@ def http_check(url: Optional[str]) -> bool:
         return False
     try:
         parsed = urlparse(url)
-        whitelist = set(getattr(settings, "qa_domain_whitelist", []))
+        whitelist = set(getattr(settings, "QA_DOMAIN_WHITELIST", []))
         if parsed.hostname not in whitelist:
             return False
-        resp = requests.head(url, timeout=settings.request_timeout, allow_redirects=True, headers={"User-Agent": settings.user_agent})
+        resp = requests.head(
+            url,
+            timeout=settings.REQUEST_TIMEOUT,
+            allow_redirects=True,
+            headers={"User-Agent": settings.USER_AGENT},
+        )
         if 200 <= resp.status_code < 400:
             return True
-        resp = requests.get(url, timeout=settings.request_timeout, allow_redirects=True, headers={"User-Agent": settings.user_agent})
+        resp = requests.get(
+            url,
+            timeout=settings.REQUEST_TIMEOUT,
+            allow_redirects=True,
+            headers={"User-Agent": settings.USER_AGENT},
+        )
         return 200 <= resp.status_code < 400
     except Exception:
         return False
@@ -86,7 +96,7 @@ def http_check(url: Optional[str]) -> bool:
 def trust_score(url: str, http_ok: Optional[bool]) -> float:
     parsed = urlparse(url) if url else None
     hostname = parsed.hostname if parsed else None
-    whitelist = set(getattr(settings, "qa_domain_whitelist", []))
+    whitelist = set(getattr(settings, "QA_DOMAIN_WHITELIST", []))
     base = 0.9 if hostname in whitelist else 0.5
     if http_ok is True:
         base += 0.1
@@ -285,7 +295,7 @@ class RSSAdapter(BaseAdapter):
             return []
 
         def _parse():
-            return feedparser.parse(url, request_headers={"User-Agent": settings.user_agent})
+            return feedparser.parse(url, request_headers={"User-Agent": settings.USER_AGENT})
 
         parsed = self.context.backoff.run(_parse, key=url)
         events: List[RawEvent] = []
@@ -336,11 +346,11 @@ class RESTPollingAdapter(BaseAdapter):
             logger.info("REST adapter throttled", extra={"source_id": key})
             return []
 
-        headers = {"User-Agent": settings.user_agent}
+        headers = {"User-Agent": settings.USER_AGENT}
         headers = self.context.secret_resolver.inject_headers(self.config, headers)
 
         def _fetch():
-            response = requests.get(url, timeout=settings.request_timeout, headers=headers)
+            response = requests.get(url, timeout=settings.REQUEST_TIMEOUT, headers=headers)
             response.raise_for_status()
             return response.json()
 
@@ -408,11 +418,11 @@ class WebPageAdapter(BaseAdapter):
             logger.info("Web adapter throttled", extra={"source_id": key})
             return []
 
-        headers = {"User-Agent": settings.user_agent}
+        headers = {"User-Agent": settings.USER_AGENT}
         headers = self.context.secret_resolver.inject_headers(self.config, headers)
 
         def _fetch_html():
-            response = requests.get(url, timeout=settings.request_timeout, headers=headers)
+            response = requests.get(url, timeout=settings.REQUEST_TIMEOUT, headers=headers)
             response.raise_for_status()
             return response.text
 
@@ -511,8 +521,11 @@ class CollectionService:
     _secret_resolver = SecretResolver()
     _config_loader = SourceConfigLoader()
     _rate_limiter = TokenBucketRateLimiter(
-        capacity=max(1, settings.max_concurrent_requests),
-        refill_rate_per_sec=max(0.5, settings.max_concurrent_requests / max(1, settings.collection_interval / 60)),
+        capacity=max(1, settings.MAX_CONCURRENT_REQUESTS),
+        refill_rate_per_sec=max(
+            0.5,
+            settings.MAX_CONCURRENT_REQUESTS / max(1, settings.COLLECTION_INTERVAL / 60),
+        ),
     )
 
     def __init__(self, db: Session):
@@ -544,12 +557,12 @@ class CollectionService:
             if content_hash in existing_hashes or content_hash in batch_hashes:
                 continue
 
-            if not body or len(body) < settings.qa_min_content_length:
+            if not body or len(body) < settings.QA_MIN_CONTENT_LENGTH:
                 continue
 
             batch_hashes.add(content_hash)
 
-            http_ok = http_check(payload.url) if settings.qa_enable_network_checks else None
+            http_ok = http_check(payload.url) if settings.QA_ENABLE_NETWORK_CHECKS else None
             semantic_score = semantic_consistency_score(body)
 
             collected_at = raw_event.collected_at

@@ -1,68 +1,77 @@
-"""
-API Gateway 설정 모듈
+"""API Gateway configuration module with Consul-backed loader."""
 
-환경 변수와 설정값을 관리하는 모듈입니다.
-Pydantic을 사용하여 타입 체크와 검증을 수행합니다.
-"""
+from __future__ import annotations
 
-import os
-from typing import Optional
-from pydantic_settings import BaseSettings
+from typing import List, Optional
+
+from pydantic import Field, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from shared.config_loader import load_settings
+
 
 class Settings(BaseSettings):
-    """
-    API Gateway 설정 클래스
-    
-    환경 변수에서 설정을 읽어오며, .env 파일도 지원합니다.
-    각 설정값은 환경 변수로 오버라이드할 수 있습니다.
-    """
-    
-    # API Gateway 기본 설정
-    PORT: int = 8000  # API Gateway 서버 포트
-    DEBUG: bool = True  # 디버그 모드 (개발 환경에서 True, 프로덕션에서 False)
-    
-    # 마이크로서비스 URL 설정 (Compose 서비스 DNS 사용)
-    ANALYSIS_SERVICE_URL: str = "http://analysis-service:8001"  # 분석 서비스 URL
-    COLLECTOR_SERVICE_URL: str = "http://collector-service:8002"  # 수집 서비스 URL
-    ABSA_SERVICE_URL: str = "http://absa-service:8003"  # ABSA 서비스 URL
-    ALERT_SERVICE_URL: str = "http://alert-service:8004"  # 알림 서비스 URL
-    OSINT_ORCHESTRATOR_SERVICE_URL: str = "http://osint-orchestrator:8005"  # OSINT 오케스트레이터 서비스 URL
-    OSINT_PLANNING_SERVICE_URL: str = "http://osint-planning:8006"  # OSINT 계획 서비스 URL
-    OSINT_SOURCE_SERVICE_URL: str = "http://osint-source:8007"  # OSINT 소스 서비스 URL
-    
-    # 요청 타임아웃 설정 (초 단위)
-    DEFAULT_TIMEOUT: int = 30  # 일반 요청 타임아웃 (30초)
-    HEALTH_CHECK_TIMEOUT: int = 5  # 헬스 체크 타임아웃 (5초)
-    
-    # Rate Limiting 설정 (분당 요청 수)
-    RATE_LIMIT_PER_MINUTE: int = 100  # IP당 분당 최대 100개 요청 허용
-    RATE_LIMIT_REDIS_URL: Optional[str] = None  # Redis URL (예: redis://redis:6379/0)
-    
-    # JWT 인증 설정 (향후 구현 예정)
-    JWT_SECRET_KEY: Optional[str] = None  # JWT 시크릿 키 (필수 설정)
-    JWT_ALGORITHM: str = "HS256"  # JWT 암호화 알고리즘
-    JWT_EXPIRATION_HOURS: int = 24  # JWT 토큰 유효 시간 (24시간)
-    
-    # CORS(Cross-Origin Resource Sharing) 설정
-    ALLOWED_ORIGINS: list = ["*"]  # 허용된 오리진 (프로덕션에서는 특정 도메인만 허용)
-    ALLOWED_METHODS: list = ["*"]  # 허용된 HTTP 메서드
-    ALLOWED_HEADERS: list = ["*"]  # 허용된 HTTP 헤더
-    
-    # 로깅 설정
-    LOG_LEVEL: str = "INFO"  # 로그 레벨 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    
-    # 환경 설정
-    ENVIRONMENT: str = "development"  # 실행 환경 (development, staging, production)
-    
-    class Config:
-        """
-        Pydantic 설정 클래스
-        
-        환경 변수 읽기 옵션을 정의합니다.
-        """
-        env_file = ".env"  # .env 파일 경로
-        case_sensitive = True  # 환경 변수명 대소문자 구분
+    """Runtime configuration for the API Gateway service."""
 
-# 설정 싱글톤 인스턴스 생성
-# 애플리케이션 전체에서 이 인스턴스를 import하여 사용
-settings = Settings()
+    model_config = SettingsConfigDict(env_prefix="", case_sensitive=True)
+
+    # Core service settings
+    PORT: int = Field(default=8000, description="API Gateway server port")
+    DEBUG: bool = Field(default=False, description="Enable debug mode")
+    ENVIRONMENT: str = Field(default="development", description="Current runtime environment")
+
+    # Service URLs (managed via Consul configs)
+    ANALYSIS_SERVICE_URL: str = Field(..., description="URL for Analysis service")
+    COLLECTOR_SERVICE_URL: str = Field(..., description="URL for Collector service")
+    ABSA_SERVICE_URL: str = Field(..., description="URL for ABSA service")
+    ALERT_SERVICE_URL: str = Field(..., description="URL for Alert service")
+    OSINT_ORCHESTRATOR_SERVICE_URL: str = Field(..., description="URL for OSINT Orchestrator service")
+    OSINT_PLANNING_SERVICE_URL: str = Field(..., description="URL for OSINT Planning service")
+    OSINT_SOURCE_SERVICE_URL: str = Field(..., description="URL for OSINT Source service")
+
+    # Eureka discovery (optional)
+    EUREKA_ENABLED: bool = Field(default=False, description="Enable Eureka service discovery")
+    EUREKA_SERVICE_URLS: Optional[str] = Field(default=None, description="Comma-separated Eureka server URLs")
+    EUREKA_APP_NAME: str = Field(default="api-gateway", description="Eureka application name for this gateway")
+    EUREKA_INSTANCE_HOST: Optional[str] = Field(default=None, description="Override host reported to Eureka")
+    EUREKA_INSTANCE_IP: Optional[str] = Field(default=None, description="Override IP reported to Eureka")
+    EUREKA_METADATA: Optional[str] = Field(default=None, description="Extra metadata JSON for Eureka registration")
+
+    # Timeouts
+    DEFAULT_TIMEOUT: int = Field(default=30, description="Default outbound request timeout")
+    HEALTH_CHECK_TIMEOUT: int = Field(default=5, description="Health check timeout")
+
+    # Rate limiting
+    RATE_LIMIT_PER_MINUTE: int = Field(default=100, description="Max requests per minute per IP")
+    RATE_LIMIT_REDIS_URL: Optional[str] = Field(default=None, description="Redis URL for rate limiting")
+
+    # JWT configuration (secrets stored via Consul)
+    JWT_SECRET_KEY: Optional[SecretStr] = Field(default=None, description="JWT secret key")
+    JWT_ALGORITHM: str = Field(default="HS256", description="JWT algorithm")
+    JWT_EXPIRATION_HOURS: int = Field(default=24, description="JWT token lifespan")
+
+    # CORS
+    ALLOWED_ORIGINS: List[str] = Field(default_factory=lambda: ["*"])
+    ALLOWED_METHODS: List[str] = Field(default_factory=lambda: ["*"])
+    ALLOWED_HEADERS: List[str] = Field(default_factory=lambda: ["*"])
+
+    # Logging
+    LOG_LEVEL: str = Field(default="INFO")
+
+    CONFIG_SYNC_TIMESTAMP: Optional[str] = Field(default=None, description="Last Consul sync timestamp")
+
+
+def _load_settings() -> Settings:
+    required_fields = [
+        "ANALYSIS_SERVICE_URL",
+        "COLLECTOR_SERVICE_URL",
+        "ABSA_SERVICE_URL",
+        "ALERT_SERVICE_URL",
+        "OSINT_ORCHESTRATOR_SERVICE_URL",
+        "OSINT_PLANNING_SERVICE_URL",
+        "OSINT_SOURCE_SERVICE_URL",
+    ]
+    return load_settings("api-gateway", settings_cls=Settings, require=required_fields)
+
+
+settings = _load_settings()

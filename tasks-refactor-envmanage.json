@@ -1,0 +1,323 @@
+{
+  "version": "1.0",
+  "generated_at": "2025-11-02T02:28:00Z",
+  "purpose": "Consul 기반 환경 변수 통합, Jenkins CI/CD 자동화, MkDocs 문서 관리, Eureka 서비스 디스커버리 결합을 통한 환경 관리 고도화 계획",
+  "context": {
+    "business_drivers": [
+      "서비스 수 증가에 따른 환경 변수 및 네트워크 충돌 리스크 감소",
+      "CI/CD 및 문서화 자동화를 통한 배포 주기 단축",
+      "프로덕션/스테이징/개발 환경 간 일관된 설정과 거버넌스 확보"
+    ],
+    "target_environments": ["개발", "스테이징", "프로덕션"],
+    "shared_network": "microservices",
+    "governance_principles": [
+      "구성은 IaC/템플릿화하고 GitOps 파이프라인으로 관리",
+      "환경별 Consul KV 네임스페이스 및 접근 제어 분리",
+      "Eureka, Jenkins, MkDocs 아티팩트는 Consul이나 Git 기반 소스 오브 트루스로 유지"
+    ]
+  },
+  "phases": [
+    {
+      "id": "P1",
+      "name": "공통 인프라 및 거버넌스 정립",
+      "duration_weeks": 1,
+      "objectives": [
+        "단일 Docker 네트워크와 DNS 전략 수립",
+        "환경별 기본 Compose 템플릿 및 비밀 관리 정책 정의"
+      ],
+      "tasks": [
+        {
+          "id": "P1-T1",
+          "title": "microservices 네트워크 및 라우팅 표준화",
+          "description": "모든 스택에서 공유하는 microservices 네트워크를 정의하고, 포트 충돌 방지용 서비스별 고정 포트 및 Traefik/Kong 연동 룰을 문서화한다.",
+          "owners": ["DevOps"],
+          "deliverables": ["네트워크 다이어그램", "포트 및 DNS 매핑 표"],
+          "dependencies": []
+        },
+        {
+          "id": "P1-T2",
+          "title": "환경 변수 및 비밀 분류 정책 수립",
+          "description": "Consul KV 네임스페이스 구조(예: config/app/env)와 ACL 정책, Jenkins 크리덴셜 바인딩 규칙, MkDocs 빌드 시 노출 금지 키 목록을 정의한다.",
+          "owners": ["Security", "DevOps"],
+          "deliverables": ["Consul KV 스키마", "접근 제어 매트릭스"],
+          "dependencies": []
+        }
+      ],
+      "exit_criteria": ["네트워크/포트 표준이 PR 승인을 획득", "Consul ACL 및 네임스페이스 설계 문서 완성"]
+    },
+    {
+      "id": "P2",
+      "name": "Consul KV 기반 환경 변수 통합",
+      "duration_weeks": 2,
+      "objectives": [
+        "개발/프로덕션용 Consul 스택 배포",
+        "KV 초기화 자동화 및 Jenkins 연동"
+      ],
+      "tasks": [
+        {
+          "id": "P2-T1",
+          "title": "단일 노드 개발용 Consul 배포",
+          "description": "consul-compose-dev.yml을 구성해 개발 환경에서 UI/CLI 확인이 가능한 단일 노드 스택을 기동한다.",
+          "owners": ["DevOps"],
+          "deliverables": ["consul-compose-dev.yml", "기동 스크립트"]
+        },
+        {
+          "id": "P2-T2",
+          "title": "3노드 HA Consul 클러스터 구축",
+          "description": "프로덕션용 3노드 구성과 서버별 config JSON을 작성하고, healthcheck를 포함한 docker-compose-prod.yml을 정의한다.",
+          "owners": ["Infra"],
+          "deliverables": ["consul-compose-prod.yml", "server1-3.json"]
+        },
+        {
+          "id": "P2-T3",
+          "title": "Consul KV 초기화 및 동기화 스크립트",
+          "description": "init-consul-kv.sh를 Jenkins 파이프라인에서 호출할 수 있도록 정리하고, 환경별 seed 데이터를 Git에 버전 관리한다.",
+          "owners": ["DevOps", "Backend"],
+          "deliverables": ["init-consul-kv.sh", "KV seed 데이터"],
+          "dependencies": ["P2-T1", "P2-T2"]
+        },
+        {
+          "id": "P2-T4",
+          "title": "Jenkins 파이프라인에서 Consul KV 연동",
+          "description": "Jenkins Credential Binding과 Consul CLI를 이용해 배포 전/후 KV 읽기·쓰기 스텝을 구현하고, 실패 시 롤백 플로우를 정의한다.",
+          "owners": ["DevOps"],
+          "deliverables": ["Jenkinsfile 스텝", "롤백 체크리스트"],
+          "dependencies": ["P2-T3"]
+        }
+      ],
+      "exit_criteria": ["Consul dev/prod 스택이 Docker Healthcheck를 통과", "Jenkins에서 Consul KV 업데이트 작업이 성공적으로 수행"]
+    },
+    {
+      "id": "P3",
+      "name": "Eureka 서비스 디스커버리 및 포트 충돌 방지",
+      "duration_weeks": 2,
+      "objectives": [
+        "Eureka 단일/고가용성 구성을 환경별로 정립",
+        "서비스 등록/조회 자동화로 동적 포트 관리 개선"
+      ],
+      "tasks": [
+        {
+          "id": "P3-T1",
+          "title": "개발 환경 Eureka 단일 서버",
+          "description": "기본 docker-compose-eureka-dev.yml을 정의하여 개발자가 UI에서 등록 상태를 확인하고, Consul에 등록된 환경 변수 기반으로 서비스가 Eureka에 자신을 등록하도록 샘플 클라이언트를 제공한다.",
+          "owners": ["Backend"],
+          "deliverables": ["docker-compose-eureka-dev.yml", "샘플 Spring 클라이언트"]
+        },
+        {
+          "id": "P3-T2",
+          "title": "3노드 Eureka HA 클러스터",
+          "description": "프로덕션용 3노드 클러스터 compose 파일과 Dockerfile을 JCasC 방식으로 정리하고, healthcheck 및 zone 설정을 검증한다.",
+          "owners": ["Infra"],
+          "deliverables": ["docker-compose-eureka-prod.yml", "Eureka Dockerfile", "application.yml 템플릿"],
+          "dependencies": ["P1-T1"]
+        },
+        {
+          "id": "P3-T3",
+          "title": "Consul ↔ Eureka 메타데이터 동기화",
+          "description": "Consul KV에 등록된 서비스 환경 변수를 기반으로 Eureka 인스턴스 메타데이터(포트, Zone)를 자동 등록/갱신하는 스크립트를 작성한다.",
+          "owners": ["Backend", "DevOps"],
+          "deliverables": ["metadata-sync 스크립트", "구성 다이어그램"],
+          "dependencies": ["P2-T4", "P3-T2"]
+        },
+        {
+          "id": "P3-T4",
+          "title": "포트 충돌 모니터링 및 알림",
+          "description": "Eureka 레지스트리에 등록된 포트/호스트 정보를 Jenkins 파이프라인에서 검증하고, 충돌 시 Slack 알림을 발송한다.",
+          "owners": ["DevOps"],
+          "deliverables": ["포트 검증 스크립트", "알림 템플릿"],
+          "dependencies": ["P3-T3"]
+        }
+      ],
+      "exit_criteria": ["서비스 등록/해제 이벤트가 Jenkins 로그에 기록", "포트 충돌 시 자동 알림 발송"]
+    },
+    {
+      "id": "P4",
+      "name": "Jenkins 기반 CI/CD 및 품질 게이트 통합",
+      "duration_weeks": 3,
+      "objectives": [
+        "Docker-in-Docker 및 커스텀 Jenkins 이미지 구축",
+        "SonarQube, Nexus, Consul, MkDocs 연계를 포함한 멀티 스테이지 파이프라인 완성"
+      ],
+      "tasks": [
+        {
+          "id": "P4-T1",
+          "title": "DinD 기반 Jenkins 인프라 구성",
+          "description": "docker:dind 사이드카와 jenkins/jenkins:lts를 활용해 DinD 환경을 구축하고, TLS 인증서 및 볼륨 정책을 문서화한다.",
+          "owners": ["DevOps"],
+          "deliverables": ["docker-compose-jenkins-dind.yml", "보안 가이드"],
+          "dependencies": ["P1-T2"]
+        },
+        {
+          "id": "P4-T2",
+          "title": "커스텀 Jenkins 이미지 및 JCasC",
+          "description": "플러그인 사전 설치, Docker/Kubernetes CLI, JCasC 템플릿 포함 커스텀 이미지를 빌드하고 Jenkins Configuration as Code 파이프라인을 구축한다.",
+          "owners": ["DevOps"],
+          "deliverables": ["Dockerfile", "plugins.txt", "jenkins.yaml"],
+          "dependencies": ["P4-T1"]
+        },
+        {
+          "id": "P4-T3",
+          "title": "품질 및 아티팩트 툴 통합",
+          "description": "SonarQube + PostgreSQL, Nexus를 Jenkins 파이프라인에 연결하고, Consul KV 업데이트 및 Eureka 검증 스텝을 포함한 multi-stage Jenkinsfile을 작성한다.",
+          "owners": ["DevOps", "QA"],
+          "deliverables": ["Jenkinsfile", "품질 게이트 정책"],
+          "dependencies": ["P4-T2", "P2-T4", "P3-T4"]
+        },
+        {
+          "id": "P4-T4",
+          "title": "백업 및 DR 전략",
+          "description": "backup-jenkins.sh를 Cron 또는 Jenkins pipeline으로 자동 실행하고, Nexus/SonarQube 데이터 백업 절차와 복구 테스트를 수행한다.",
+          "owners": ["Infra"],
+          "deliverables": ["백업 스크립트", "복구 검증 리포트"],
+          "dependencies": ["P4-T3"]
+        }
+      ],
+      "exit_criteria": ["모든 파이프라인 스테이지가 성공적으로 실행", "백업/복구 테스트 완료"]
+    },
+    {
+      "id": "P5",
+      "name": "MkDocs 문서 자동화 및 배포",
+      "duration_weeks": 2,
+      "objectives": [
+        "실시간 리로드 개발 환경 제공",
+        "5분 주기의 Git 동기화와 프로덕션 배포 자동화"
+      ],
+      "tasks": [
+        {
+          "id": "P5-T1",
+          "title": "MkDocs 개발 모드 환경 구성",
+          "description": "mkdocs-material 이미지를 사용한 개발 환경 compose 파일을 작성하고, LIVE_RELOAD_SUPPORT 및 FAST_MODE를 활성화한다.",
+          "owners": ["TechWriter"],
+          "deliverables": ["docker-compose-mkdocs-dev.yml"],
+          "dependencies": ["P1-T1"]
+        },
+        {
+          "id": "P5-T2",
+          "title": "Git 자동 동기화 및 빌드 워커",
+          "description": "docs-sync와 mkdocs-watch 서비스로 5분 간격 git pull과 정적 사이트 생성 자동화를 구현하고, Jenkins 파이프라인에서 주기 검증을 수행한다.",
+          "owners": ["TechWriter", "DevOps"],
+          "deliverables": ["docker-compose-mkdocs-sync.yml", "Jenkins 모니터링 스텝"],
+          "dependencies": ["P5-T1", "P4-T3"]
+        },
+        {
+          "id": "P5-T3",
+          "title": "프로덕션 빌드 및 Nginx 배포",
+          "description": "mkdocs-builder + nginx 스택을 구성하고, SSL 및 캐싱 정책을 설정하여 프로덕션용 정적 사이트를 서빙한다.",
+          "owners": ["Infra", "TechWriter"],
+          "deliverables": ["docker-compose-mkdocs-prod.yml", "nginx.conf"],
+          "dependencies": ["P5-T2"]
+        },
+        {
+          "id": "P5-T4",
+          "title": "CI/CD 통합",
+          "description": "Jenkins에서 문서 빌드 파이프라인을 생성하여 git push 또는 수동 트리거 시 MkDocs 사이트를 빌드·배포하고, Consul에 공개 URL을 업데이트한다.",
+          "owners": ["TechWriter", "DevOps"],
+          "deliverables": ["MkDocs 파이프라인", "Consul 업데이트 스크립트"],
+          "dependencies": ["P5-T3", "P2-T4"]
+        }
+      ],
+      "exit_criteria": ["Git 변경 후 5분 이내 문서 자동 반영", "프로덕션 URL이 Consul에 등록"]
+    },
+    {
+      "id": "P6",
+      "name": "운영 안정화 및 거버넌스",
+      "duration_weeks": 2,
+      "objectives": [
+        "모니터링/알림/로그 수집 체계 확립",
+        "교육 및 운영 프로세스 정립"
+      ],
+      "tasks": [
+        {
+          "id": "P6-T1",
+          "title": "관측성 대시보드 구성",
+          "description": "Consul, Eureka, Jenkins, MkDocs 로그와 헬스체크를 Prometheus/Grafana 또는 ELK로 수집하고, KPI 대시보드를 설계한다.",
+          "owners": ["SRE"],
+          "deliverables": ["대시보드", "알림 룰"]
+        },
+        {
+          "id": "P6-T2",
+          "title": "운영 프로세스 및 교육",
+          "description": "변경 관리 흐름, 장애 대응 Runbook, 주기적 백업/복구 리허설 계획을 수립하고 팀 교육을 진행한다.",
+          "owners": ["DevOps", "PMO"],
+          "deliverables": ["운영 매뉴얼", "교육 자료"],
+          "dependencies": ["P4-T4"]
+        }
+      ],
+      "exit_criteria": ["운영 매뉴얼 승인", "대시보드/알림이 운영 환경에서 작동"]
+    }
+  ],
+  "cross_component_integration": [
+    {
+      "theme": "Consul ↔ Jenkins",
+      "actions": [
+        "Consul KV 변경 시 Jenkins Pipeline을 트리거하는 Webhook 또는 Polling 설정",
+        "Jenkins 배포 성공 후 Consul에 서비스 버전/빌드 번호 업데이트",
+        "Consul ACL 토큰은 Jenkins Credentials로 관리하고 감사 로그를 주기적으로 검토"
+      ]
+    },
+    {
+      "theme": "Eureka ↔ Consul",
+      "actions": [
+        "Consul KV에 정의된 서비스 포트/zone을 Eureka 등록 전에 검증",
+        "Eureka 등록 실패 시 Consul 상태를 업데이트하고 Jenkins 알림과 연계",
+        "장애 발생 시 Eureka 등록정보를 기준으로 Rolling Restart 실행"
+      ]
+    },
+    {
+      "theme": "MkDocs ↔ Jenkins",
+      "actions": [
+        "문서 저장소 변경 시 Jenkins가 빌드-배포 파이프라인을 실행",
+        "MkDocs 배포 후 사이트 URL과 새 문서 버전을 Consul과 Slack에 게시",
+        "문서 빌드 실패 시 Jira 티켓을 자동 생성하여 추적"
+      ]
+    }
+  ],
+  "risk_register": [
+    {
+      "id": "R1",
+      "description": "Consul/ETCD ACL 구성 미비로 인한 비인가 접근 위험",
+      "impact": "높음",
+      "likelihood": "중간",
+      "mitigation": "P1-T2 단계에서 ACL 정책 정의 및 Vault 통합 고려",
+      "owner": "Security"
+    },
+    {
+      "id": "R2",
+      "description": "Eureka와 실제 서비스 포트 정보 불일치로 인한 라우팅 실패",
+      "impact": "중간",
+      "likelihood": "중간",
+      "mitigation": "P3-T4 단계의 포트 검증 스크립트와 Slack 알림으로 조기 탐지",
+      "owner": "DevOps"
+    },
+    {
+      "id": "R3",
+      "description": "MkDocs 자동 빌드 시 Git 인증 실패",
+      "impact": "중간",
+      "likelihood": "낮음",
+      "mitigation": "Jenkins Credential Rotation 정책과 SSH 키 상태 모니터링",
+      "owner": "TechWriter"
+    }
+  ],
+  "operational_metrics": [
+    {
+      "name": "Consul KV 성공 동기화율",
+      "target": "99%",
+      "collection_method": "Jenkins 파이프라인 단계 성공률"
+    },
+    {
+      "name": "Eureka 등록 지연",
+      "target": "배포 후 60초 이내",
+      "collection_method": "Eureka 헬스체크 API와 Jenkins 로그 비교"
+    },
+    {
+      "name": "MkDocs 자동 배포 소요 시간",
+      "target": "Git 커밋 후 5분 이내",
+      "collection_method": "Jenkins 빌드 히스토리 분석"
+    }
+  ],
+  "communication_plan": {
+    "status_cadence": "매주 수요일 DevOps 스탠드업에서 진행 상황 공유",
+    "stakeholders": ["DevOps", "Backend", "TechWriter", "Security", "Infra"],
+    "artifact_repository": "Git (IaC 및 스크립트) + Confluence (운영 문서)"
+  }
+}

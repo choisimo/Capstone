@@ -106,7 +106,7 @@ class SourceService:
     
     def _load_sources_config(self) -> Dict:
         """Load sources configuration from YAML file"""
-        config_path = Path(settings.sources_config_file)
+        config_path = Path(settings.SOURCES_CONFIG_FILE)
         if not config_path.exists():
             config_path.parent.mkdir(parents=True, exist_ok=True)
             return {}
@@ -120,7 +120,7 @@ class SourceService:
     
     def _save_sources_config(self, config: Dict):
         """Save sources configuration to YAML file"""
-        config_path = Path(settings.sources_config_file)
+        config_path = Path(settings.SOURCES_CONFIG_FILE)
         config_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(config_path, 'w', encoding='utf-8') as f:
@@ -128,7 +128,7 @@ class SourceService:
     
     async def _initialize_sources(self):
         """Initialize sources from configuration file"""
-        if not settings.enable_dynamic_sources:
+        if not settings.ENABLE_DYNAMIC_SOURCES:
             return
         
         for category_name, sources in self.sources_config.items():
@@ -177,7 +177,7 @@ class SourceService:
                             rate_limit=crawl_policy_data.get('rate_limit', 1.0),
                             max_depth=crawl_policy_data.get('max_depth', 3),
                             timeout=crawl_policy_data.get('timeout', 30),
-                            user_agent=crawl_policy_data.get('user_agent', settings.default_user_agent),
+                            user_agent=crawl_policy_data.get('user_agent', settings.DEFAULT_USER_AGENT),
                             follow_redirects=crawl_policy_data.get('follow_redirects', True),
                             respect_robots=crawl_policy_data.get('respect_robots', True)
                         )
@@ -204,7 +204,7 @@ class SourceService:
                         print(f"Loaded source: {name} ({url})")
                         
                         # Start monitoring if enabled
-                        if settings.monitoring_interval > 0:
+                        if settings.MONITORING_INTERVAL > 0:
                             self.monitoring_tasks[source_id] = asyncio.create_task(
                                 self._monitor_source_periodic(source_id)
                             )
@@ -236,11 +236,11 @@ class SourceService:
                     await self._update_source_from_monitoring(source, monitoring)
                     
                 # Wait for next interval
-                await asyncio.sleep(settings.monitoring_interval)
+                await asyncio.sleep(settings.MONITORING_INTERVAL)
                 
             except Exception as e:
                 print(f"Monitoring error for {source_id}: {e}")
-                await asyncio.sleep(settings.monitoring_interval)
+                await asyncio.sleep(settings.MONITORING_INTERVAL)
     
     async def add_dynamic_source(self, source_data: Dict) -> OsintSource:
         """Add a new source dynamically and save to config"""
@@ -262,7 +262,7 @@ class SourceService:
         )
         
         # Add to config file if dynamic sources enabled
-        if settings.enable_dynamic_sources:
+        if settings.ENABLE_DYNAMIC_SOURCES:
             # Determine category group
             category_group = source_data.get('category_group', 'dynamic_sources')
             
@@ -287,7 +287,7 @@ class SourceService:
             self._save_sources_config(self.sources_config)
             
             # Start monitoring
-            if settings.monitoring_interval > 0:
+            if settings.MONITORING_INTERVAL > 0:
                 self.monitoring_tasks[source.id] = asyncio.create_task(
                     self._monitor_source_periodic(source.id)
                 )
@@ -306,7 +306,7 @@ class SourceService:
             del self.monitoring_tasks[source_id]
         
         # Remove from config if it's a dynamic source
-        if settings.enable_dynamic_sources:
+        if settings.ENABLE_DYNAMIC_SOURCES:
             for category_group, sources in self.sources_config.items():
                 self.sources_config[category_group] = [
                     s for s in sources if s.get('url') != source.url
@@ -771,8 +771,8 @@ class SourceService:
         start_time = datetime.utcnow()
         
         try:
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=settings.http_timeout)) as session:
-                headers = {'User-Agent': settings.default_user_agent}
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=settings.HTTP_TIMEOUT)) as session:
+                headers = {'User-Agent': settings.DEFAULT_USER_AGENT}
                 async with session.get(url, headers=headers, allow_redirects=True) as response:
                     response_time = (datetime.utcnow() - start_time).total_seconds() * 1000
                     
@@ -788,7 +788,7 @@ class SourceService:
         except asyncio.TimeoutError:
             return {
                 "success": False,
-                "response_time": settings.http_timeout * 1000,
+                "response_time": settings.HTTP_TIMEOUT * 1000,
                 "status_code": 0,
                 "error": "Timeout",
                 "checked_at": datetime.utcnow().isoformat()

@@ -6,10 +6,23 @@ from typing import Dict, Any
 
 from fastapi import FastAPI
 
+from app.config import settings
+from shared.eureka_client import create_manager_from_settings
+
 app = FastAPI(
     title="OSINT Source Service",
     description="Comprehensive OSINT source management with discovery, validation, and monitoring",
     version="1.0.0"
+)
+
+eureka_manager = create_manager_from_settings(
+    enabled=settings.EUREKA_ENABLED,
+    service_urls=settings.EUREKA_SERVICE_URLS,
+    app_name=settings.EUREKA_APP_NAME,
+    instance_port=settings.PORT,
+    instance_host=settings.EUREKA_INSTANCE_HOST,
+    instance_ip=settings.EUREKA_INSTANCE_IP,
+    metadata=settings.EUREKA_METADATA,
 )
 
 # Global service instances
@@ -50,6 +63,7 @@ async def startup_event():
             await load_initial_sources()
         
         print("🚀 OSINT Source Service startup complete")
+        await eureka_manager.register()
         
     except Exception as e:
         print(f"❌ Startup failed: {e}")
@@ -69,6 +83,8 @@ async def shutdown_event():
         
         print("✓ Database connections closed")
         print("👋 OSINT Source Service shutdown complete")
+
+        await eureka_manager.deregister()
         
     except Exception as e:
         print(f"❌ Shutdown error: {e}")

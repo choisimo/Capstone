@@ -11,18 +11,33 @@ Alert Service 메인 모듈
 - 알림 히스토리 관리
 """
 
+import logging
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from app.db import engine, Base
 from app.routers import alerts, rules, notifications
 from app.config import settings
+from shared.eureka_client import create_manager_from_settings
+
+logger = logging.getLogger(__name__)
 
 # FastAPI 애플리케이션 인스턴스 생성
 app = FastAPI(
     title="Pension Sentiment Alert Service",  # 서비스 제목
     description="Notification and alerting system for pension sentiment analysis",  # 서비스 설명
     version="1.0.0"  # API 버전
+)
+
+eureka_manager = create_manager_from_settings(
+    enabled=settings.EUREKA_ENABLED,
+    service_urls=settings.EUREKA_SERVICE_URLS,
+    app_name=settings.EUREKA_APP_NAME,
+    instance_port=settings.PORT,
+    instance_host=settings.EUREKA_INSTANCE_HOST,
+    instance_ip=settings.EUREKA_INSTANCE_IP,
+    metadata=settings.EUREKA_METADATA,
 )
 
 # CORS 미들웨어 추가 - 크로스 오리진 요청 허용
@@ -47,6 +62,11 @@ async def startup_event():
     서비스 시작 시 데이터베이스 테이블을 생성합니다.
     """
     Base.metadata.create_all(bind=engine)  # SQLAlchemy 모델 기반 테이블 생성
+    if eureka_manager.is_enabled:
+        try:
+            await eureka_manager.register()
+        except Exception:
+            logger.warning("Eureka registration failed; continuing without discovery", exc_info=True)
 
 @app.get("/health")
 async def health_check():
@@ -87,6 +107,16 @@ async def root():
         }
     }
 
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    if eureka_manager.is_enabled:
+        try:
+            await eureka_manager.deregister()
+        except Exception:
+            logger.warning("Eureka deregistration failed", exc_info=True)
+
+
 if __name__ == "__main__":
     """
     직접 실행 시 진입점
@@ -96,5 +126,5 @@ if __name__ == "__main__":
     uvicorn.run(
         app,  # FastAPI 애플리케이션 인스턴스
         host="0.0.0.0",  # 모든 네트워크 인터페이스에서 접속 허용
-        port=8004  # Alert 서비스 포트 (8004)
+        port=settings.PORT  # Alert 서비스 포트
     )

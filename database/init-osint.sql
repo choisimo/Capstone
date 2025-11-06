@@ -273,4 +273,138 @@ INSERT INTO osint_worker_nodes (node_id, node_type, capabilities, max_concurrent
 ('worker-002', 'analyzer', ARRAY['sentiment_analysis', 'keyword_expansion'], 3, 'active'),
 ('worker-003', 'alert', ARRAY['alert_generation'], 2, 'active');
 
+-- =====================================================
+-- ANALYSIS SERVICE TABLES
+-- =====================================================
+
+-- Sentiment Analysis Results
+CREATE TABLE sentiment_analysis (
+    id BIGSERIAL PRIMARY KEY,
+    content_id VARCHAR(255) NOT NULL,
+    text TEXT NOT NULL,
+    sentiment_score DECIMAL(3,2) NOT NULL CHECK (sentiment_score >= -1.0 AND sentiment_score <= 1.0),
+    sentiment_label VARCHAR(20) NOT NULL CHECK (sentiment_label IN ('positive', 'negative', 'neutral')),
+    confidence DECIMAL(3,2) NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0),
+    model_version VARCHAR(50) NOT NULL,
+    analyzed_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Trend Data
+CREATE TABLE trend_data (
+    id BIGSERIAL PRIMARY KEY,
+    entity VARCHAR(255) NOT NULL,
+    period VARCHAR(20) NOT NULL CHECK (period IN ('daily', 'weekly', 'monthly')),
+    date DATE NOT NULL,
+    sentiment_score DECIMAL(3,2) NOT NULL CHECK (sentiment_score >= -1.0 AND sentiment_score <= 1.0),
+    volume INTEGER NOT NULL DEFAULT 0,
+    keywords TEXT[],
+    trend_direction VARCHAR(20) CHECK (trend_direction IN ('increasing', 'decreasing', 'stable')),
+    trend_strength DECIMAL(5,4) CHECK (trend_strength >= 0.0 AND trend_strength <= 1.0),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(entity, period, date)
+);
+
+-- Reports
+CREATE TABLE reports (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
+    report_type VARCHAR(100) NOT NULL,
+    content JSONB NOT NULL DEFAULT '{}',
+    parameters JSONB DEFAULT '{}',
+    start_date DATE,
+    end_date DATE,
+    status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'completed', 'failed')),
+    file_path VARCHAR(1000),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ML Models
+CREATE TABLE ml_models (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    model_type VARCHAR(100) NOT NULL,
+    file_path VARCHAR(1000),
+    is_active BOOLEAN DEFAULT FALSE,
+    metrics JSONB DEFAULT '{}',
+    hyperparameters JSONB DEFAULT '{}',
+    training_job_id VARCHAR(100),
+    training_status VARCHAR(50) CHECK (training_status IN ('pending', 'running', 'completed', 'failed')),
+    training_progress INTEGER DEFAULT 0 CHECK (training_progress >= 0 AND training_progress <= 100),
+    trained_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(name, version)
+);
+
+-- =====================================================
+-- INDEXES FOR ANALYSIS SERVICE TABLES
+-- =====================================================
+
+-- Sentiment Analysis indexes
+CREATE INDEX idx_sentiment_analysis_content_id ON sentiment_analysis(content_id);
+CREATE INDEX idx_sentiment_analysis_analyzed_at ON sentiment_analysis(analyzed_at DESC);
+CREATE INDEX idx_sentiment_analysis_sentiment_label ON sentiment_analysis(sentiment_label);
+CREATE INDEX idx_sentiment_analysis_date_range ON sentiment_analysis(analyzed_at, sentiment_label);
+
+-- Trend Data indexes
+CREATE INDEX idx_trend_data_entity ON trend_data(entity);
+CREATE INDEX idx_trend_data_period ON trend_data(period);
+CREATE INDEX idx_trend_data_date ON trend_data(date DESC);
+CREATE INDEX idx_trend_data_entity_period_date ON trend_data(entity, period, date DESC);
+CREATE INDEX idx_trend_data_volume ON trend_data(volume DESC);
+CREATE INDEX idx_trend_data_keywords ON trend_data USING gin(keywords);
+
+-- Reports indexes
+CREATE INDEX idx_reports_report_type ON reports(report_type);
+CREATE INDEX idx_reports_status ON reports(status);
+CREATE INDEX idx_reports_created_at ON reports(created_at DESC);
+CREATE INDEX idx_reports_date_range ON reports(start_date, end_date);
+
+-- ML Models indexes
+CREATE INDEX idx_ml_models_model_type ON ml_models(model_type);
+CREATE INDEX idx_ml_models_is_active ON ml_models(is_active);
+CREATE INDEX idx_ml_models_training_job_id ON ml_models(training_job_id);
+CREATE INDEX idx_ml_models_training_status ON ml_models(training_status);
+CREATE INDEX idx_ml_models_created_at ON ml_models(created_at DESC);
+
+-- =====================================================
+-- TRIGGERS FOR ANALYSIS SERVICE TABLES
+-- =====================================================
+
+CREATE TRIGGER update_sentiment_analysis_updated_at BEFORE UPDATE ON sentiment_analysis FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_trend_data_updated_at BEFORE UPDATE ON trend_data FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_reports_updated_at BEFORE UPDATE ON reports FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_ml_models_updated_at BEFORE UPDATE ON ml_models FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+-- SAMPLE DATA FOR ANALYSIS SERVICE
+-- =====================================================
+
+-- Insert sample sentiment analysis
+INSERT INTO sentiment_analysis (content_id, text, sentiment_score, sentiment_label, confidence, model_version, analyzed_at) VALUES
+('content-001', '연금 정책이 매우 좋습니다', 0.8, 'positive', 0.92, 'v1.0.0', NOW() - INTERVAL '1 day'),
+('content-002', '투자 수익률이 낮아 실망스럽습니다', -0.6, 'negative', 0.85, 'v1.0.0', NOW() - INTERVAL '2 days'),
+('content-003', '은퇴 계획에 대해 알아보고 있습니다', 0.0, 'neutral', 0.78, 'v1.0.0', NOW() - INTERVAL '3 days');
+
+-- Insert sample trend data
+INSERT INTO trend_data (entity, period, date, sentiment_score, volume, keywords, trend_direction, trend_strength) VALUES
+('pension', 'daily', CURRENT_DATE - INTERVAL '1 day', 0.3, 150, ARRAY['연금', '투자', '수익'], 'increasing', 0.65),
+('pension', 'daily', CURRENT_DATE - INTERVAL '2 days', 0.2, 120, ARRAY['연금', '정책'], 'stable', 0.45),
+('retirement', 'weekly', CURRENT_DATE - INTERVAL '7 days', 0.5, 500, ARRAY['은퇴', '준비', '계획'], 'increasing', 0.75);
+
+-- Insert sample report
+INSERT INTO reports (title, report_type, content, status) VALUES
+('Weekly Sentiment Analysis Report', 'sentiment_weekly', '{"summary": "Positive sentiment increased by 15%", "total_analyses": 500}', 'completed'),
+('Monthly Trend Report', 'trend_monthly', '{"summary": "Pension topics showing upward trend", "total_entities": 10}', 'completed');
+
+-- Insert sample ML model
+INSERT INTO ml_models (name, version, model_type, is_active, metrics) VALUES
+('BERT Sentiment Analyzer', 'v1.0.0', 'sentiment_analysis', TRUE, '{"accuracy": 0.92, "f1_score": 0.89}'),
+('TrendNet Forecaster', 'v1.0.0', 'trend_analysis', TRUE, '{"mae": 0.15, "rmse": 0.21}');
+
 COMMIT;

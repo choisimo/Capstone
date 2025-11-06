@@ -1,11 +1,13 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware  
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import asyncio
+import socket
 import uvicorn
 from app.db import engine, Base, get_db
 from app.routers import sources, collections, feeds
 from app.config import settings
+from shared.eureka_client import create_manager_from_settings
 import httpx
 import redis
 
@@ -13,6 +15,33 @@ app = FastAPI(
     title="Pension Sentiment Collector Service",
     description="Web scraping and RSS feed collection for pension sentiment data",
     version="1.0.0"
+)
+
+
+def _resolve_service_port(configured_port: int) -> int:
+    if configured_port:
+        return configured_port
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("0.0.0.0", 0))
+        return sock.getsockname()[1]
+
+
+SERVICE_PORT = _resolve_service_port(settings.PORT)
+app.state.service_port = SERVICE_PORT
+
+metadata = settings.EUREKA_METADATA or {
+    "environment": settings.ENVIRONMENT,
+    "service": settings.EUREKA_APP_NAME,
+}
+
+eureka_manager = create_manager_from_settings(
+    enabled=settings.EUREKA_ENABLED,
+    service_urls=settings.EUREKA_SERVICE_URLS,
+    app_name=settings.EUREKA_APP_NAME,
+    instance_port=SERVICE_PORT,
+    instance_host=settings.EUREKA_INSTANCE_HOST,
+    instance_ip=settings.EUREKA_INSTANCE_IP,
+    metadata=metadata,
 )
 
 app.add_middleware(
@@ -73,7 +102,7 @@ async def startup_event():
         app.state.startup_attempts["redis"] = attempt
         try:
             logger.info(f"Redis connection attempt {attempt}/40")
-            r = redis.from_url(settings.redis_url, socket_connect_timeout=3, socket_timeout=3)
+            r = redis.from_url(settings.REDIS_URL, socket_connect_timeout=3, socket_timeout=3)
             r.ping()
             app.state.dependencies["redis"] = True
             logger.info("Redis connected successfully")
@@ -91,7 +120,7 @@ async def startup_event():
         app.state.startup_attempts["analysis"] = attempt
         try:
             logger.info(f"Analysis Service health check attempt {attempt}/40")
-            url = f"{settings.analysis_service_url}/health"
+            url = f"{settings.ANALYSIS_SERVICE_URL}/health"
             timeout = httpx.Timeout(connect=3.0, read=5.0)
             async with httpx.AsyncClient(timeout=timeout) as client:
                 resp = await client.get(url)
@@ -111,6 +140,7 @@ async def startup_event():
     if all(app.state.dependencies.values()):
         app.state.ready = True
         logger.info("All dependencies ready - Collector Service is ready to serve requests")
+        await eureka_manager.register()
     else:
         logger.error(f"Some dependencies are not ready: {app.state.dependencies}")
 
@@ -152,5 +182,10 @@ async def root():
         }
     }
 
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await eureka_manager.deregister()
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    uvicorn.run(app, host="0.0.0.0", port=SERVICE_PORT)
