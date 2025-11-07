@@ -16,7 +16,7 @@ services:
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
     volumes:
       - postgres-spring-data:/var/lib/postgresql/data
-      - ./infra/db/postgres/init-osint.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ../db/postgres/init-osint.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     networks:
@@ -76,7 +76,7 @@ services:
   api-gateway:
     image: pension/api-gateway:local
     build:
-      context: ./services/java
+      context: ../../services/java
       dockerfile: gateway/Dockerfile
     container_name: api-gateway-spring
     restart: unless-stopped
@@ -129,7 +129,7 @@ services:
   collector-service:
     image: pension/collector-service:local
     build:
-      context: ./services/java
+      context: ../../services/java
       dockerfile: collector/Dockerfile
     container_name: collector-service-spring
     restart: unless-stopped
@@ -171,7 +171,7 @@ services:
   analysis-service:
     image: pension/analysis-service:local
     build:
-      context: ./services/java
+      context: ../../services/java
       dockerfile: analysis/Dockerfile
     container_name: analysis-service-spring
     restart: unless-stopped
@@ -217,7 +217,7 @@ services:
   absa-service:
     image: pension/absa-service:local
     build:
-      context: ./services/java
+      context: ../../services/java
       dockerfile: absa/Dockerfile
     container_name: absa-service-spring
     restart: unless-stopped
