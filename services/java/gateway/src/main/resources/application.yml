@@ -1,0 +1,61 @@
+server:
+  port: ${PORT:8000}
+
+spring:
+  application:
+    name: api-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+services:
+  collector-url: ${SERVICES_COLLECTOR_URL:http://localhost:8002}
+  analysis-url: ${SERVICES_ANALYSIS_URL:http://localhost:8001}
+  absa-url: ${SERVICES_ABSA_URL:http://localhost:8003}
+  alert-url: ${SERVICES_ALERT_URL:http://localhost:8004}
+  osint-orchestrator-url: ${SERVICES_OSINT_ORCHESTRATOR_URL:http://localhost:8005}
+  osint-planning-url: ${SERVICES_OSINT_PLANNING_URL:http://localhost:8006}
+  osint-source-url: ${SERVICES_OSINT_SOURCE_URL:http://localhost:8007}
+
+logging:
+  level:
+    root: INFO
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  cloud:
+    gateway:
+      routes: []
+
+---
+spring:
+  config:
+    activate:
+      on-profile: staging
+  cloud:
+    gateway:
+      routes: []
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  cloud:
+    gateway:
+      routes: []

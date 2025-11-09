@@ -1,3 +1,59 @@
+# Scripts Directory
+
+## Directory Structure (Reorganized)
+
+```
+scripts/
+├── ops/        # Operations & deployment scripts
+│   ├── docker-test-and-stability.sh
+│   ├── production-start.sh
+│   └── fix-services.sh
+├── dev/        # Development utilities
+│   └── msa-test.sh
+├── tests/      # Testing & validation scripts
+│   ├── check-health.sh
+│   └── integration-test.sh
+└── README.md   # This file
+```
+
+## Operations Scripts (ops/)
+
+Scripts for deployment and operational tasks:
+
+- `docker-test-and-stability.sh` - Docker stability testing
+- `production-start.sh` - Production deployment
+- `fix-services.sh` - Service recovery utilities
+
+## Development Scripts (dev/)
+
+Development utilities:
+
+- `msa-test.sh` - Microservice testing utilities
+
+## Test Scripts (tests/)
+
+Testing and validation:
+
+- `check-health.sh` - Health check for all services
+- `integration-test.sh` - Integration test suite
+
+## Usage
+
+Make scripts executable:
+
+```bash
+chmod +x scripts/**/*.sh
+```
+
+Run from repository root:
+
+```bash
+./scripts/tests/check-health.sh
+./scripts/ops/docker-test-and-stability.sh
+```
+
+---
+
 # Meta-Development Script
 
 This folder contains a **meta-development script** (`dev.js`) and related utilities that manage tasks for an AI-driven or traditional software development workflow. The script revolves around a `tasks.json` file, which holds an up-to-date list of development tasks.
