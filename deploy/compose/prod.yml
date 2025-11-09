@@ -1,0 +1,46 @@
+version: "3.9"
+
+# Production overrides: lean infra (external dependencies assumed), profile=prod, tighter restart policies.
+# Usage: docker compose -f deploy/compose/compose.yml -f deploy/compose/prod.yml up -d
+
+services:
+  api-gateway:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    restart: always
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+
+  analysis-service:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      HIBERNATE_DDL_AUTO: validate
+    restart: always
+    # Port mapping optional; uncomment if direct access is required
+    # ports:
+    #   - "8001:8001"
+
+  collector-service:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    restart: always
+    # ports:
+    #   - "8002:8002"
+
+  absa-service:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    restart: always
+    # ports:
+    #   - "8003:8003"
+
+  frontend-dashboard:
+    environment:
+      VITE_API_GATEWAY_URL: ${VITE_API_GATEWAY_URL:-https://api.example.com}
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+
+networks:
+  capstone-net:
+    driver: bridge
