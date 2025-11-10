@@ -83,10 +83,9 @@ export default function Explore() {
     setError(undefined);
     setWarning(undefined);
     try {
-      const res = await searchAgent({ q: searchQuery, engine });
-      setResults(res.results || []);
-      if (res.warning) setWarning(res.warning);
-      else setWarning(undefined);
+      const res = await searchAgent(searchQuery);
+      setResults([]);
+      setWarning(undefined);
     } catch (e: any) {
       setError(e?.message || String(e));
     } finally {
@@ -103,11 +102,11 @@ export default function Explore() {
         const from = new Date(to.getTime() - 7 * 24 * 3600 * 1000);
         const [trendRes, kwRes, meshRes] = await Promise.all([
           fetchSentimentTrend({ from: from.toISOString(), to: to.toISOString(), agg: "day" }),
-          fetchTopKeywords({ from: from.toISOString(), to: to.toISOString(), size: 20 }),
+          fetchTopKeywords({ limit: 20, period: "daily" }),
           fetchMesh({ from: from.toISOString(), to: to.toISOString(), agg: "day", max_nodes: 200 }),
         ]);
-        setTrend(trendRes.series);
-        setKwItems(kwRes.items || []);
+        setTrend((trendRes.trends || []).map((t: any) => ({ timestamp: t.date, positive: Math.max(0, t.sentiment_score), negative: Math.max(0, -t.sentiment_score), neutral: 0 })));
+        setKwItems(Array.isArray(kwRes) ? kwRes : []);
         setMeshNodes(meshRes.nodes || []);
         setMeshLinks(meshRes.links || []);
       } catch (e) {
@@ -228,13 +227,13 @@ ${result.evidence.map((e: any, i: number) => `${i + 1}. ${e.text} (출처: ${e.s
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-40" />
-                    <XAxis dataKey="ts" tick={{ fontSize: 12 }} hide={false} />
+                    <XAxis dataKey="timestamp" tick={{ fontSize: 12 }} hide={false} />
                     <YAxis tick={{ fontSize: 12 }} width={36} />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="pos" name="긍정" stroke="#16a34a" fillOpacity={1} fill="url(#colorPos)" />
-                    <Area type="monotone" dataKey="neg" name="부정" stroke="#dc2626" fillOpacity={1} fill="url(#colorNeg)" />
-                    <Area type="monotone" dataKey="neu" name="중립" stroke="#6b7280" fillOpacity={1} fill="url(#colorNeu)" />
+                    <Area type="monotone" dataKey="positive" name="긍정" stroke="#16a34a" fillOpacity={1} fill="url(#colorPos)" />
+                    <Area type="monotone" dataKey="negative" name="부정" stroke="#dc2626" fillOpacity={1} fill="url(#colorNeg)" />
+                    <Area type="monotone" dataKey="neutral" name="중립" stroke="#6b7280" fillOpacity={1} fill="url(#colorNeu)" />
                   </AreaChart>
                 </ResponsiveContainer>
               )}

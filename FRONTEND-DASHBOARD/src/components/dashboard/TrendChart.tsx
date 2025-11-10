@@ -1,17 +1,38 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { fetchSentimentTrend } from "@/lib/api";
 
-const trendData = [
-  { date: "01-01", positive: 45, neutral: 35, negative: 20 },
-  { date: "01-02", positive: 42, neutral: 38, negative: 20 },
-  { date: "01-03", positive: 40, neutral: 35, negative: 25 },
-  { date: "01-04", positive: 38, neutral: 37, negative: 25 },
-  { date: "01-05", positive: 42, neutral: 35, negative: 23 },
-  { date: "01-06", positive: 44, neutral: 34, negative: 22 },
-  { date: "01-07", positive: 42, neutral: 35, negative: 23 },
-];
+type TrendRow = { date: string; score: number; volume: number };
 
 export function TrendChart() {
+  const [data, setData] = useState<TrendRow[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const to = new Date();
+        const from = new Date(to.getTime() - 7 * 24 * 3600 * 1000);
+        const res = await fetchSentimentTrend({ from: from.toISOString(), to: to.toISOString(), agg: 'day' });
+        const rows: TrendRow[] = (res.trends || []).map((t: any) => ({
+          date: new Date(t.date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }),
+          score: typeof t.sentiment_score === 'number' ? t.sentiment_score : 0,
+          volume: typeof t.volume === 'number' ? t.volume : 0,
+        }));
+        setData(rows);
+      } catch (e: any) {
+        setError(e?.message || '데이터 로드 실패');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -19,7 +40,7 @@ export function TrendChart() {
           <p className="text-sm font-medium mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.value}%
+              {entry.name}: {entry.value}
             </p>
           ))}
         </div>
@@ -35,46 +56,38 @@ export function TrendChart() {
       </CardHeader>
       <CardContent>
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={trendData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="date" 
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <YAxis 
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="positive" 
-                stroke="hsl(var(--sentiment-positive))" 
-                strokeWidth={2}
-                name="긍정"
-                dot={{ fill: "hsl(var(--sentiment-positive))", strokeWidth: 2, r: 4 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="neutral" 
-                stroke="hsl(var(--sentiment-neutral))" 
-                strokeWidth={2}
-                name="중립"
-                dot={{ fill: "hsl(var(--sentiment-neutral))", strokeWidth: 2, r: 4 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="negative" 
-                stroke="hsl(var(--sentiment-negative))" 
-                strokeWidth={2}
-                name="부정"
-                dot={{ fill: "hsl(var(--sentiment-negative))", strokeWidth: 2, r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {loading && (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">로딩 중...</div>
+          )}
+          {error && !loading && (
+            <div className="h-full flex items-center justify-center text-sm text-destructive">{error}</div>
+          )}
+          {!loading && !error && (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="score" 
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  name="감성 점수"
+                  dot={{ fill: "#3b82f6", strokeWidth: 2, r: 3 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>

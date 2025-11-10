@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 # Copy rest of source
 COPY . .
@@ -16,7 +16,7 @@ ARG REACT_APP_API_URL
 ENV VITE_API_URL=${REACT_APP_API_URL}
 
 # Build static assets
-RUN npm run build
+RUN node ./node_modules/vite/bin/vite.js build
 
 # -------------------- Runtime Stage --------------------
 FROM nginx:1.27-alpine AS runtime

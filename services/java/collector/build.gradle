@@ -1,14 +1,5 @@
-<<<<<<< HEAD:services/java/collector/build.gradle
 plugins { id "org.springframework.boot" }
 
-dependencies {
-  implementation "org.springframework.boot:spring-boot-starter-web"
-  implementation "org.springframework.boot:spring-boot-starter-validation"
-  implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-  runtimeOnly "org.postgresql:postgresql"
-  implementation "org.springframework.boot:spring-boot-starter-actuator"
-  implementation "com.rometools:rome:2.1.0"
-=======
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -22,5 +13,4 @@ dependencies {
 bootJar {
     archiveBaseName = 'collector'
     archiveVersion = '1.0.0-SNAPSHOT'
->>>>>>> 38703cba5ba9976fec4a9969e718ceee9ef73f61:CodeJava/collector/build.gradle
 }
