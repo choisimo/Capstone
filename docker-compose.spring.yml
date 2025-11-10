@@ -301,7 +301,7 @@ services:
       context: ./FRONTEND-DASHBOARD
       dockerfile: Dockerfile
       args:
-        REACT_APP_API_URL: http://api-gateway:${GATEWAY_PORT:-8080}
+        REACT_APP_API_URL: /api
     container_name: frontend-dashboard-spring
     restart: unless-stopped
     environment:
