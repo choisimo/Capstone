@@ -32,3 +32,13 @@ logging:
     org.springframework.data.mongodb: ${LOG_LEVEL:INFO}
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+crawl4ai:
+  url: ${CRAWL4AI_URL:http://crawl4ai:8001}
+  endpoint: ${CRAWL4AI_ENDPOINT:/crawl}
+
+perplexity:
+  api:
+    url: ${PERPLEXITY_API_URL:https://api.perplexity.ai/chat/completions}
+    key: ${PERPLEXITY_API_KEY:}
+  model: ${PERPLEXITY_MODEL:sonar}

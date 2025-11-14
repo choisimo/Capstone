@@ -46,12 +46,12 @@ make clean
 
 ## 실시간 모니터링
 
-### API 문서 (Swagger UI)
-- API Gateway: http://localhost:8000/docs
-- Analysis Service: http://localhost:8001/docs
-- Collector Service: http://localhost:8002/docs
-- ABSA Service: http://localhost:8003/docs
-- Alert Service: http://localhost:8004/docs
+### 헬스 체크 (Spring Boot Actuator)
+- API Gateway: http://localhost:8080/actuator/health
+- Analysis Service: http://localhost:8001/actuator/health
+- Collector Service: http://localhost:8002/actuator/health
+- ABSA Service: http://localhost:8003/actuator/health
+- Alert Service: http://localhost:8004/actuator/health
 
 ### 대시보드
 - Web Dashboard: http://localhost:3000

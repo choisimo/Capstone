@@ -1,32 +1,37 @@
 # alert-service
 
 ## 개요
-- **목적**: 감성/분석 지표 기반 경보 생성, 알림 채널(Slack, Email, Webhook 등) 팬아웃, 경보 이력 관리.
-- **담당 범위**: `app/routers/alerts.py`, `app/routers/rules.py`, `app/routers/notifications.py`, `app/services/alert_service.py`, `app/services/rule_service.py`, `app/services/notification_service.py`, `app/db.py`, `app/schemas.py`.
-- **운영 프로파일**: FastAPI 단일 프로세스. 외부 메시지 큐 없이 HTTP/DB 중심.
+
+- **목적**: 감성/분석 지표 기반 경보 관리 및 간단한 규칙 토글 API 제공.
+- **구현**: Java Spring Boot (Web, Actuator, JPA 설정 존재하나 현재 컨트롤러는 메모리 스텁 수준).
+- **담당 범위**: `services/java/alert/src/main/java/com/capstone/alert/controller/*`, `resources/application.yml`.
 
 ## 인터페이스
-- **REST**:
-  - `GET /alerts` · `GET /alerts/{id}` · `POST /alerts` · `PATCH /alerts/{id}` · `DELETE /alerts/{id}` (`app/routers/alerts.py`).
-  - `POST /alerts/trigger`, `POST /alerts/bulk-trigger` – 규칙 평가 후 경보 생성.
-  - `POST /alerts/{id}/acknowledge`, `POST /alerts/{id}/resolve` – 경보 상태 갱신.
-  - `GET /alerts/stats/overview`, `GET /alerts/dashboard/summary` – 통계/대시보드 데이터.
-  - `GET /alerts/{id}/history` – 상태 이력.
-  - `GET /rules`, `POST /rules`, `PUT /rules/{id}`, `DELETE /rules/{id}` (`app/routers/rules.py`).
-  - `POST /rules/{id}/test` – 규칙 시뮬레이션.
-  - `GET /notifications`, `POST /notifications/{id}/retry` 등 (`app/routers/notifications.py`).
-  - `GET /health`, `GET /` (`app/main.py`).
-- **비동기 처리**: `NotificationService` 내부에서 채널별 알림 전송. 현재 Celery 큐 연동은 코드로만 정의돼 있으며 실행체계 별도 구성 필요.
+
+- **REST (모든 경로는 `/api/v1/alerts` 접두사)**
+  - 목록 조회
+    - `GET /api/v1/alerts` → 경보 리스트(현재 빈 목록 스텁)
+  - 상태 변경
+    - `POST /api/v1/alerts/{id}/acknowledge`
+    - `POST /api/v1/alerts/{id}/resolve`
+  - 규칙 관리(간단 토글)
+    - `GET  /api/v1/alerts/rules`
+    - `PATCH /api/v1/alerts/rules/{id}` (본문의 `enabled` 또는 `is_active` 반영)
+- **헬스 체크**
+  - `GET /actuator/health`
+  - `GET /health`
 
 ## 데이터/스토리지
-- **PostgreSQL** (`app/db.py`):
-  - `AlertRule`, `Alert`, `Notification`, `AlertHistory`, `AlertSubscription` 테이블.
-  - ENUM은 문자열 열로 저장.
-- **Redis**: 설정값 존재(`app/config.py`)하지만 코드 내 직접 사용 경로 없음.
-- **Alembic**: `requirements.txt`에 포함되며 마이그레이션 관리 전제.
+
+- 현재 컨트롤러는 스텁 구현으로 DB 연동 없음. `application.yml`에는 PostgreSQL 구성이 존재하며, 향후 확장 시 JPA 연동을 고려.
 
 ## 설정(ENV)
-- `.env.example` 참고.
+
+- Compose 서비스명: `alert-service` (포트 8004)
+- 데이터베이스 환경 변수 (Compose → Spring)
+  - `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD`
+- 헬스 인디케이터
+  - 메일 인디케이터 비활성화: `management.health.mail.enabled=false` (적용됨)
 - **필수**: `DATABASE_URL`.
 - **선택**: `REDIS_URL`, Slack/Twilio/SMTP 크리덴셜, `SERVICE_NAME`, `RATE_LIMIT_PER_MINUTE`, `ENABLE_METRICS`, 외부 서비스 URL 등.
 - **보안**: API 키/비밀번호는 Secret Manager/Vault 주입. 저장소에 평문 금지.

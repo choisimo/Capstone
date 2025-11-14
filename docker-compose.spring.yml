@@ -67,6 +67,22 @@ services:
       retries: 5
       start_period: 15s
 
+  crawl4ai:
+    image: capstone/crawl4ai:local
+    build:
+      context: ./services/python/crawl-worker
+      dockerfile: Dockerfile
+    container_name: crawl4ai
+    restart: unless-stopped
+    networks:
+      - spring-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   # ===========================================
   # Spring Boot Microservices
   # ===========================================
@@ -152,12 +168,16 @@ services:
       
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # Crawl4AI sidecar URL (internal DNS)
+      CRAWL4AI_URL: http://crawl4ai:8001
     ports:
       - "8002:8002"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      crawl4ai:
         condition: service_healthy
     networks:
       - spring-network

@@ -1,81 +1,95 @@
 # api-gateway
 
+
 ## 개요
+
 - **목적**: 대시보드/자동화 클라이언트의 단일 진입점. 내부 마이크로서비스(Analysis·Collector·ABSA·Alert·OSINT 계열) 요청 프록시, 헬스 체크, 예외 처리 제공.
-- **담당 범위**: `app/main.py`, `app/routers/*.py`, `app/config.py`. 인증·레이트 제한·캐시 등 고급 기능은 미구현 상태.
+- **담당 범위**: Spring Cloud Gateway (`services/java/gateway/src/main/java/com/capstone/gateway/config/GatewayRoutes.java`, `services/java/gateway/src/main/resources/application.yml`). 인증·레이트 제한·캐시 등 고급 기능은 미구현 상태.
+
 
 ## 인터페이스
-- **REST**
-  - `GET /health` — 각 마이크로서비스 `/health` 호출 후 상태 집계.
-  - `GET /` — 게이트웨이 메타 정보 및 라우팅 대상 목록.
-  - `app/routers/analysis.py` → `/api/v1/analysis/*` (감성/트렌드/리포트/모델 API 프록시).
-  - `app/routers/collector.py` → `/api/v1/collector/*` (수집 서비스 프록시).
-  - `app/routers/absa.py` → `/api/v1/absa/*` (ABSA 서비스 프록시).
-  - `app/routers/alerts.py` → `/api/v1/alerts/*` (경보 서비스 프록시).
-  - `app/routers/osint_orchestrator.py` → `/api/v1/osint-orchestrator/*`.
-  - `app/routers/osint_planning.py` → `/api/v1/osint-planning/*`.
-  - `app/routers/osint_source.py` → `/api/v1/osint-source/*`.
+
+- **REST(경로 기반 라우팅)**
+  - Analysis Service → `/api/v1/analysis/**`, `/api/v1/sentiment/**`, `/api/v1/trends/**`, `/api/v1/reports/**`, `/api/v1/models/**`
+  - Collector Service → `/api/v1/collector/**`, `/sources/**`, `/collections/**`, `/feeds/**`
+  - ABSA Service → `/api/v1/absa/**`, `/api/v1/personas/**` (페르소나)
+  - Alert Service → `/api/v1/alerts/**`
+  - OSINT Orchestrator → `/api/v1/osint-orchestrator/**`, `/tasks/**`, `/dashboard/**`
+  - OSINT Planning → `/api/v1/osint-planning/**`, `/api/v1/plans/**`
+  - OSINT Source → `/api/v1/osint-source/**`, `/api/v1/sources/**`
 - **WebSocket/SSE**: 구현 없음.
-- **내부 통신**: 각 라우터가 `httpx.AsyncClient`로 하위 서비스 REST 호출.
+
 
 ### 라우팅 특이 사항
-- **ABSA Personas 리라이트**: ABSA 서비스의 페르소나 엔드포인트는 백엔드에서 `/api/v1/personas/*`로 마운트되어 있으며, 게이트웨이는 `/api/v1/absa/personas/*` 요청을 백엔드의 `api/v1/personas/*`로 프록시합니다.
-- **타임아웃 처리**: 프록시 요청은 기본 30초 타임아웃을 사용하며, `httpx.TimeoutException`은 504, `httpx.ConnectError`는 503으로 매핑됩니다.
+
+- **ABSA Personas 포워딩**: 게이트웨이는 `/api/v1/personas/**` 요청을 ABSA 서비스로 그대로 포워딩합니다(경로 재작성 없음).
+- **Alert 레거시 경로 제거**: `/alerts/**`, `/rules/**`, `/notifications/**` 레거시 경로는 제거됨. 현재는 `/api/v1/alerts/**`만 허용.
+
 
 ## 데이터/스토리지
+
 - **캐시 계층**: 구현 없음. 응답 캐싱·Redis 미사용.
-- **내부 상태**: FastAPI lifespan에서 `app.state.http_client` 초기화만 수행.
+- **내부 상태**: 상태 비보존(stateless) 게이트웨이. 라우팅 설정만 관리.
+
 
 ## 설정(ENV)
-- **로딩 방식**: `app/config.py::Settings` (`pydantic-settings`).
-- **주요 환경 변수**
-  - `PORT` (기본 `8000`), `DEBUG` (기본 `True`).
-  - 서비스 URL: `ANALYSIS_SERVICE_URL`, `COLLECTOR_SERVICE_URL`, `ABSA_SERVICE_URL`, `ALERT_SERVICE_URL`, `OSINT_ORCHESTRATOR_SERVICE_URL`, `OSINT_PLANNING_SERVICE_URL`, `OSINT_SOURCE_SERVICE_URL`.
-  - 타임아웃: `DEFAULT_TIMEOUT` (기본 30초), `HEALTH_CHECK_TIMEOUT` (기본 5초 — 실제 코드에서는 별도 사용 없이 상수화된 값으로 5초 지정).
-  - 레이트 제한/인증 관련 필드(`RATE_LIMIT_PER_MINUTE`, `JWT_*`)는 선언만 되어 있고 코드상 사용 없음.
-  - CORS 설정: `ALLOWED_ORIGINS`, `ALLOWED_METHODS`, `ALLOWED_HEADERS` (기본 `*`).
-- **비밀 관리**: JWT 시크릿 등 민감 값은 환경 변수로 주입. 현재 기능 미구현.
+
+- Spring Boot `application.yml` 기반 설정.
+  - 서비스 URL 프로퍼티(`services.*-url`): `collector-url`, `analysis-url`, `absa-url`, `alert-url`, `osint-orchestrator-url`, `osint-planning-url`, `osint-source-url`.
+  - Docker Compose 환경 변수 매핑: `SERVICES_COLLECTOR_URL`, `SERVICES_ANALYSIS_URL`, `SERVICES_ABSA_URL`, `SERVICES_ALERT_URL`, `SERVICES_OSINT_ORCHESTRATOR_URL`, `SERVICES_OSINT_PLANNING_URL`, `SERVICES_OSINT_SOURCE_URL`.
+  - 포트: `PORT` (기본 8080; docker-compose.spring.yml에서 주입).
+  - 프로필: `SPRING_PROFILES_ACTIVE=dev`(기본).
+
 
 ## 의존성
-- **Python 패키지**: FastAPI, httpx, pydantic-settings, uvicorn (`BACKEND-API-GATEWAY/requirements.txt`).
-- **외부 서비스**: 실제로는 각 내부 마이크로서비스 HTTP 엔드포인트.
-- **사용하지 않는 항목**: Redis, Prometheus, JWT 인증은 코드에 없음.
+
+- **주요 구성요소**: Spring Boot, Spring Cloud Gateway, Spring Actuator.
+- **참고**: 실제 의존성은 `services/java/gateway/build.gradle` 참조.
+
 
 ## 로컬 실행
-- **Uvicorn**
+
+- **Docker Compose**
+
   ```bash
-  uvicorn app.main:app --reload --port 8000
+  docker compose -f docker-compose.spring.yml up -d api-gateway
   ```
-- **Docker**: `Dockerfile`는 Python 기반 컨테이너에서 FastAPI 실행.
-  ```bash
-  docker build -t api-gateway .
-  docker run --rm -p 8000:8000 --env-file .env api-gateway
-  ```
-- **Compose**: `docker-compose.*.yml`에서 `api-gateway` 서비스 정의 확인 필요 (환경 변수로 각 서비스 URL 주입).
+
+- **포트**: 기본 8080 (`http://localhost:8080`).
+
 
 ## 관측성
-- **로그**: FastAPI/uvicorn 기본 로깅. 별도 logger 설정 없음.
+
+- **로그**: Spring Boot 기본 로깅. 별도 logger 설정 없음.
 - **메트릭/트레이스**: Prometheus/OpenTelemetry 미연결.
-- **헬스 체크**: `/health` 호출 시 개별 서비스 상태/응답 시간만 기록.
+- **헬스 체크**: Actuator `/actuator/health` 노출.
+
 
 ## 보안
+
 - **인증/인가**: 라우터에 인증 없음. API Key/JWT 검증 미구현.
 - **CORS**: 모든 Origin 허용. 프로덕션에서는 `ALLOWED_ORIGINS` 제한 필요.
 - **전송 보안**: HTTPS/TLS 구성은 외부 인프라(로드밸런서 등) 의존.
 
+
 ## SLO/성능
+
 - 공식 SLO 미정. 프록시 레이어 특성상 하위 서비스 지연에 의존.
-- 타임아웃/재시도: 각 프록시에서 httpx 타임아웃 기반. 재시도·서킷브레이커·캐시는 미구현.
+- 타임아웃/재시도: 각 프록시에서 Spring Cloud Gateway 기본 타임아웃/재시도 정책 적용.
+
 
 ## 운영/장애 대응
-- **예외 처리**: `httpx.TimeoutException`→504, `httpx.ConnectError`→503, 기타 예외→500.
-- **라이프사이클**: lifespan에서 httpx 클라이언트 생성/종료 관리.
-- **모니터링**: 헬스 체크 외 자동화 없음. Alerting은 외부 시스템 필요.
+
+- **에러 매핑**: 다운스트림 타임아웃/연결 실패 등은 Spring Cloud Gateway 기본 에러 핸들링으로 504/503 응답으로 매핑됨.
+- **라이프사이클**: 상태 비보존(stateless) 구성. 라우팅 정의는 Spring Bean으로 관리.
+- **모니터링**: Actuator 헬스 체크 중심. 추가 Alerting/메트릭 연계는 백로그.
+
 
 ## 통신 프로토콜
 - **주 통신**: HTTP/JSON 프록시.
 - **이벤트/Kafka**: 코드에 없음.
 - **WebSocket**: `/ws/alerts` 미구현.
+
 
 ## 백로그 / 개선 사항
 - 인증/레이트 제한 미들웨어 추가.

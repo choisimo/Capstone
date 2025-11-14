@@ -7,6 +7,7 @@ import com.capstone.collector.entity.DataSourceEntity;
 import com.capstone.collector.repository.CollectionJobRepository;
 import com.capstone.collector.repository.CollectedDataRepository;
 import com.capstone.collector.repository.DataSourceRepository;
+import com.capstone.collector.strategy.CollectionStrategy;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class CollectionService {
     private final CollectedDataRepository dataRepo;
     private final DataSourceRepository sourceRepo;
     private final ObjectMapper objectMapper;
+    private final List<CollectionStrategy> strategies;
 
     @Value("${collection.min-content-length:100}")
     private int minContentLength;
@@ -40,11 +42,13 @@ public class CollectionService {
     public CollectionService(CollectionJobRepository jobRepo,
                              CollectedDataRepository dataRepo,
                              DataSourceRepository sourceRepo,
-                             ObjectMapper objectMapper) {
+                             ObjectMapper objectMapper,
+                             List<CollectionStrategy> strategies) {
         this.jobRepo = jobRepo;
         this.dataRepo = dataRepo;
         this.sourceRepo = sourceRepo;
         this.objectMapper = objectMapper;
+        this.strategies = strategies;
     }
 
     @Transactional
@@ -117,8 +121,26 @@ public class CollectionService {
     }
 
     private int performCollectionForSource(DataSourceEntity source) {
-        logger.info("Collecting from source: {} ({})", source.getName(), source.getSourceType());
-        return 0;
+        String type = source.getSourceType();
+        logger.info("Collecting from source: {} (type={})", source.getName(), type);
+
+        CollectionStrategy strategy = strategies == null ? null : strategies.stream()
+                .filter(s -> s.supports(type))
+                .findFirst()
+                .orElse(null);
+
+        if (strategy == null) {
+            logger.warn("No collection strategy for type: {} (sourceId={})", type, source.getId());
+            return 0;
+        }
+        logger.info("Found strategy {} for type {}", strategy.getClass().getSimpleName(), type);
+
+        try {
+            return strategy.collect(source).join();
+        } catch (Exception ex) {
+            logger.error("Strategy collect failed for source {}: {}", source.getId(), ex.getMessage());
+            return 0;
+        }
     }
 
     @Transactional(readOnly = true)

@@ -4,6 +4,20 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'osint_user') THEN
+        CREATE ROLE osint_user LOGIN PASSWORD 'osint_password';
+    END IF;
+END $$;
+
+GRANT CONNECT ON DATABASE osint_db TO osint_user;
+GRANT USAGE, CREATE ON SCHEMA public TO osint_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO osint_user;
+GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO osint_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO osint_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO osint_user;
+
 -- =====================================================
 -- OSINT PLANNING SERVICE TABLES
 -- =====================================================

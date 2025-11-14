@@ -33,6 +33,9 @@ management:
     health:
       show-details: always
 
+crawl4ai:
+  url: ${CRAWL4AI_URL:http://crawl4ai:8001}
+
 ---
 spring:
   config:

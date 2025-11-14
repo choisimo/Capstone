@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8004
 
 spring:
   application:
@@ -46,6 +46,10 @@ management:
     export:
       prometheus:
         enabled: true
+
+  health:
+    mail:
+      enabled: false
 
 logging:
   level:

@@ -47,6 +47,10 @@ management:
       prometheus:
         enabled: true
 
+  health:
+    mail:
+      enabled: false
+
 logging:
   level:
     com.capstone.alert: ${LOG_LEVEL:INFO}

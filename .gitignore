@@ -210,3 +210,5 @@ infra/db/data/
 *.bak
 *.swp
 *~.windsurfrules
+gradle.zip
+node_modules
