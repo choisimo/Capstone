@@ -3,21 +3,29 @@ package com.capstone.collector.service;
 import com.capstone.collector.dto.FeedDtos.*;
 import com.capstone.collector.entity.DataSourceEntity;
 import com.capstone.collector.repository.DataSourceRepository;
+import com.capstone.collector.util.VirtualExecutors;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.net.URL;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +33,11 @@ public class FeedService {
     private static final Logger logger = LoggerFactory.getLogger(FeedService.class);
     
     private final DataSourceRepository sourceRepo;
+    private final ExecutorService executor = VirtualExecutors.newVirtualPerTaskOrCached();
+    private final ConcurrentHashMap<String, Semaphore> domainLimiters = new ConcurrentHashMap<>();
+
+    @Value("${collector.rss.max-concurrent-per-domain:2}")
+    private int maxConcurrentPerDomain;
     
     public FeedService(DataSourceRepository sourceRepo) {
         this.sourceRepo = sourceRepo;
@@ -107,32 +120,36 @@ public class FeedService {
         }
     }
     
-    @Transactional
     public FetchAllResult fetchAll() {
         List<DataSourceEntity> feeds = sourceRepo.findAll().stream()
                 .filter(s -> "rss".equalsIgnoreCase(s.getSourceType()))
                 .filter(s -> Boolean.TRUE.equals(s.getIsActive()))
                 .collect(Collectors.toList());
-        
-        int successCount = 0;
-        int errorCount = 0;
-        List<FeedFetchResult> results = new java.util.ArrayList<>();
-        
+
+        List<CompletableFuture<FeedFetchResult>> futures = new ArrayList<>();
         for (DataSourceEntity feed : feeds) {
-            try {
-                FeedFetchResult result = fetchFeed(feed.getId());
-                results.add(result);
-                if (result.items_collected() > 0) {
-                    successCount++;
-                } else {
-                    errorCount++;
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                String domain = extractDomain(feed.getUrl());
+                Semaphore limiter = domainLimiters.computeIfAbsent(domain, d -> new Semaphore(maxConcurrentPerDomain));
+                try {
+                    limiter.acquire();
+                    return fetchFeed(feed.getId());
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return new FeedFetchResult(String.valueOf(feed.getId()), feed.getName(), 0, List.of(), OffsetDateTime.now(ZoneOffset.UTC));
+                } catch (Exception ex) {
+                    logger.error("Failed to fetch feed: {}", feed.getId(), ex);
+                    return new FeedFetchResult(String.valueOf(feed.getId()), feed.getName(), 0, List.of(), OffsetDateTime.now(ZoneOffset.UTC));
+                } finally {
+                    limiter.release();
                 }
-            } catch (Exception ex) {
-                logger.error("Failed to fetch feed: {}", feed.getId(), ex);
-                errorCount++;
-            }
+            }, executor));
         }
-        
+
+        List<FeedFetchResult> results = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+        int successCount = (int) results.stream().filter(r -> r.items_collected() > 0).count();
+        int errorCount = feeds.size() - successCount;
+
         return new FetchAllResult(
                 feeds.size(),
                 successCount,
@@ -178,5 +195,16 @@ public class FeedService {
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toOffsetDateTime();
+    }
+    
+    private String extractDomain(String url) {
+        try {
+            URI uri = new URI(url);
+            String host = uri.getHost();
+            return host != null ? host : url;
+        } catch (Exception e) {
+            logger.warn("Failed to extract domain from URL: {}", url, e);
+            return url;
+        }
     }
 }

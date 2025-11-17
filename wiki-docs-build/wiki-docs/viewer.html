@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>문서 뷰어</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>body{margin:0;background:#e2e8f0;font-family:system-ui;}header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;background:rgba(255,255,255,.9);border-bottom:1px solid rgba(148,163,184,.5);backdrop-filter:blur(8px);}h1{margin:0;font-size:1rem;word-break:break-all;font-family:ui-monospace;}main{max-width:1200px;margin:0 auto;padding:1.5rem;}#content{background:#fff;border-radius:12px;box-shadow:0 10px 35px rgba(15,23,42,.07);padding:1.5rem;min-height:70vh;overflow-x:auto;}a.button{display:inline-flex;align-items:center;padding:.45rem .85rem;border-radius:7px;text-decoration:none;font-size:.85rem;}a.primary{background:#2563eb;color:#fff;}a.secondary{background:rgba(148,163,184,.3);color:#1f2937;margin-right:.6rem;}pre{background:rgba(15,23,42,.08);padding:1rem;border-radius:10px;overflow:auto;}iframe.preview{width:100%;min-height:70vh;border:1px solid rgba(148,163,184,.4);border-radius:10px;background:#fff;}</style>
+</head>
+<body>
+  <header>
+    <h1 id="doc-path">문서 로드 중...</h1>
+    <nav>
+      <a class="button secondary" href="index.html">← 목록</a>
+      <a class="button primary" id="raw-link" target="_blank">Raw</a>
+    </nav>
+  </header>
+  <main>
+    <section id="content">문서를 불러오는 중입니다...</section>
+  </main>
+<script>function qp(n){return new URLSearchParams(window.location.search).get(n);}function ext(p){const i=p.lastIndexOf('.');return i===-1?'':p.slice(i).toLowerCase();}async function load(){const path=qp('path');if(!path){document.getElementById('content').textContent='path 파라미터가 필요합니다.';return;}document.title=path+' – 문서 뷰어';document.getElementById('doc-path').textContent=path;const raw=`raw/${path}`;document.getElementById('raw-link').href=raw;const extension=ext(path);if(['.pdf','.doc','.docx'].includes(extension)){document.getElementById('content').innerHTML='<p>브라우저 미리보기를 지원하지 않는 형식입니다. Raw 링크를 통해 다운로드하세요.</p>';return;}if(['.html','.htm'].includes(extension)){document.getElementById('content').innerHTML=`<iframe class="preview" src='${raw}'></iframe>`;return;}try{const res=await fetch(raw,{cache:'no-store'});if(!res.ok)throw new Error('문서 요청 실패');const text=await res.text();if(['.md','.markdown','.mdx'].includes(extension)){document.getElementById('content').innerHTML=marked.parse(text,{mangle:false,headerIds:true});return;}if(['.json','.yaml','.yml','.csv','.tsv','.txt','.rst','.adoc','.log'].includes(extension)){const escaped=text.replace(/[&<>]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));document.getElementById('content').innerHTML=`<pre>${escaped}</pre>`;return;}document.getElementById('content').innerHTML='<p>이 형식은 기본 미리보기 대상이 아닙니다. Raw 링크를 통해 확인하세요.</p>'; }catch(err){document.getElementById('content').textContent=`문서를 불러오지 못했습니다: ${err.message}`;}}load();</script>
+</body>
+</html>

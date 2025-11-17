@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ===========================================
   # Infrastructure Services
@@ -69,6 +67,22 @@ services:
       retries: 5
       start_period: 15s
 
+  crawl4ai:
+    image: capstone/crawl4ai:local
+    build:
+      context: ./services/python/crawl-worker
+      dockerfile: Dockerfile
+    container_name: crawl4ai
+    restart: unless-stopped
+    networks:
+      - spring-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   # ===========================================
   # Spring Boot Microservices
   # ===========================================
@@ -117,10 +131,12 @@ services:
         condition: service_started
       absa-service:
         condition: service_started
+      alert-service:
+        condition: service_started
     networks:
       - spring-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${GATEWAY_PORT:-8080}/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${GATEWAY_PORT:-8080}/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -152,6 +168,8 @@ services:
       
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # Crawl4AI sidecar URL (internal DNS)
+      CRAWL4AI_URL: http://crawl4ai:8001
     ports:
       - "8002:8002"
     depends_on:
@@ -159,10 +177,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      crawl4ai:
+        condition: service_healthy
     networks:
       - spring-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8002/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -208,7 +228,7 @@ services:
     networks:
       - spring-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8001/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -254,11 +274,82 @@ services:
     networks:
       - spring-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8003/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8003/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  alert-service:
+    image: pension/alert-service:local
+    build:
+      context: ./services/java
+      dockerfile: alert/Dockerfile
+    container_name: alert-service-spring
+    restart: unless-stopped
+    environment:
+      # Spring Configuration
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      PORT: 8004
+
+      # Database Configuration
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-osint_db}
+      DATABASE_USER: ${DB_USER:-osint_user}
+      DATABASE_PASSWORD: ${DB_PASSWORD:-osint_password}
+
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8004:8004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - spring-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8004/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  frontend-dashboard:
+    image: pension/frontend-dashboard:local
+    build:
+      context: ./FRONTEND-DASHBOARD
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: /api
+    container_name: frontend-dashboard-spring
+    restart: unless-stopped
+    environment:
+      # Runtime fallback; built assets already bake API URL via build arg
+      VITE_API_GATEWAY_URL: http://api-gateway:${GATEWAY_PORT:-8080}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      - spring-network
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: swagger-ui
+    restart: unless-stopped
+    volumes:
+      - ./openapi-consolidated.yaml:/usr/share/nginx/html/openapi.yaml:ro
+    environment:
+      SWAGGER_JSON: /usr/share/nginx/html/openapi.yaml
+    ports:
+      - "9000:8080"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      - spring-network
 
 networks:
   spring-network:

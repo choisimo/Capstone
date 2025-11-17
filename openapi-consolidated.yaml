@@ -1,0 +1,498 @@
+openapi: 3.0.3
+info:
+  title: Capstone Consolidated Backend API
+  version: 0.1.0
+  description: |
+    Hand-crafted consolidated specification aggregating exposed REST endpoints across Spring Boot microservices (analysis, collector, absa, alert). Generated from controller annotations; may not include all field constraints. Adjust schemas after integrating springdoc-openapi.
+servers:
+  - url: http://localhost:8080
+    description: Local multi-service compose
+paths:
+  /api/v1/models:
+    get:
+      tags: [analysis]
+      summary: List ML models
+      parameters:
+        - in: query
+          name: modelType
+          schema: { type: string }
+        - in: query
+          name: activeOnly
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MLModelResponse' }
+  /api/v1/models/upload:
+    post:
+      tags: [analysis]
+      summary: Upload ML model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MLModelRequest' }
+      responses:
+        '200':
+          description: Uploaded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MLModelResponse' }
+  /api/v1/models/{modelId}:
+    get:
+      tags: [analysis]
+      summary: Get model by ID
+      parameters:
+        - in: path
+          name: modelId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/MLModelResponse' } } } }
+        '404': { description: Not Found }
+    delete:
+      tags: [analysis]
+      summary: Delete model
+      parameters:
+        - in: path
+          name: modelId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Deleted, content: { application/json: { schema: { $ref: '#/components/schemas/GenericMessage' } } } }
+        '404': { description: Not Found }
+  /api/v1/models/{modelId}/activate:
+    put:
+      tags: [analysis]
+      summary: Activate model
+      parameters:
+        - in: path
+          name: modelId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Activated, content: { application/json: { schema: { $ref: '#/components/schemas/GenericMessage' } } } }
+        '404': { description: Not Found }
+  /api/v1/models/train:
+    post:
+      tags: [analysis]
+      summary: Train model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ModelTrainingRequest' }
+      responses:
+        '200': { description: Training started, content: { application/json: { schema: { $ref: '#/components/schemas/ModelTrainingResponse' } } } }
+  /api/v1/models/training/{jobId}:
+    get:
+      tags: [analysis]
+      summary: Get training status
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TrainingStatus' } } } }
+        '404': { description: Not Found }
+  /api/v1/sentiment/analyze:
+    post:
+      tags: [analysis]
+      summary: Analyze sentiment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SentimentAnalysisRequest' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/SentimentAnalysisResponse' } } } }
+  /api/v1/sentiment/batch:
+    post:
+      tags: [analysis]
+      summary: Batch sentiment analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BatchSentimentRequest' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/BatchSentimentResponse' } } } }
+  /api/v1/sentiment/history/{contentId}:
+    get:
+      tags: [analysis]
+      summary: Sentiment history
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/SentimentHistory' } } } } }
+        '404': { description: Not Found }
+  /api/v1/sentiment/stats:
+    get:
+      tags: [analysis]
+      summary: Sentiment statistics
+      parameters:
+        - in: query
+          name: startDate
+          schema: { type: string, format: date }
+        - in: query
+          name: endDate
+          schema: { type: string, format: date }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/SentimentStats' } } } }
+  /sources/:
+    post:
+      tags: [collector]
+      summary: Create data source
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DataSourceCreate' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/DataSource' } } } }
+    get:
+      tags: [collector]
+      summary: List data sources
+      parameters:
+        - in: query
+          name: skip
+          schema: { type: integer, default: 0 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 100 }
+        - in: query
+          name: active_only
+          schema: { type: boolean }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/DataSource' } } } } }
+  /sources/{source_id}:
+    get:
+      tags: [collector]
+      summary: Get data source
+      parameters:
+        - in: path
+          name: source_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/DataSource' } } } }
+        '404': { description: Not Found }
+    put:
+      tags: [collector]
+      summary: Update data source
+      parameters:
+        - in: path
+          name: source_id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DataSourceUpdate' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/DataSource' } } } }
+        '404': { description: Not Found }
+    delete:
+      tags: [collector]
+      summary: Delete data source
+      parameters:
+        - in: path
+          name: source_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: No Content }
+        '404': { description: Not Found }
+  /sources/{source_id}/test:
+    post:
+      tags: [collector]
+      summary: Test data source
+      parameters:
+        - in: path
+          name: source_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean }, source_id: { type: integer } } } } } }
+  /api/v1/absa/models/:
+    get:
+      tags: [absa]
+      summary: List ABSA models
+      parameters:
+        - in: query
+          name: skip
+          schema: { type: integer, default: 0 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ModelListResponse' } } } }
+  /api/v1/absa/models/{modelId}:
+    get:
+      tags: [absa]
+      summary: Get ABSA model
+      parameters:
+        - in: path
+          name: modelId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ModelDetailResponse' } } } }
+        '404': { description: Not Found }
+    put:
+      tags: [absa]
+      summary: Update ABSA model
+      parameters:
+        - in: path
+          name: modelId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ModelUpdateRequest' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ModelUpdateResponse' } } } }
+        '404': { description: Not Found }
+    delete:
+      tags: [absa]
+      summary: Delete ABSA model
+      parameters:
+        - in: path
+          name: modelId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/DeleteResponse' } } } }
+        '404': { description: Not Found }
+  /api/v1/absa/models/initialize:
+    post:
+      tags: [absa]
+      summary: Initialize default ABSA models
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/InitializeResponse' } } } }
+  /api/v1/alerts:
+    get:
+      tags: [alert]
+      summary: List alerts
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: status
+          schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /api/v1/alerts/{id}/acknowledge:
+    post:
+      tags: [alert]
+      summary: Acknowledge alert
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '204': { description: No Content }
+  /api/v1/alerts/{id}/resolve:
+    post:
+      tags: [alert]
+      summary: Resolve alert
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '204': { description: No Content }
+  /api/v1/alerts/rules:
+    get:
+      tags: [alert]
+      summary: List alert rules
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: enabled
+          schema: { type: boolean }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /api/v1/alerts/rules/{id}:
+    patch:
+      tags: [alert]
+      summary: Toggle alert rule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { type: object, properties: { enabled: { type: boolean }, is_active: { type: boolean } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { rule: { type: object, properties: { id: { type: integer }, is_active: { type: boolean } } } } } } } }
+components:
+  schemas:
+    GenericMessage:
+      type: object
+      properties:
+        message: { type: string }
+    MLModelRequest:
+      type: object
+      properties:
+        name: { type: string }
+        type: { type: string }
+        path: { type: string }
+        metrics: { type: object, additionalProperties: { type: number } }
+    MLModelResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        type: { type: string }
+        version: { type: string }
+        active: { type: boolean }
+        created_at: { type: string, format: date-time }
+    ModelTrainingRequest:
+      type: object
+      properties:
+        modelName: { type: string }
+        dataPath: { type: string }
+        hyperparams: { type: object, additionalProperties: { type: string } }
+    ModelTrainingResponse:
+      type: object
+      properties:
+        jobId: { type: string }
+        status: { type: string }
+    TrainingStatus:
+      type: object
+      properties:
+        jobId: { type: string }
+        status: { type: string }
+        progress: { type: number }
+        metrics: { type: object, additionalProperties: { type: number } }
+    SentimentAnalysisRequest:
+      type: object
+      properties:
+        text: { type: string }
+        content_id: { type: string }
+    SentimentAnalysisResponse:
+      type: object
+      properties:
+        content_id: { type: string }
+        sentiment: { type: string }
+        score: { type: number }
+        confidence: { type: number }
+    BatchSentimentRequest:
+      type: object
+      properties:
+        texts:
+          type: array
+          items: { type: string }
+    BatchSentimentResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/SentimentAnalysisResponse' }
+        stats:
+          type: object
+          properties:
+            positive: { type: integer }
+            negative: { type: integer }
+            neutral: { type: integer }
+    SentimentHistory:
+      type: object
+      properties:
+        content_id: { type: string }
+        timestamp: { type: string, format: date-time }
+        sentiment: { type: string }
+        score: { type: number }
+    SentimentStats:
+      type: object
+      properties:
+        positive_ratio: { type: number }
+        negative_ratio: { type: number }
+        neutral_ratio: { type: number }
+        average_confidence: { type: number }
+    DataSourceCreate:
+      type: object
+      properties:
+        name: { type: string }
+        url: { type: string }
+        type: { type: string }
+    DataSourceUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        url: { type: string }
+        type: { type: string }
+        active: { type: boolean }
+    DataSource:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        url: { type: string }
+        type: { type: string }
+        active: { type: boolean }
+    ModelListResponse:
+      type: object
+      properties:
+        models:
+          type: array
+          items: { type: object }
+    ModelDetailResponse:
+      type: object
+      properties:
+        modelId: { type: string }
+        name: { type: string }
+        version: { type: string }
+        metadata: { type: object }
+    ModelUpdateRequest:
+      type: object
+      properties:
+        description: { type: string }
+        tags: { type: array, items: { type: string } }
+    ModelUpdateResponse:
+      type: object
+      properties:
+        modelId: { type: string }
+        updated: { type: boolean }
+    DeleteResponse:
+      type: object
+      properties:
+        modelId: { type: string }
+        deleted: { type: boolean }
+    InitializeResponse:
+      type: object
+      properties:
+        created: { type: array, items: { type: string } }
+        skipped: { type: array, items: { type: string } }

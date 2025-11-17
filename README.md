@@ -15,7 +15,7 @@ coverage: 1.0
 ## 시스템 아키텍처
 
 ### 서비스 포트 할당
-- **API Gateway**: `8000` - 메인 진입점 및 라우팅
+- **API Gateway**: `8080` - 메인 진입점 및 라우팅
 - **Analysis Service**: `8001` - 감성 분석 & ML 모델
 - **Collector Service**: `8002` - 웹 스크래핑 & RSS 수집
 - **ABSA Service**: `8003` - 속성 기반 감성 분석
@@ -46,12 +46,12 @@ make clean
 
 ## 실시간 모니터링
 
-### API 문서 (Swagger UI)
-- API Gateway: http://localhost:8000/docs
-- Analysis Service: http://localhost:8001/docs
-- Collector Service: http://localhost:8002/docs
-- ABSA Service: http://localhost:8003/docs
-- Alert Service: http://localhost:8004/docs
+### 헬스 체크 (Spring Boot Actuator)
+- API Gateway: http://localhost:8080/actuator/health
+- Analysis Service: http://localhost:8001/actuator/health
+- Collector Service: http://localhost:8002/actuator/health
+- ABSA Service: http://localhost:8003/actuator/health
+- Alert Service: http://localhost:8004/actuator/health
 
 ### 대시보드
 - Web Dashboard: http://localhost:3000

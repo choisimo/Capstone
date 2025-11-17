@@ -136,7 +136,7 @@ export function RealTimeDashboard() {
       // Fetch keywords
       const keywordPromise = fetchFn(
         `keywords-${from}-${to}`,
-        () => fetchTopKeywords({ from, to, size: 20 })
+        () => fetchTopKeywords({ limit: 20, period: 'daily' })
       );
 
       const [sentimentData, trendData, keywordData] = await Promise.all([
@@ -161,7 +161,7 @@ export function RealTimeDashboard() {
       }));
 
       // Transform keyword data
-      const keywords: Keyword[] = (keywordData.keywords || []).map((k: any) => ({
+      const keywords: Keyword[] = (Array.isArray(keywordData) ? keywordData : []).map((k: any) => ({
         keyword: k.keyword || k.word,
         score: k.score || k.count,
         count: k.count

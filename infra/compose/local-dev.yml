@@ -117,6 +117,8 @@ services:
         condition: service_started
       absa-service:
         condition: service_started
+      alert-service:
+        condition: service_started
     networks:
       - spring-network
     healthcheck:
@@ -255,6 +257,41 @@ services:
       - spring-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  alert-service:
+    image: pension/alert-service:local
+    build:
+      context: ../../services/java
+      dockerfile: alert/Dockerfile
+    container_name: alert-service-spring
+    restart: unless-stopped
+    environment:
+      # Spring Configuration
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      PORT: 8004
+
+      # Database Configuration
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-osint_db}
+      DATABASE_USER: ${DB_USER:-osint_user}
+      DATABASE_PASSWORD: ${DB_PASSWORD:-osint_password}
+
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8004:8004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - spring-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3

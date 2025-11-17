@@ -46,7 +46,7 @@ public class GatewayRoutes {
                         .uri(absaUrl))
                 
                 // Alert Service
-                .route("alert", r -> r.path("/api/v1/alerts/**", "/alerts/**", "/rules/**", "/notifications/**")
+                .route("alert", r -> r.path("/api/v1/alerts/**")
                         .uri(alertUrl))
                 
                 // OSINT Orchestrator Service

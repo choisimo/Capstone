@@ -1,9 +1,10 @@
 import React from "react";
-import type { MeshResponse } from "@/types/mesh";
+import type { MeshNode, MeshLink } from "@/types/mesh";
 
 // Minimal placeholder visualization that lists node/link counts
 // Can be swapped to force-graph later.
-export default function MeshVisualization({ data }: { data: MeshResponse }) {
+type SimpleMesh = { nodes: MeshNode[]; links: MeshLink[] };
+export default function MeshVisualization({ data }: { data: SimpleMesh }) {
   return (
     <div className="w-full h-80 rounded-lg border bg-background/50 p-4 flex flex-col gap-2">
       <div className="text-sm text-muted-foreground">Mesh Preview</div>

@@ -34,6 +34,7 @@ public class CollectedDataEntity {
     private String contentHash;
 
     @Column(name = "metadata_json", columnDefinition = "jsonb")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     private String metadataJson;
 
     @Column(nullable = false)
