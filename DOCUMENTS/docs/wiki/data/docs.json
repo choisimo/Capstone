@@ -1,0 +1,994 @@
+{
+  "generated_at": "2025-11-14T14:38:35.711245+00:00",
+  "count": 246,
+  "files": [
+    {
+      "path": "DOCKER/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/collector-service-tasks.md",
+      "title": "Collector Service Tasks"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/deployment-command-inventory.md",
+      "title": "Deployment Command Inventory"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/development-guide.md",
+      "title": "Development Guide"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/env-config-refactor-implementation-plan.md",
+      "title": "Env Config Refactor Implementation Plan"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/environment-governance-p1.md",
+      "title": "Environment Governance P1"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks-continued.md",
+      "title": "Frontend Dashboard Tasks Continued"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks.md",
+      "title": "Frontend Dashboard Tasks"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/gcp-deployment-runbook.md",
+      "title": "Gcp Deployment Runbook"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/linux-deployment-runbook.md",
+      "title": "Linux Deployment Runbook"
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/sentiment-service-tasks.md",
+      "title": "Sentiment Service Tasks"
+    },
+    {
+      "path": "DOCUMENTS/NoteForBreak/UserTrackingMethods.md",
+      "title": "Usertrackingmethods"
+    },
+    {
+      "path": "DOCUMENTS/implementation-summary.md",
+      "title": "Implementation Summary"
+    },
+    {
+      "path": "DOCUMENTS/BACKLOG/backend-api-specification.md",
+      "title": "Backend Api Specification"
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-ai-agent-crawling-service.md",
+      "title": "Prd Ai Agent Crawling Service"
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-analytics-visualization-service.md",
+      "title": "Prd Analytics Visualization Service"
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-data-exploration-service.md",
+      "title": "Prd Data Exploration Service"
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-monitoring-service.md",
+      "title": "Prd Monitoring Service"
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-notification-event-service.md",
+      "title": "Prd Notification Event Service"
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/webcrawler-integration-plan.md",
+      "title": "Webcrawler Integration Plan"
+    },
+    {
+      "path": "README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "docs/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "docs/_archive/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "docs/_archive/api/api-and-events.DOCUMENTS.md",
+      "title": "Api And Events.Documents"
+    },
+    {
+      "path": "docs/_archive/api/api-and-events.md",
+      "title": "Api And Events"
+    },
+    {
+      "path": "docs/_archive/architecture/SERVICE_DISCOVERY_POLICY.md",
+      "title": "Service Discovery Policy"
+    },
+    {
+      "path": "docs/_archive/architecture/frontend-integration.md",
+      "title": "Frontend Integration"
+    },
+    {
+      "path": "docs/_archive/architecture/gcp-architecture.md",
+      "title": "Gcp Architecture"
+    },
+    {
+      "path": "docs/_archive/architecture/mas-architecture.md",
+      "title": "Mas Architecture"
+    },
+    {
+      "path": "docs/_archive/architecture/observability-alert-pipeline.md",
+      "title": "Observability Alert Pipeline"
+    },
+    {
+      "path": "docs/_archive/architecture/system-architecture.md",
+      "title": "System Architecture"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-16.md",
+      "title": "2025 09 16"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-17.md",
+      "title": "2025 09 17"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-18.md",
+      "title": "2025 09 18"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-19.md",
+      "title": "2025 09 19"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-20.md",
+      "title": "2025 09 20"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-21.md",
+      "title": "2025 09 21"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-22.md",
+      "title": "2025 09 22"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-23.md",
+      "title": "2025 09 23"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-24.md",
+      "title": "2025 09 24"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-25.md",
+      "title": "2025 09 25"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-26.md",
+      "title": "2025 09 26"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-27.md",
+      "title": "2025 09 27"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-28.md",
+      "title": "2025 09 28"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-29.md",
+      "title": "2025 09 29"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-30-evening.md",
+      "title": "2025 09 30 Evening"
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-30.md",
+      "title": "2025 09 30"
+    },
+    {
+      "path": "docs/_archive/history/20250929-011118-history.md",
+      "title": "20250929 011118 History"
+    },
+    {
+      "path": "docs/_archive/history/20250929-172733-history.md",
+      "title": "20250929 172733 History"
+    },
+    {
+      "path": "docs/_archive/history/20250929-172847-history.md",
+      "title": "20250929 172847 History"
+    },
+    {
+      "path": "docs/_archive/history/20250929-174613-history.md",
+      "title": "20250929 174613 History"
+    },
+    {
+      "path": "docs/_archive/prd/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "docs/_archive/prd/absa-service-detailed-prd.md",
+      "title": "Absa Service Detailed Prd"
+    },
+    {
+      "path": "docs/_archive/prd/alert-service-detailed-prd.md",
+      "title": "Alert Service Detailed Prd"
+    },
+    {
+      "path": "docs/_archive/prd/analysis-service-detailed-prd.md",
+      "title": "Analysis Service Detailed Prd"
+    },
+    {
+      "path": "docs/_archive/prd/api-gateway-detailed-prd.md",
+      "title": "Api Gateway Detailed Prd"
+    },
+    {
+      "path": "docs/_archive/prd/cicd-pipeline-prd.md",
+      "title": "Cicd Pipeline Prd"
+    },
+    {
+      "path": "docs/_archive/prd/collector-service-detailed-prd.md",
+      "title": "Collector Service Detailed Prd"
+    },
+    {
+      "path": "docs/_archive/prd/frontend-prd.md",
+      "title": "Frontend Prd"
+    },
+    {
+      "path": "docs/_archive/prd/identity-linking-prd.md",
+      "title": "Identity Linking Prd"
+    },
+    {
+      "path": "docs/_archive/prd/implementation-tasks.md",
+      "title": "Implementation Tasks"
+    },
+    {
+      "path": "docs/_archive/prd/monitoring-observability-prd.md",
+      "title": "Monitoring Observability Prd"
+    },
+    {
+      "path": "docs/_archive/prd/osint-services-detailed-prd.md",
+      "title": "Osint Services Detailed Prd"
+    },
+    {
+      "path": "docs/_archive/prd/pensions-sentiment-prd.md",
+      "title": "Pensions Sentiment Prd"
+    },
+    {
+      "path": "docs/_archive/prd/persona-scheduler-prd.md",
+      "title": "Persona Scheduler Prd"
+    },
+    {
+      "path": "docs/_archive/prd/prd-implementation-status.md",
+      "title": "Prd Implementation Status"
+    },
+    {
+      "path": "docs/_archive/reports/mock-data-audit-report.md",
+      "title": "Mock Data Audit Report"
+    },
+    {
+      "path": "docs/_archive/reports/rules-compliance-report.md",
+      "title": "Rules Compliance Report"
+    },
+    {
+      "path": "docs/_archive/reports/stability-enhancement-report.md",
+      "title": "Stability Enhancement Report"
+    },
+    {
+      "path": "docs/_archive/services/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "docs/_archive/services/_template.md",
+      "title": "Template"
+    },
+    {
+      "path": "docs/_archive/services/absa-service.md",
+      "title": "Absa Service"
+    },
+    {
+      "path": "docs/_archive/services/alert-service.md",
+      "title": "Alert Service"
+    },
+    {
+      "path": "docs/_archive/services/analysis-service.md",
+      "title": "Analysis Service"
+    },
+    {
+      "path": "docs/_archive/services/api-gateway.md",
+      "title": "Api Gateway"
+    },
+    {
+      "path": "docs/_archive/services/collector-service.md",
+      "title": "Collector Service"
+    },
+    {
+      "path": "docs/_archive/services/crawler-implementation-guide.md",
+      "title": "Crawler Implementation Guide"
+    },
+    {
+      "path": "docs/_archive/services/dashboard-web.md",
+      "title": "Dashboard Web"
+    },
+    {
+      "path": "docs/_archive/services/dedup-anonymizer.md",
+      "title": "Dedup Anonymizer"
+    },
+    {
+      "path": "docs/_archive/services/detailed-task-breakdown.md",
+      "title": "Detailed Task Breakdown"
+    },
+    {
+      "path": "docs/_archive/services/event-analysis.md",
+      "title": "Event Analysis"
+    },
+    {
+      "path": "docs/_archive/services/ingest-worker.md",
+      "title": "Ingest Worker"
+    },
+    {
+      "path": "docs/_archive/services/master-task-list.md",
+      "title": "Master Task List"
+    },
+    {
+      "path": "docs/_archive/services/mesh-aggregator.md",
+      "title": "Mesh Aggregator"
+    },
+    {
+      "path": "docs/_archive/services/nlp-preprocess.md",
+      "title": "Nlp Preprocess"
+    },
+    {
+      "path": "docs/_archive/services/osint-msa-guide.md",
+      "title": "Osint Msa Guide"
+    },
+    {
+      "path": "docs/_archive/services/sentiment-service-tasks-continued.md",
+      "title": "Sentiment Service Tasks Continued"
+    },
+    {
+      "path": "docs/_archive/services/sentiment-service.md",
+      "title": "Sentiment Service"
+    },
+    {
+      "path": "docs/_archive/services/summarizer-rag.md",
+      "title": "Summarizer Rag"
+    },
+    {
+      "path": "docs/_archive/services/tagging-service.md",
+      "title": "Tagging Service"
+    },
+    {
+      "path": "docs/_archive/services/topic-modeler.md",
+      "title": "Topic Modeler"
+    },
+    {
+      "path": "docs/api/contracts.md",
+      "title": "Contracts"
+    },
+    {
+      "path": "docs/architecture/SERVICE_DISCOVERY_POLICY.md",
+      "title": "Service Discovery Policy"
+    },
+    {
+      "path": "docs/architecture/frontend-integration.md",
+      "title": "Frontend Integration"
+    },
+    {
+      "path": "docs/architecture/gcp-architecture.md",
+      "title": "Gcp Architecture"
+    },
+    {
+      "path": "docs/architecture/mas-architecture.md",
+      "title": "Mas Architecture"
+    },
+    {
+      "path": "docs/architecture/observability-alert-pipeline.md",
+      "title": "Observability Alert Pipeline"
+    },
+    {
+      "path": "docs/architecture/system-architecture.md",
+      "title": "System Architecture"
+    },
+    {
+      "path": "docs/runbooks/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "docs/runbooks/_template.md",
+      "title": "Template"
+    },
+    {
+      "path": "docs/runbooks/absa-service.md",
+      "title": "Absa Service"
+    },
+    {
+      "path": "docs/runbooks/alert-service.md",
+      "title": "Alert Service"
+    },
+    {
+      "path": "docs/runbooks/analysis-service.md",
+      "title": "Analysis Service"
+    },
+    {
+      "path": "docs/runbooks/api-gateway.md",
+      "title": "Api Gateway"
+    },
+    {
+      "path": "docs/runbooks/collector-service.md",
+      "title": "Collector Service"
+    },
+    {
+      "path": "docs/runbooks/crawler-implementation-guide.md",
+      "title": "Crawler Implementation Guide"
+    },
+    {
+      "path": "docs/runbooks/dashboard-web.md",
+      "title": "Dashboard Web"
+    },
+    {
+      "path": "docs/runbooks/dedup-anonymizer.md",
+      "title": "Dedup Anonymizer"
+    },
+    {
+      "path": "docs/runbooks/detailed-task-breakdown.md",
+      "title": "Detailed Task Breakdown"
+    },
+    {
+      "path": "docs/runbooks/event-analysis.md",
+      "title": "Event Analysis"
+    },
+    {
+      "path": "docs/runbooks/ingest-worker.md",
+      "title": "Ingest Worker"
+    },
+    {
+      "path": "docs/runbooks/master-task-list.md",
+      "title": "Master Task List"
+    },
+    {
+      "path": "docs/runbooks/mesh-aggregator.md",
+      "title": "Mesh Aggregator"
+    },
+    {
+      "path": "docs/runbooks/nlp-preprocess.md",
+      "title": "Nlp Preprocess"
+    },
+    {
+      "path": "docs/runbooks/osint-msa-guide.md",
+      "title": "Osint Msa Guide"
+    },
+    {
+      "path": "docs/runbooks/sentiment-service-tasks-continued.md",
+      "title": "Sentiment Service Tasks Continued"
+    },
+    {
+      "path": "docs/runbooks/sentiment-service.md",
+      "title": "Sentiment Service"
+    },
+    {
+      "path": "docs/runbooks/summarizer-rag.md",
+      "title": "Summarizer Rag"
+    },
+    {
+      "path": "docs/runbooks/tagging-service.md",
+      "title": "Tagging Service"
+    },
+    {
+      "path": "docs/runbooks/topic-modeler.md",
+      "title": "Topic Modeler"
+    },
+    {
+      "path": "infra/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "scripts/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "services/java/MIGRATION_PHASE1_COMPLETE.md",
+      "title": "Migration Phase1 Complete"
+    },
+    {
+      "path": "tools/.windsurf/workflows/documentation-sync-workflow.md",
+      "title": "Documentation Sync Workflow"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCKER/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/collector-service-tasks.md",
+      "title": "Collector Service Tasks"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/deployment-command-inventory.md",
+      "title": "Deployment Command Inventory"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/development-guide.md",
+      "title": "Development Guide"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/env-config-refactor-implementation-plan.md",
+      "title": "Env Config Refactor Implementation Plan"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/environment-governance-p1.md",
+      "title": "Environment Governance P1"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks-continued.md",
+      "title": "Frontend Dashboard Tasks Continued"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks.md",
+      "title": "Frontend Dashboard Tasks"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/gcp-deployment-runbook.md",
+      "title": "Gcp Deployment Runbook"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/linux-deployment-runbook.md",
+      "title": "Linux Deployment Runbook"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/DEVELOPMENT/sentiment-service-tasks.md",
+      "title": "Sentiment Service Tasks"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/NoteForBreak/UserTrackingMethods.md",
+      "title": "Usertrackingmethods"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCUMENTS/implementation-summary.md",
+      "title": "Implementation Summary"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-ai-agent-crawling-service.md",
+      "title": "Prd Ai Agent Crawling Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-analytics-visualization-service.md",
+      "title": "Prd Analytics Visualization Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-data-exploration-service.md",
+      "title": "Prd Data Exploration Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-monitoring-service.md",
+      "title": "Prd Monitoring Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-notification-event-service.md",
+      "title": "Prd Notification Event Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/webcrawler-integration-plan.md",
+      "title": "Webcrawler Integration Plan"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/api/api-and-events.DOCUMENTS.md",
+      "title": "Api And Events.Documents"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/api/api-and-events.md",
+      "title": "Api And Events"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/SERVICE_DISCOVERY_POLICY.md",
+      "title": "Service Discovery Policy"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/frontend-integration.md",
+      "title": "Frontend Integration"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/gcp-architecture.md",
+      "title": "Gcp Architecture"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/mas-architecture.md",
+      "title": "Mas Architecture"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/observability-alert-pipeline.md",
+      "title": "Observability Alert Pipeline"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/system-architecture.md",
+      "title": "System Architecture"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-16.md",
+      "title": "2025 09 16"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-17.md",
+      "title": "2025 09 17"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-18.md",
+      "title": "2025 09 18"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-19.md",
+      "title": "2025 09 19"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-20.md",
+      "title": "2025 09 20"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-21.md",
+      "title": "2025 09 21"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-22.md",
+      "title": "2025 09 22"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-23.md",
+      "title": "2025 09 23"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-24.md",
+      "title": "2025 09 24"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-25.md",
+      "title": "2025 09 25"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-26.md",
+      "title": "2025 09 26"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-27.md",
+      "title": "2025 09 27"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-28.md",
+      "title": "2025 09 28"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-29.md",
+      "title": "2025 09 29"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-30-evening.md",
+      "title": "2025 09 30 Evening"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-30.md",
+      "title": "2025 09 30"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/history/20250929-011118-history.md",
+      "title": "20250929 011118 History"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/history/20250929-172733-history.md",
+      "title": "20250929 172733 History"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/history/20250929-172847-history.md",
+      "title": "20250929 172847 History"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/history/20250929-174613-history.md",
+      "title": "20250929 174613 History"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/absa-service-detailed-prd.md",
+      "title": "Absa Service Detailed Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/alert-service-detailed-prd.md",
+      "title": "Alert Service Detailed Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/analysis-service-detailed-prd.md",
+      "title": "Analysis Service Detailed Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/api-gateway-detailed-prd.md",
+      "title": "Api Gateway Detailed Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/cicd-pipeline-prd.md",
+      "title": "Cicd Pipeline Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/collector-service-detailed-prd.md",
+      "title": "Collector Service Detailed Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/frontend-prd.md",
+      "title": "Frontend Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/identity-linking-prd.md",
+      "title": "Identity Linking Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/implementation-tasks.md",
+      "title": "Implementation Tasks"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/monitoring-observability-prd.md",
+      "title": "Monitoring Observability Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/osint-services-detailed-prd.md",
+      "title": "Osint Services Detailed Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/pensions-sentiment-prd.md",
+      "title": "Pensions Sentiment Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/persona-scheduler-prd.md",
+      "title": "Persona Scheduler Prd"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/prd-implementation-status.md",
+      "title": "Prd Implementation Status"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/reports/mock-data-audit-report.md",
+      "title": "Mock Data Audit Report"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/reports/rules-compliance-report.md",
+      "title": "Rules Compliance Report"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/reports/stability-enhancement-report.md",
+      "title": "Stability Enhancement Report"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/_template.md",
+      "title": "Template"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/absa-service.md",
+      "title": "Absa Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/alert-service.md",
+      "title": "Alert Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/analysis-service.md",
+      "title": "Analysis Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/api-gateway.md",
+      "title": "Api Gateway"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/collector-service.md",
+      "title": "Collector Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/crawler-implementation-guide.md",
+      "title": "Crawler Implementation Guide"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/dashboard-web.md",
+      "title": "Dashboard Web"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/dedup-anonymizer.md",
+      "title": "Dedup Anonymizer"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/detailed-task-breakdown.md",
+      "title": "Detailed Task Breakdown"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/event-analysis.md",
+      "title": "Event Analysis"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/ingest-worker.md",
+      "title": "Ingest Worker"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/master-task-list.md",
+      "title": "Master Task List"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/mesh-aggregator.md",
+      "title": "Mesh Aggregator"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/nlp-preprocess.md",
+      "title": "Nlp Preprocess"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/osint-msa-guide.md",
+      "title": "Osint Msa Guide"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/sentiment-service-tasks-continued.md",
+      "title": "Sentiment Service Tasks Continued"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/sentiment-service.md",
+      "title": "Sentiment Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/summarizer-rag.md",
+      "title": "Summarizer Rag"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/tagging-service.md",
+      "title": "Tagging Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/topic-modeler.md",
+      "title": "Topic Modeler"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/api/contracts.md",
+      "title": "Contracts"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/SERVICE_DISCOVERY_POLICY.md",
+      "title": "Service Discovery Policy"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/frontend-integration.md",
+      "title": "Frontend Integration"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/gcp-architecture.md",
+      "title": "Gcp Architecture"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/mas-architecture.md",
+      "title": "Mas Architecture"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/observability-alert-pipeline.md",
+      "title": "Observability Alert Pipeline"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/system-architecture.md",
+      "title": "System Architecture"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/_template.md",
+      "title": "Template"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/absa-service.md",
+      "title": "Absa Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/alert-service.md",
+      "title": "Alert Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/analysis-service.md",
+      "title": "Analysis Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/api-gateway.md",
+      "title": "Api Gateway"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/collector-service.md",
+      "title": "Collector Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/crawler-implementation-guide.md",
+      "title": "Crawler Implementation Guide"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/dashboard-web.md",
+      "title": "Dashboard Web"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/dedup-anonymizer.md",
+      "title": "Dedup Anonymizer"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/detailed-task-breakdown.md",
+      "title": "Detailed Task Breakdown"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/event-analysis.md",
+      "title": "Event Analysis"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/ingest-worker.md",
+      "title": "Ingest Worker"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/master-task-list.md",
+      "title": "Master Task List"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/mesh-aggregator.md",
+      "title": "Mesh Aggregator"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/nlp-preprocess.md",
+      "title": "Nlp Preprocess"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/osint-msa-guide.md",
+      "title": "Osint Msa Guide"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/sentiment-service-tasks-continued.md",
+      "title": "Sentiment Service Tasks Continued"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/sentiment-service.md",
+      "title": "Sentiment Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/summarizer-rag.md",
+      "title": "Summarizer Rag"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/tagging-service.md",
+      "title": "Tagging Service"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/topic-modeler.md",
+      "title": "Topic Modeler"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/infra/README.md",
+      "title": "Readme"
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/scripts/README.md",
+      "title": "Readme"
+    }
+  ]
+}

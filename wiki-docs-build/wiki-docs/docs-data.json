@@ -1,0 +1,1487 @@
+{
+  "generated_at": "2025-11-14T14:38:50.205108+00:00",
+  "files": [
+    {
+      "path": "DOCKER/README.md",
+      "ext": "md",
+      "size": 2114,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/ARCHITECTURE/Viki-platform-Architecture.png",
+      "ext": "png",
+      "size": 306784,
+      "textual": false
+    },
+    {
+      "path": "DOCUMENTS/ARCHITECTURE/web-info-validator.png",
+      "ext": "png",
+      "size": 112819,
+      "textual": false
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/collector-service-tasks.md",
+      "ext": "md",
+      "size": 4088,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/deployment-command-inventory.md",
+      "ext": "md",
+      "size": 4243,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/development-guide.md",
+      "ext": "md",
+      "size": 5288,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/env-config-refactor-implementation-plan.md",
+      "ext": "md",
+      "size": 11115,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/environment-governance-p1.md",
+      "ext": "md",
+      "size": 9311,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks-continued.md",
+      "ext": "md",
+      "size": 3722,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/frontend-dashboard-tasks.md",
+      "ext": "md",
+      "size": 4718,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/gcp-deployment-runbook.md",
+      "ext": "md",
+      "size": 2303,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/linux-deployment-runbook.md",
+      "ext": "md",
+      "size": 1284,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/DEVELOPMENT/sentiment-service-tasks.md",
+      "ext": "md",
+      "size": 3903,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/NoteForBreak/UserTrackingMethods.md",
+      "ext": "md",
+      "size": 8221,
+      "textual": true
+    },
+    {
+      "path": "DOCUMENTS/implementation-summary.md",
+      "ext": "md",
+      "size": 2906,
+      "textual": true
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/README.md",
+      "ext": "md",
+      "size": 1331,
+      "textual": true
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-ai-agent-crawling-service.md",
+      "ext": "md",
+      "size": 14309,
+      "textual": true
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-analytics-visualization-service.md",
+      "ext": "md",
+      "size": 20949,
+      "textual": true
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-data-exploration-service.md",
+      "ext": "md",
+      "size": 17641,
+      "textual": true
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-monitoring-service.md",
+      "ext": "md",
+      "size": 8768,
+      "textual": true
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/prd-notification-event-service.md",
+      "ext": "md",
+      "size": 8374,
+      "textual": true
+    },
+    {
+      "path": "FRONTEND-DASHBOARD/docs/webcrawler-integration-plan.md",
+      "ext": "md",
+      "size": 14554,
+      "textual": true
+    },
+    {
+      "path": "README.md",
+      "ext": "md",
+      "size": 16042,
+      "textual": true
+    },
+    {
+      "path": "docs/README.md",
+      "ext": "md",
+      "size": 1876,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/README.md",
+      "ext": "md",
+      "size": 773,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/api/api-and-events.DOCUMENTS.md",
+      "ext": "md",
+      "size": 6891,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/api/api-and-events.md",
+      "ext": "md",
+      "size": 6891,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/architecture/SERVICE_DISCOVERY_POLICY.md",
+      "ext": "md",
+      "size": 6085,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/architecture/frontend-integration.md",
+      "ext": "md",
+      "size": 2924,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/architecture/gcp-architecture.md",
+      "ext": "md",
+      "size": 4059,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/architecture/mas-architecture.md",
+      "ext": "md",
+      "size": 9824,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/architecture/observability-alert-pipeline.md",
+      "ext": "md",
+      "size": 7061,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/architecture/system-architecture.md",
+      "ext": "md",
+      "size": 10381,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-16.md",
+      "ext": "md",
+      "size": 94,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-17.md",
+      "ext": "md",
+      "size": 2863,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-18.md",
+      "ext": "md",
+      "size": 1335,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-19.md",
+      "ext": "md",
+      "size": 1384,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-20.md",
+      "ext": "md",
+      "size": 1297,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-21.md",
+      "ext": "md",
+      "size": 510,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-22.md",
+      "ext": "md",
+      "size": 925,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-23.md",
+      "ext": "md",
+      "size": 204,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-24.md",
+      "ext": "md",
+      "size": 204,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-25.md",
+      "ext": "md",
+      "size": 534,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-26.md",
+      "ext": "md",
+      "size": 1768,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-27.md",
+      "ext": "md",
+      "size": 554,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-28.md",
+      "ext": "md",
+      "size": 1084,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-29.md",
+      "ext": "md",
+      "size": 1107,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-30-evening.md",
+      "ext": "md",
+      "size": 5990,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/daily/2025-09-30.md",
+      "ext": "md",
+      "size": 13159,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/history/20250929-011118-history.md",
+      "ext": "md",
+      "size": 2322,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/history/20250929-172733-history.md",
+      "ext": "md",
+      "size": 597,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/history/20250929-172847-history.md",
+      "ext": "md",
+      "size": 600,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/history/20250929-174613-history.md",
+      "ext": "md",
+      "size": 1960,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/mkdocs.yml",
+      "ext": "yml",
+      "size": 2554,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/mkdocs/DEPRECATED.md",
+      "ext": "md",
+      "size": 916,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/README.md",
+      "ext": "md",
+      "size": 6102,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/absa-service-detailed-prd.md",
+      "ext": "md",
+      "size": 8047,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/alert-service-detailed-prd.md",
+      "ext": "md",
+      "size": 8041,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/analysis-service-detailed-prd.md",
+      "ext": "md",
+      "size": 9898,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/api-gateway-detailed-prd.md",
+      "ext": "md",
+      "size": 6165,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/cicd-pipeline-prd.md",
+      "ext": "md",
+      "size": 1686,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/collector-readiness-stabilization-prd.txt",
+      "ext": "txt",
+      "size": 4728,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/collector-service-detailed-prd.md",
+      "ext": "md",
+      "size": 9211,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/cross-service-api-smoke-tests-prd.txt",
+      "ext": "txt",
+      "size": 4803,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/frontend-prd.md",
+      "ext": "md",
+      "size": 4939,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/identity-linking-prd.md",
+      "ext": "md",
+      "size": 2127,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/implementation-tasks.md",
+      "ext": "md",
+      "size": 14618,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/monitoring-observability-prd.md",
+      "ext": "md",
+      "size": 913,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/osint-services-detailed-prd.md",
+      "ext": "md",
+      "size": 6594,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/pensions-sentiment-prd.md",
+      "ext": "md",
+      "size": 7633,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/persona-scheduler-prd.md",
+      "ext": "md",
+      "size": 1900,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/prd/prd-implementation-status.md",
+      "ext": "md",
+      "size": 10028,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/reports/mock-data-audit-report.md",
+      "ext": "md",
+      "size": 3232,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/reports/rules-compliance-report.md",
+      "ext": "md",
+      "size": 12908,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/reports/stability-enhancement-report.md",
+      "ext": "md",
+      "size": 13244,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/README.md",
+      "ext": "md",
+      "size": 2232,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/_template.md",
+      "ext": "md",
+      "size": 905,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/absa-service.md",
+      "ext": "md",
+      "size": 7044,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/alert-service.md",
+      "ext": "md",
+      "size": 5358,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/analysis-service.md",
+      "ext": "md",
+      "size": 6732,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/api-gateway.md",
+      "ext": "md",
+      "size": 5528,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/collector-service.md",
+      "ext": "md",
+      "size": 8676,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/crawler-implementation-guide.md",
+      "ext": "md",
+      "size": 10024,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/dashboard-web.md",
+      "ext": "md",
+      "size": 1773,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/dedup-anonymizer.md",
+      "ext": "md",
+      "size": 2369,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/detailed-task-breakdown.md",
+      "ext": "md",
+      "size": 9415,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/event-analysis.md",
+      "ext": "md",
+      "size": 2068,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/ingest-worker.md",
+      "ext": "md",
+      "size": 4431,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/master-task-list.md",
+      "ext": "md",
+      "size": 4104,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/mesh-aggregator.md",
+      "ext": "md",
+      "size": 3367,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/nlp-preprocess.md",
+      "ext": "md",
+      "size": 2350,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/osint-msa-guide.md",
+      "ext": "md",
+      "size": 10825,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/sentiment-service-tasks-continued.md",
+      "ext": "md",
+      "size": 2663,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/sentiment-service.md",
+      "ext": "md",
+      "size": 2441,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/summarizer-rag.md",
+      "ext": "md",
+      "size": 1951,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/tagging-service.md",
+      "ext": "md",
+      "size": 3188,
+      "textual": true
+    },
+    {
+      "path": "docs/_archive/services/topic-modeler.md",
+      "ext": "md",
+      "size": 2121,
+      "textual": true
+    },
+    {
+      "path": "docs/api/contracts.md",
+      "ext": "md",
+      "size": 5456,
+      "textual": true
+    },
+    {
+      "path": "docs/architecture/SERVICE_DISCOVERY_POLICY.md",
+      "ext": "md",
+      "size": 6085,
+      "textual": true
+    },
+    {
+      "path": "docs/architecture/Viki-platform-Architecture.png",
+      "ext": "png",
+      "size": 306784,
+      "textual": false
+    },
+    {
+      "path": "docs/architecture/frontend-integration.md",
+      "ext": "md",
+      "size": 2924,
+      "textual": true
+    },
+    {
+      "path": "docs/architecture/gcp-architecture.md",
+      "ext": "md",
+      "size": 4059,
+      "textual": true
+    },
+    {
+      "path": "docs/architecture/mas-architecture.md",
+      "ext": "md",
+      "size": 9824,
+      "textual": true
+    },
+    {
+      "path": "docs/architecture/observability-alert-pipeline.md",
+      "ext": "md",
+      "size": 7061,
+      "textual": true
+    },
+    {
+      "path": "docs/architecture/system-architecture.md",
+      "ext": "md",
+      "size": 10381,
+      "textual": true
+    },
+    {
+      "path": "docs/architecture/web-info-validator.png",
+      "ext": "png",
+      "size": 112819,
+      "textual": false
+    },
+    {
+      "path": "docs/runbooks/README.md",
+      "ext": "md",
+      "size": 2232,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/_template.md",
+      "ext": "md",
+      "size": 905,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/absa-service.md",
+      "ext": "md",
+      "size": 4079,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/alert-service.md",
+      "ext": "md",
+      "size": 4827,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/analysis-service.md",
+      "ext": "md",
+      "size": 2998,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/api-gateway.md",
+      "ext": "md",
+      "size": 4747,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/collector-service.md",
+      "ext": "md",
+      "size": 6873,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/crawler-implementation-guide.md",
+      "ext": "md",
+      "size": 10024,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/dashboard-web.md",
+      "ext": "md",
+      "size": 1773,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/dedup-anonymizer.md",
+      "ext": "md",
+      "size": 2369,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/detailed-task-breakdown.md",
+      "ext": "md",
+      "size": 9415,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/event-analysis.md",
+      "ext": "md",
+      "size": 2068,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/ingest-worker.md",
+      "ext": "md",
+      "size": 4431,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/master-task-list.md",
+      "ext": "md",
+      "size": 4104,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/mesh-aggregator.md",
+      "ext": "md",
+      "size": 3367,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/nlp-preprocess.md",
+      "ext": "md",
+      "size": 2350,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/osint-msa-guide.md",
+      "ext": "md",
+      "size": 10825,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/sentiment-service-tasks-continued.md",
+      "ext": "md",
+      "size": 2663,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/sentiment-service.md",
+      "ext": "md",
+      "size": 2441,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/summarizer-rag.md",
+      "ext": "md",
+      "size": 1951,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/tagging-service.md",
+      "ext": "md",
+      "size": 3188,
+      "textual": true
+    },
+    {
+      "path": "docs/runbooks/topic-modeler.md",
+      "ext": "md",
+      "size": 2121,
+      "textual": true
+    },
+    {
+      "path": "docs/wiki/data/docs.json",
+      "ext": "json",
+      "size": 29967,
+      "textual": true
+    },
+    {
+      "path": "infra/README.md",
+      "ext": "md",
+      "size": 1412,
+      "textual": true
+    },
+    {
+      "path": "scripts/README.md",
+      "ext": "md",
+      "size": 18031,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/DOCKER/README.md",
+      "ext": "md",
+      "size": 2114,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/README.md",
+      "ext": "md",
+      "size": 1331,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-ai-agent-crawling-service.md",
+      "ext": "md",
+      "size": 14309,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-analytics-visualization-service.md",
+      "ext": "md",
+      "size": 20949,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-data-exploration-service.md",
+      "ext": "md",
+      "size": 17641,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-monitoring-service.md",
+      "ext": "md",
+      "size": 8768,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/prd-notification-event-service.md",
+      "ext": "md",
+      "size": 8374,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/FRONTEND-DASHBOARD/docs/webcrawler-integration-plan.md",
+      "ext": "md",
+      "size": 14554,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/README.md",
+      "ext": "md",
+      "size": 16042,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/README.md",
+      "ext": "md",
+      "size": 1876,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/README.md",
+      "ext": "md",
+      "size": 773,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/api/api-and-events.DOCUMENTS.md",
+      "ext": "md",
+      "size": 6891,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/api/api-and-events.md",
+      "ext": "md",
+      "size": 6891,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/SERVICE_DISCOVERY_POLICY.md",
+      "ext": "md",
+      "size": 6085,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/frontend-integration.md",
+      "ext": "md",
+      "size": 2924,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/gcp-architecture.md",
+      "ext": "md",
+      "size": 4059,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/mas-architecture.md",
+      "ext": "md",
+      "size": 9824,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/observability-alert-pipeline.md",
+      "ext": "md",
+      "size": 7061,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/architecture/system-architecture.md",
+      "ext": "md",
+      "size": 10381,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-16.md",
+      "ext": "md",
+      "size": 94,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-17.md",
+      "ext": "md",
+      "size": 2863,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-18.md",
+      "ext": "md",
+      "size": 1335,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-19.md",
+      "ext": "md",
+      "size": 1384,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-20.md",
+      "ext": "md",
+      "size": 1297,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-21.md",
+      "ext": "md",
+      "size": 510,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-22.md",
+      "ext": "md",
+      "size": 925,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-23.md",
+      "ext": "md",
+      "size": 204,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-24.md",
+      "ext": "md",
+      "size": 204,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-25.md",
+      "ext": "md",
+      "size": 534,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-26.md",
+      "ext": "md",
+      "size": 1768,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-27.md",
+      "ext": "md",
+      "size": 554,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-28.md",
+      "ext": "md",
+      "size": 1084,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-29.md",
+      "ext": "md",
+      "size": 1107,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-30-evening.md",
+      "ext": "md",
+      "size": 5990,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/daily/2025-09-30.md",
+      "ext": "md",
+      "size": 13159,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/history/20250929-011118-history.md",
+      "ext": "md",
+      "size": 2322,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/history/20250929-172733-history.md",
+      "ext": "md",
+      "size": 597,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/history/20250929-172847-history.md",
+      "ext": "md",
+      "size": 600,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/history/20250929-174613-history.md",
+      "ext": "md",
+      "size": 1960,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/mkdocs.yml",
+      "ext": "yml",
+      "size": 2554,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/mkdocs/DEPRECATED.md",
+      "ext": "md",
+      "size": 916,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/README.md",
+      "ext": "md",
+      "size": 6102,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/absa-service-detailed-prd.md",
+      "ext": "md",
+      "size": 8047,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/alert-service-detailed-prd.md",
+      "ext": "md",
+      "size": 8041,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/analysis-service-detailed-prd.md",
+      "ext": "md",
+      "size": 9898,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/api-gateway-detailed-prd.md",
+      "ext": "md",
+      "size": 6165,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/cicd-pipeline-prd.md",
+      "ext": "md",
+      "size": 1686,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/collector-readiness-stabilization-prd.txt",
+      "ext": "txt",
+      "size": 4728,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/collector-service-detailed-prd.md",
+      "ext": "md",
+      "size": 9211,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/cross-service-api-smoke-tests-prd.txt",
+      "ext": "txt",
+      "size": 4803,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/frontend-prd.md",
+      "ext": "md",
+      "size": 4939,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/identity-linking-prd.md",
+      "ext": "md",
+      "size": 2127,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/implementation-tasks.md",
+      "ext": "md",
+      "size": 14618,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/monitoring-observability-prd.md",
+      "ext": "md",
+      "size": 913,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/osint-services-detailed-prd.md",
+      "ext": "md",
+      "size": 6594,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/pensions-sentiment-prd.md",
+      "ext": "md",
+      "size": 7633,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/persona-scheduler-prd.md",
+      "ext": "md",
+      "size": 1900,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/prd/prd-implementation-status.md",
+      "ext": "md",
+      "size": 10028,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/reports/mock-data-audit-report.md",
+      "ext": "md",
+      "size": 3232,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/reports/rules-compliance-report.md",
+      "ext": "md",
+      "size": 12908,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/reports/stability-enhancement-report.md",
+      "ext": "md",
+      "size": 13244,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/README.md",
+      "ext": "md",
+      "size": 2232,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/_template.md",
+      "ext": "md",
+      "size": 905,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/absa-service.md",
+      "ext": "md",
+      "size": 7044,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/alert-service.md",
+      "ext": "md",
+      "size": 5358,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/analysis-service.md",
+      "ext": "md",
+      "size": 6732,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/api-gateway.md",
+      "ext": "md",
+      "size": 5528,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/collector-service.md",
+      "ext": "md",
+      "size": 8676,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/crawler-implementation-guide.md",
+      "ext": "md",
+      "size": 10024,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/dashboard-web.md",
+      "ext": "md",
+      "size": 1773,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/dedup-anonymizer.md",
+      "ext": "md",
+      "size": 2369,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/detailed-task-breakdown.md",
+      "ext": "md",
+      "size": 9415,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/event-analysis.md",
+      "ext": "md",
+      "size": 2068,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/ingest-worker.md",
+      "ext": "md",
+      "size": 4431,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/master-task-list.md",
+      "ext": "md",
+      "size": 4104,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/mesh-aggregator.md",
+      "ext": "md",
+      "size": 3367,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/nlp-preprocess.md",
+      "ext": "md",
+      "size": 2350,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/osint-msa-guide.md",
+      "ext": "md",
+      "size": 10825,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/sentiment-service-tasks-continued.md",
+      "ext": "md",
+      "size": 2663,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/sentiment-service.md",
+      "ext": "md",
+      "size": 2441,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/summarizer-rag.md",
+      "ext": "md",
+      "size": 1951,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/tagging-service.md",
+      "ext": "md",
+      "size": 3188,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/_archive/services/topic-modeler.md",
+      "ext": "md",
+      "size": 2121,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/api/contracts.md",
+      "ext": "md",
+      "size": 5456,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/SERVICE_DISCOVERY_POLICY.md",
+      "ext": "md",
+      "size": 6085,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/Viki-platform-Architecture.png",
+      "ext": "png",
+      "size": 306784,
+      "textual": false
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/frontend-integration.md",
+      "ext": "md",
+      "size": 2924,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/gcp-architecture.md",
+      "ext": "md",
+      "size": 4059,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/mas-architecture.md",
+      "ext": "md",
+      "size": 9824,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/observability-alert-pipeline.md",
+      "ext": "md",
+      "size": 7061,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/system-architecture.md",
+      "ext": "md",
+      "size": 10381,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/architecture/web-info-validator.png",
+      "ext": "png",
+      "size": 112819,
+      "textual": false
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/README.md",
+      "ext": "md",
+      "size": 2232,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/_template.md",
+      "ext": "md",
+      "size": 905,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/absa-service.md",
+      "ext": "md",
+      "size": 4079,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/alert-service.md",
+      "ext": "md",
+      "size": 4827,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/analysis-service.md",
+      "ext": "md",
+      "size": 2998,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/api-gateway.md",
+      "ext": "md",
+      "size": 4747,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/collector-service.md",
+      "ext": "md",
+      "size": 6873,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/crawler-implementation-guide.md",
+      "ext": "md",
+      "size": 10024,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/dashboard-web.md",
+      "ext": "md",
+      "size": 1773,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/dedup-anonymizer.md",
+      "ext": "md",
+      "size": 2369,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/detailed-task-breakdown.md",
+      "ext": "md",
+      "size": 9415,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/event-analysis.md",
+      "ext": "md",
+      "size": 2068,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/ingest-worker.md",
+      "ext": "md",
+      "size": 4431,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/master-task-list.md",
+      "ext": "md",
+      "size": 4104,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/mesh-aggregator.md",
+      "ext": "md",
+      "size": 3367,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/nlp-preprocess.md",
+      "ext": "md",
+      "size": 2350,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/osint-msa-guide.md",
+      "ext": "md",
+      "size": 10825,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/sentiment-service-tasks-continued.md",
+      "ext": "md",
+      "size": 2663,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/sentiment-service.md",
+      "ext": "md",
+      "size": 2441,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/summarizer-rag.md",
+      "ext": "md",
+      "size": 1951,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/tagging-service.md",
+      "ext": "md",
+      "size": 3188,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/docs/runbooks/topic-modeler.md",
+      "ext": "md",
+      "size": 2121,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/infra/README.md",
+      "ext": "md",
+      "size": 1412,
+      "textual": true
+    },
+    {
+      "path": "wiki-docs-build/wiki-docs/raw/scripts/README.md",
+      "ext": "md",
+      "size": 18031,
+      "textual": true
+    }
+  ]
+}

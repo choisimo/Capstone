@@ -6,10 +6,10 @@ Successfully migrated Python FastAPI microservices to Spring Boot 3.3.4 with JDK
 ## Completed Tasks
 
 ### 1. Infrastructure Setup
-- ✅ Updated parent POM to JDK 21 (from JDK 17)
-- ✅ Created 5 new Spring Boot modules
-- ✅ Registered all modules in parent POM
-- ✅ Updated API Gateway routes
+-  Updated parent POM to JDK 21 (from JDK 17)
+-  Created 5 new Spring Boot modules
+-  Registered all modules in parent POM
+-  Updated API Gateway routes
 
 ### 2. New Modules Created
 
@@ -149,15 +149,15 @@ cd gateway && ./mvnw spring-boot:run
 
 | Service | Python Port | Java Port | Status | Priority |
 |---------|-------------|-----------|--------|----------|
-| Gateway | 8000 | 8080 | ✅ Completed | P0 |
-| Collector | 8001 | 8091 | ✅ Completed | P0 |
-| Analysis | 8002 | 8092 | ✅ Completed | P0 |
-| ABSA | 8003 | 8083 | 🏗️ Scaffolding Done | P1 |
-| Alert | 8004 | 8084 | 🏗️ Scaffolding Done | P1 |
-| OSINT Orchestrator | 8005 | 8085 | 🏗️ Scaffolding Done | P1 |
-| OSINT Planning | 8006 | 8086 | 🏗️ Scaffolding Done | P2 |
-| OSINT Source | 8007 | 8087 | 🏗️ Scaffolding Done | P2 |
-| Web Collector | - | TBD | ⏸️ Pending Decision | P3 |
+| Gateway | 8000 | 8080 |  Completed | P0 |
+| Collector | 8001 | 8091 |  Completed | P0 |
+| Analysis | 8002 | 8092 |  Completed | P0 |
+| ABSA | 8003 | 8083 |  Scaffolding Done | P1 |
+| Alert | 8004 | 8084 |  Scaffolding Done | P1 |
+| OSINT Orchestrator | 8005 | 8085 |  Scaffolding Done | P1 |
+| OSINT Planning | 8006 | 8086 |  Scaffolding Done | P2 |
+| OSINT Source | 8007 | 8087 |  Scaffolding Done | P2 |
+| Web Collector | - | TBD | ⏸ Pending Decision | P3 |
 
 ## Architecture Decisions
 
