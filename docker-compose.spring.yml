@@ -340,14 +340,41 @@ services:
     container_name: swagger-ui
     restart: unless-stopped
     volumes:
-      - ./openapi-consolidated.yaml:/usr/share/nginx/html/openapi.yaml:ro
+      # Swagger UI 초기화 스크립트가 /usr/share/nginx/html/openapi.yaml로 사본을 만들도록,
+      # 호스트 스펙 파일은 별도의 경로(/openapi/openapi.yaml)에 마운트합니다.
+      - ./openapi-consolidated.yaml:/openapi/openapi.yaml:ro
     environment:
-      SWAGGER_JSON: /usr/share/nginx/html/openapi.yaml
+      # 컨테이너 내부의 스펙 위치를 원본(/openapi/openapi.yaml)로 지정
+      SWAGGER_JSON: /openapi/openapi.yaml
     ports:
       - "9000:8080"
     depends_on:
       api-gateway:
         condition: service_started
+    networks:
+      - spring-network
+
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io
+    container_name: changedetection
+    restart: unless-stopped
+    volumes:
+      - changedetection-data:/datastore
+    environment:
+      - PLAYWRIGHT_DRIVER_URL=ws://playwright:3000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - playwright
+    networks:
+      - spring-network
+
+  playwright:
+    image: browserless/chrome
+    container_name: playwright
+    restart: unless-stopped
+    expose:
+      - "3000"
     networks:
       - spring-network
 
@@ -361,3 +388,4 @@ volumes:
   redis-spring-data:
   consul-spring-data:
   consul-spring-config:
+  changedetection-data:
