@@ -3,52 +3,71 @@
 CHD_ADDR="${CHANGEDETECTION_BASE_URL:-http://changedetection:5000}"
 API_KEY="${CHANGEDETECTION_API_KEY:-}"
 
-# Install jq once (curlimages/curl is Alpine-based)
-if ! command -v jq >/dev/null 2>&1; then
-  apk add --no-cache jq >/dev/null
-fi
-
-if [ -z "$API_KEY" ]; then
-  echo "[changedetection-seed] CHANGEDETECTION_API_KEY is empty. Skipping seed."
-  exit 0
-fi
-
 echo "[changedetection-seed] Using changedetection base URL: $CHD_ADDR"
 
-ensure_tag() {
-  TAG_NAME="$1"
-  echo "[changedetection-seed] Ensuring tag exists: $TAG_NAME"
-
-  CREATE_RESP=$(curl -s -X POST "$CHD_ADDR/api/v1/tag" \
-    -H "x-api-key: $API_KEY" \
-    -H "Content-Type: application/json" \
-    -d "{\"tag\": \"$TAG_NAME\"}")
-
-  TAG_UUID=$(echo "$CREATE_RESP" | jq -r '.uuid // empty')
-
-  if [ -z "$TAG_UUID" ] || [ "$TAG_UUID" = "null" ]; then
-    LIST_RESP=$(curl -s "$CHD_ADDR/api/v1/tag" -H "x-api-key: $API_KEY")
-    TAG_UUID=$(echo "$LIST_RESP" | jq -r ".tags[] | select(.title == \"$TAG_NAME\").uuid" | head -n 1)
+# Wait for changedetection to be ready and initialize
+echo "[changedetection-seed] Waiting for changedetection to initialize..."
+for i in $(seq 1 60); do
+  if curl -s "$CHD_ADDR" >/dev/null 2>&1; then
+    echo "[changedetection-seed] changedetection is responding"
+    sleep 3  # Give it a bit more time to create the datastore
+    break
   fi
+  echo "[changedetection-seed] Waiting for changedetection to be ready... ($i/60)"
+  sleep 2
+done
 
-  if [ -z "$TAG_UUID" ] || [ "$TAG_UUID" = "null" ]; then
-    echo "[changedetection-seed] Failed to resolve tag $TAG_NAME"
-    return 1
+# If API_KEY is not provided, try to extract it from changedetection's datastore
+if [ -z "$API_KEY" ]; then
+  echo "[changedetection-seed] API key not provided, attempting to extract from datastore..."
+  
+  if [ -f /datastore/url-watches.json ]; then
+    API_KEY=$(grep -o '"api_access_token": "[^"]*"' /datastore/url-watches.json | head -1 | cut -d'"' -f4)
+    
+    if [ -n "$API_KEY" ]; then
+      echo "[changedetection-seed] Successfully extracted API key from datastore"
+    else
+      echo "[changedetection-seed] Failed to extract API key from datastore"
+      echo "[changedetection-seed] Please set CHANGEDETECTION_API_KEY environment variable"
+      exit 0
+    fi
+  else
+    echo "[changedetection-seed] Datastore file not found at /datastore/url-watches.json"
+    echo "[changedetection-seed] Please set CHANGEDETECTION_API_KEY environment variable"
+    exit 0
   fi
+else
+  echo "[changedetection-seed] Using provided API key"
+fi
 
-  echo "$TAG_UUID"
+# Check if watch already exists
+watch_exists() {
+  URL="$1"
+  WATCHES=$(curl -s "$CHD_ADDR/api/v1/watch" -H "x-api-key: $API_KEY")
+  echo "$WATCHES" | grep -q "\"url\": \"$URL\""
+  return $?
 }
 
-# shellcheck disable=SC2120
 import_watch() {
   URL="$1"
   TITLE="$2"
-  TAG_UUID="$3"
+  
+  if watch_exists "$URL"; then
+    echo "[changedetection-seed] Watch already exists: $TITLE ($URL)"
+    return 0
+  fi
+  
   echo "[changedetection-seed] Adding watch: $TITLE ($URL)"
-  curl -s -X POST "$CHD_ADDR/api/v1/watch" \
+  RESPONSE=$(curl -s -X POST "$CHD_ADDR/api/v1/watch" \
     -H "x-api-key: $API_KEY" \
     -H "Content-Type: application/json" \
-    -d "{\"url\": \"$URL\", \"title\": \"$TITLE\", \"tags\": [\"$TAG_UUID\"], \"time_between_check\": \"7200\"}"
+    -d "{\"url\": \"$URL\", \"title\": \"$TITLE\"}")
+  
+  if echo "$RESPONSE" | grep -q "uuid"; then
+    echo "[changedetection-seed] Successfully added: $TITLE"
+  else
+    echo "[changedetection-seed] Failed to add: $TITLE - $RESPONSE"
+  fi
 }
 
 NEWS_WATCHES='
@@ -91,25 +110,23 @@ https://www.bobaedream.co.kr|Bobaedream
 https://www.teamblind.com/kr|Blind
 '
 
-seed_group() {
-  TAG_NAME="$1"
-  WATCH_DATA="$2"
-
-  TAG_UUID=$(ensure_tag "$TAG_NAME") || return 1
-  echo "[changedetection-seed] Using tag $TAG_NAME ($TAG_UUID)"
+seed_watches() {
+  WATCH_DATA="$1"
 
   while IFS='|' read -r URL TITLE; do
     [ -z "$URL" ] && continue
-    import_watch "$URL" "$TITLE" "$TAG_UUID"
-    sleep 0.5
-    echo
+    import_watch "$URL" "$TITLE"
+    sleep 0.3
   done <<EOF
 $WATCH_DATA
 EOF
 }
 
-seed_group "news" "$NEWS_WATCHES"
-seed_group "community" "$COMMUNITY_WATCHES"
+echo "[changedetection-seed] Seeding news watches..."
+seed_watches "$NEWS_WATCHES"
+
+echo "[changedetection-seed] Seeding community watches..."
+seed_watches "$COMMUNITY_WATCHES"
 
 echo "[changedetection-seed] Seed completed."
 exit 0
