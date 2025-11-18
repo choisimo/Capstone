@@ -53,6 +53,16 @@ management:
     health:
       show-details: always
 
+# Analysis Service Configuration
+analysis:
+  perplexity:
+    kv-key: config/analysis/dev/secrets/perplexity/api_key
+    base-url: https://api.perplexity.ai
+    model: sonar
+  consul:
+    host: ${CONSUL_HOST:localhost}
+    port: ${CONSUL_PORT:8500}
+
 ---
 spring:
   config:

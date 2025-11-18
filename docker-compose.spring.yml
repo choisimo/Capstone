@@ -67,6 +67,45 @@ services:
       retries: 5
       start_period: 15s
 
+  consul-kv-init:
+    image: curlimages/curl:8.5.0
+    container_name: consul-kv-init
+    depends_on:
+      consul:
+        condition: service_healthy
+    environment:
+      CONSUL_HTTP_ADDR: http://consul:8500
+      CONSUL_HTTP_TOKEN: ${CONSUL_HTTP_TOKEN:-}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY:-}
+      CHANGEDETECTION_API_KEY: ${CHANGEDETECTION_API_KEY:-}
+    networks:
+      - spring-network
+    volumes:
+      - ./init-scripts/consul:/scripts:ro
+    restart: "no"
+    command:
+      - /bin/sh
+      - /scripts/seed-kv.sh
+
+  changedetection-seed:
+    image: curlimages/curl:8.5.0
+    container_name: changedetection-seed
+    depends_on:
+      changedetection:
+        condition: service_started
+    environment:
+      CHANGEDETECTION_BASE_URL: ${CHANGEDETECTION_BASE_URL:-http://changedetection:5000}
+      CHANGEDETECTION_API_KEY: ${CHANGEDETECTION_API_KEY:-}
+      CHANGEDETECTION_DEFAULT_TAG: ${CHANGEDETECTION_DEFAULT_TAG:-news}
+    networks:
+      - spring-network
+    volumes:
+      - ./init-scripts/changedetection:/scripts:ro
+    restart: "no"
+    command:
+      - /bin/sh
+      - /scripts/seed-watches.sh
+
   crawl4ai:
     image: capstone/crawl4ai:local
     build:
@@ -225,6 +264,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      consul-kv-init:
+        condition: service_completed_successfully
+      changedetection-seed:
+        condition: service_completed_successfully
     networks:
       - spring-network
     healthcheck:
