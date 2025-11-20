@@ -62,6 +62,12 @@ analysis:
   consul:
     host: ${CONSUL_HOST:localhost}
     port: ${CONSUL_PORT:8500}
+  ai-serve:
+    base-url: ${AI_SERVE_BASE_URL:http://auto-chat-proxy:7016}
+    default-title: ${AI_SERVE_DEFAULT_TITLE:Capstone AI Session}
+    default-provider: ${AI_SERVE_DEFAULT_PROVIDER:openai}
+    default-model: ${AI_SERVE_DEFAULT_MODEL:gpt-4.1}
+    auth-token: ${AI_SERVE_AUTH_TOKEN:}
 
 ---
 spring:

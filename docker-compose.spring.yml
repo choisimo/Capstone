@@ -425,6 +425,93 @@ services:
     networks:
       - spring-network
 
+  chromadb:
+    image: chromadb/chroma
+    container_name: chromadb
+    restart: unless-stopped
+    volumes:
+      - chroma-data:/chroma/.chroma/index
+    expose:
+      - "8000"
+    networks:
+      - spring-network
+
+  embedding-server:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8
+    container_name: embedding-server
+    restart: unless-stopped
+    command: --model-id sentence-transformers/all-MiniLM-L6-v2
+    volumes:
+      - embedding-data:/data
+    expose:
+      - "80"
+    networks:
+      - spring-network
+
+  opencode:
+    build:
+      context: ./services/AI_agent_server
+      dockerfile: ai-serve.Dockerfile
+    image: opencode-serve:local
+    container_name: opencode
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      OPENCODE_HOST: 0.0.0.0
+      OPENCODE_PORT: 7012
+      VECTOR_DB_HOST: chromadb
+      VECTOR_DB_PORT: 8000
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GH_TOKEN: ${GH_TOKEN:-}
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - |
+        if [ -f /home/appuser/.config/opencode/secrets.sh ]; then
+          if [ -z "${GITHUB_TOKEN:-}" ] || [ -z "${GH_TOKEN:-}" ]; then
+            . /home/appuser/.config/opencode/secrets.sh
+          fi
+        fi
+        exec "$0" "$@"
+    command:
+      - /app/node_modules/.bin/opencode
+      - serve
+      - --hostname
+      - 0.0.0.0
+      - --port
+      - "7012"
+    volumes:
+      - opencode-data:/var/lib/opencode
+      - opencode-logs:/var/log/opencode
+      - opencode-config:/home/appuser/.config/opencode
+    depends_on:
+      chromadb:
+        condition: service_started
+      embedding-server:
+        condition: service_started
+    ports:
+      - "7015:7012"
+    networks:
+      - spring-network
+
+  auto-chat-proxy:
+    image: node:20-alpine
+    container_name: auto-chat-proxy
+    working_dir: /app
+    volumes:
+      - ./services/AI_agent_server:/app:ro
+    environment:
+      OPENCODE_BASE: http://opencode:7012
+      PROXY_PORT: 7016
+    command: ["node", "auto-chat-proxy.js"]
+    depends_on:
+      opencode:
+        condition: service_started
+    ports:
+      - "7016:7016"
+    networks:
+      - spring-network
+
 networks:
   spring-network:
     driver: bridge
@@ -436,3 +523,8 @@ volumes:
   consul-spring-data:
   consul-spring-config:
   changedetection-data:
+  chroma-data:
+  embedding-data:
+  opencode-data:
+  opencode-logs:
+  opencode-config:

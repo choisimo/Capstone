@@ -15,8 +15,14 @@ subprojects {
     apply plugin: 'io.spring.dependency-management'
 
     java {
-        sourceCompatibility = '17'
-        targetCompatibility = '17'
+        // Use Gradle Java toolchain to target Java 21 (LTS).
+        // This ensures compilation uses a Java 21 toolchain even if the local JDK differs.
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+        // Also set source/target compatibility constants for legacy tasks/plugins.
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     repositories {

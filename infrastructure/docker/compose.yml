@@ -1,0 +1,102 @@
+version: "3.9"
+
+# Base application service definitions.
+# Extend with dev.yml for local development and prod.yml for production overrides.
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  networks:
+    - capstone-net
+
+services:
+  api-gateway:
+    <<: *service-defaults
+    build:
+      context: ../../services/java
+      dockerfile: gateway/Dockerfile
+    image: pension/api-gateway:local
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      PORT: 8080
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    expose:
+      - "8080"
+
+  analysis-service:
+    <<: *service-defaults
+    build:
+      context: ../../services/java
+      dockerfile: analysis/Dockerfile
+    image: pension/analysis-service:local
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      PORT: 8001
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-osint_db}
+      DB_USER: ${DB_USER:-osint_user}
+      DB_PASSWORD: ${DB_PASSWORD:-osint_password}
+    expose:
+      - "8001"
+
+  collector-service:
+    <<: *service-defaults
+    build:
+      context: ../../services/java
+      dockerfile: collector/Dockerfile
+    image: pension/collector-service:local
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      PORT: 8002
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-osint_db}
+      DB_USERNAME: ${DB_USER:-osint_user}
+      DB_PASSWORD: ${DB_PASSWORD:-osint_password}
+    expose:
+      - "8002"
+
+  absa-service:
+    <<: *service-defaults
+    build:
+      context: ../../services/java
+      dockerfile: absa/Dockerfile
+    image: pension/absa-service:local
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      PORT: 8003
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-osint_db}
+      DB_USER: ${DB_USER:-osint_user}
+      DB_PASSWORD: ${DB_PASSWORD:-osint_password}
+    expose:
+      - "8003"
+
+  alert-service:
+    <<: *service-defaults
+    build:
+      context: ../../services/java
+      dockerfile: alert/Dockerfile
+    image: pension/alert-service:local
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      PORT: 8004
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-osint_db}
+      DATABASE_USER: ${DB_USER:-osint_user}
+      DATABASE_PASSWORD: ${DB_PASSWORD:-osint_password}
+    expose:
+      - "8004"
+
+  frontend-dashboard:
+    <<: *service-defaults
+    build:
+      context: ../../services/frontend-dashboard
+      dockerfile: Dockerfile
+    image: pension/frontend-dashboard:local
+    environment:
+      VITE_API_GATEWAY_URL: ${VITE_API_GATEWAY_URL:-http://localhost:8080}
+    expose:
+      - "5173"
+
+networks:
+  capstone-net:
+    driver: bridge

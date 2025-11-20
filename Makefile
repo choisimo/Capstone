@@ -1,6 +1,10 @@
 # MSA Pension Sentiment Analysis Platform
 # Spring Boot Microservices Architecture
-# NOTE: This Makefile references the main compose file. For local dev, use infra/compose/local-dev.yml
+# NOTE: This Makefile references the unified infrastructure configuration.
+
+COMPOSE_FILE := infrastructure/docker/compose.yml
+DEV_FILE := infrastructure/docker/dev.yml
+PROD_FILE := infrastructure/docker/prod.yml
 
 .PHONY: help build start stop restart logs clean test lint check-health
 
@@ -11,14 +15,13 @@ help:
 	@echo ""
 	@echo "Available commands:"
 	@echo "  build         - Build all microservices"
-	@echo "  start         - Start all services"
+	@echo "  start         - Start all services (Development mode)"
+	@echo "  start-prod    - Start all services (Production mode)"
 	@echo "  stop          - Stop all services"
 	@echo "  restart       - Restart all services"
 	@echo "  logs          - Show logs for all services"
 	@echo "  logs-service  - Show logs for specific service (e.g., make logs-service SERVICE=analysis)"
 	@echo "  clean         - Clean up containers and volumes"
-	@echo "  test          - Run tests for all services"
-	@echo "  lint          - Run linting for all services"
 	@echo "  check-health  - Check health of all services"
 	@echo "  status        - Show status of all services"
 	@echo ""
@@ -28,6 +31,7 @@ help:
 	@echo "  🕷️  Collector      (Port 8002) - Web scraping & RSS feeds"
 	@echo "  🎯 ABSA           (Port 8003) - Aspect-based sentiment analysis"
 	@echo "  🚨 Alert          (Port 8004) - Notifications & alerts"
+	@echo "  🖥️  Frontend       (Port 5173) - Dashboard"
 	@echo ""
 	@echo "Infrastructure:"
 	@echo "  🐘 PostgreSQL     (Port 5432) - Main database with pgvector"
@@ -36,60 +40,50 @@ help:
 # Infrastructure commands
 infra-start:
 	@echo "🚀 Starting infrastructure services..."
-	docker compose -f docker-compose.spring.yml up -d postgres redis
+	docker compose -f $(COMPOSE_FILE) -f $(DEV_FILE) up -d postgres redis
 
 infra-stop:
 	@echo "🛑 Stopping infrastructure services..."
-	docker compose -f docker-compose.spring.yml stop postgres redis
+	docker compose -f $(COMPOSE_FILE) -f $(DEV_FILE) stop postgres redis
 
 # Build all services
 build:
 	@echo "🏗️  Building all microservices..."
-	docker compose -f docker-compose.spring.yml build
+	docker compose -f $(COMPOSE_FILE) -f $(DEV_FILE) build
 
 # Service lifecycle
 start:
-	@echo "🚀 Starting MSA Pension Sentiment Platform..."
-	docker compose -f docker-compose.spring.yml up -d
+	@echo "🚀 Starting MSA Pension Sentiment Platform (Development)..."
+	docker compose -f $(COMPOSE_FILE) -f $(DEV_FILE) up -d
 	@echo "✅ All services started!"
 	@echo ""
 	@make check-health
 
+start-prod:
+	@echo "🚀 Starting MSA Pension Sentiment Platform (Production)..."
+	docker compose -f $(COMPOSE_FILE) -f $(PROD_FILE) up -d
+	@echo "✅ All services started!"
+
 stop:
 	@echo "🛑 Stopping all services..."
-	docker compose -f docker-compose.spring.yml down
+	docker compose -f $(COMPOSE_FILE) down
 
 restart: stop start
 
 # Logs
 logs:
 	@echo "📋 Showing logs for all services..."
-	docker compose -f docker-compose.spring.yml logs -f
+	docker compose -f $(COMPOSE_FILE) logs -f
 
 logs-service:
 	@echo "📋 Showing logs for $(SERVICE)..."
-	docker compose -f docker-compose.spring.yml logs -f $(SERVICE)
+	docker compose -f $(COMPOSE_FILE) logs -f $(SERVICE)
 
 # Maintenance
 clean:
 	@echo "🧹 Cleaning up containers and volumes..."
-	docker compose -f docker-compose.spring.yml down -v --remove-orphans
+	docker compose -f $(COMPOSE_FILE) down -v --remove-orphans
 	docker system prune -f
-
-# Development
-test:
-	@echo "🧪 Running tests for all services..."
-	@for service in analysis-service collector-service absa-service alert-service api-gateway; do \
-		echo "Testing $$service..."; \
-		docker compose -f docker-compose.spring.yml exec $$service pytest tests/ || echo "⚠️  Tests failed for $$service"; \
-	done
-
-lint:
-	@echo "🔍 Running linting for all services..."
-	@for service in analysis-service collector-service absa-service alert-service api-gateway; do \
-		echo "Linting $$service..."; \
-		docker compose -f docker-compose.spring.yml exec $$service ruff check app/ || echo "⚠️  Linting issues in $$service"; \
-	done
 
 # Health checks
 check-health:
@@ -102,59 +96,21 @@ check-health:
 
 status:
 	@echo "📊 Service Status:"
-	docker compose -f docker-compose.spring.yml ps
-
-# Quick start for development
-dev-start: infra-start
-	@echo "🔧 Starting development environment..."
-	@echo "Infrastructure started. Start individual services with:"
-	@echo "  cd services/analysis-service && uvicorn app.main:app --reload --port 8001"
-	@echo "  cd services/collector-service && uvicorn app.main:app --reload --port 8002"
-	@echo "  cd services/absa-service && uvicorn app.main:app --reload --port 8003"
-	@echo "  cd services/alert-service && uvicorn app.main:app --reload --port 8004"
-	@echo "  cd services/api-gateway && uvicorn app.main:app --reload --port 8000"
+	docker compose -f $(COMPOSE_FILE) ps
 
 # Database management
-db-migrate:
-	@echo "🗃️  Running database migrations..."
-	docker compose -f docker-compose.spring.yml exec analysis-service alembic upgrade head
-
 db-reset:
 	@echo "⚠️  Resetting database (this will delete all data)..."
 	@read -p "Are you sure? [y/N] " confirm && [ "$$confirm" = "y" ] || exit 1
-	docker compose -f docker-compose.spring.yml stop postgres
-	docker volume rm capstone_postgres-data
-	docker compose -f docker-compose.spring.yml up -d postgres
-	@make db-migrate
+	docker compose -f $(COMPOSE_FILE) stop postgres
+	docker volume rm infrastructure_postgres-data || true
+	docker compose -f $(COMPOSE_FILE) -f $(DEV_FILE) up -d postgres
 
 # API Documentation
 docs:
 	@echo "📚 API Documentation URLs:"
-	@echo "  API Gateway:  http://localhost:8000/docs"
-	@echo "  Analysis:     http://localhost:8001/docs"
-	@echo "  Collector:    http://localhost:8002/docs"
-	@echo "  ABSA:         http://localhost:8003/docs"
-	@echo "  Alert:        http://localhost:8004/docs"
-
-# Monitoring
-monitor:
-	@echo "📈 Starting monitoring dashboard..."
-	@echo "Redis: redis-cli -h localhost -p 6379 monitor"
-	@echo "PostgreSQL: docker compose -f docker-compose.msa.yml exec postgres psql -U postgres -d pension_sentiment"
-
-# Production deployment helpers
-prod-build:
-	@echo "🚀 Building for production..."
-	docker compose -f docker-compose.spring.yml build --no-cache
-
-prod-deploy: prod-build
-	@echo "🌐 Deploying to production..."
-	docker compose -f docker-compose.spring.yml up -d --force-recreate
-
-# Security scan
-security-scan:
-	@echo "🔒 Running security scan..."
-	@for service in analysis-service collector-service absa-service alert-service api-gateway; do \
-		echo "Scanning $$service..."; \
-		docker run --rm -v $(PWD)/services/$$service:/target clair-scanner:latest || echo "⚠️  Security issues in $$service"; \
-	done
+	@echo "  API Gateway:  http://localhost:8080/swagger-ui.html"
+	@echo "  Analysis:     http://localhost:8001/swagger-ui.html"
+	@echo "  Collector:    http://localhost:8002/swagger-ui.html"
+	@echo "  ABSA:         http://localhost:8003/swagger-ui.html"
+	@echo "  Alert:        http://localhost:8004/swagger-ui.html"

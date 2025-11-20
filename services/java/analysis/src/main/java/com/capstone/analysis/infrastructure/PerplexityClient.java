@@ -67,7 +67,9 @@ public class PerplexityClient {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() / 100 != 2) {
-                throw new IllegalStateException("Perplexity API error: status=" + response.statusCode());
+                throw new IllegalStateException(
+                    "Perplexity API error: status=" + response.statusCode() + 
+                    ", body=" + response.body());
             }
 
             return parseResponse(query, response.body());

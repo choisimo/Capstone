@@ -31,6 +31,7 @@ public interface TrendDataRepository extends JpaRepository<TrendDataEntity, Long
     /**
      * Find popular trends (high volume) within a date range
      */
+    // TODO: QueryDSL 기반 구현으로 마이그레이션 (타입 안전성과 동적 쿼리 지원 개선)
     @Query("SELECT t FROM TrendDataEntity t WHERE t.date BETWEEN :startDate AND :endDate " +
            "ORDER BY t.volume DESC")
     List<TrendDataEntity> findPopularTrends(
@@ -51,6 +52,7 @@ public interface TrendDataRepository extends JpaRepository<TrendDataEntity, Long
     /**
      * Calculate average sentiment for entity within date range
      */
+    // TODO: QueryDSL 기반 구현으로 마이그레이션 (타입 안전성과 동적 쿼리 지원 개선)
     @Query("SELECT AVG(t.sentimentScore) FROM TrendDataEntity t " +
            "WHERE t.entity = :entity AND t.date BETWEEN :startDate AND :endDate")
     Double calculateAverageSentiment(
@@ -62,6 +64,7 @@ public interface TrendDataRepository extends JpaRepository<TrendDataEntity, Long
     /**
      * Find latest trend data for each distinct entity
      */
+    // TODO: QueryDSL 기반 구현으로 마이그레이션 (타입 안전성과 동적 쿼리 지원 개선)
     @Query("SELECT t FROM TrendDataEntity t WHERE t.date = " +
            "(SELECT MAX(t2.date) FROM TrendDataEntity t2 WHERE t2.entity = t.entity)")
     List<TrendDataEntity> findLatestTrendsPerEntity(Pageable pageable);

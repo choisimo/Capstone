@@ -17,4 +17,17 @@ public class AgentDtos {
             double confidence,
             Instant timestamp
     ) {}
+
+    public record AiChatRequest(
+            String message,
+            String title,
+            String providerId,
+            String modelId
+    ) {}
+
+    public record AiChatResponse(
+            String sessionId,
+            String reply,
+            Object rawResponse
+    ) {}
 }

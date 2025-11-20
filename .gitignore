@@ -180,14 +180,14 @@ tasks.json
 tasks/
 
 # Frontend exceptions (allow tracked sources and env templates)
-!FRONTEND-DASHBOARD/src/lib/**
+!services/frontend-dashboard/src/lib/**
 
 # Allow environment templates while still ignoring actual env files
 !.env.example
 !*/.env.example
-!FRONTEND-DASHBOARD/.env.example
-!FRONTEND-DASHBOARD/.env.development.example
-!FRONTEND-DASHBOARD/.env.production.example
+!services/frontend-dashboard/.env.example
+!services/frontend-dashboard/.env.development.example
+!services/frontend-dashboard/.env.production.example
 
 # Java / Gradle
 .gradle/
@@ -202,8 +202,8 @@ services/java/*/build/
 !gradle-wrapper.jar
 
 # Infra generated files
-infra/compose/*.local.yml
-infra/db/data/
+infrastructure/docker/*.local.yml
+infrastructure/db/data/
 
 # Build artifacts
 *.tmp
