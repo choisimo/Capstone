@@ -22,6 +22,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -87,7 +88,7 @@ public class FeedService {
     }
     
     @Transactional
-    public FeedFetchResult fetchFeed(Long feedId) {
+    public FeedFetchResult fetchFeed(UUID feedId) {
         DataSourceEntity source = sourceRepo.findById(feedId)
                 .orElseThrow(() -> new RuntimeException("Feed not found"));
         
@@ -102,7 +103,7 @@ public class FeedService {
             sourceRepo.save(source);
             
             return new FeedFetchResult(
-                    String.valueOf(feedId),
+                    feedId.toString(),
                     feed.getTitle(),
                     entries.size(),
                     entries,
@@ -111,7 +112,7 @@ public class FeedService {
         } catch (Exception ex) {
             logger.error("Failed to fetch feed: {}", feedId, ex);
             return new FeedFetchResult(
-                    String.valueOf(feedId),
+                    feedId.toString(),
                     source.getName(),
                     0,
                     List.of(),
@@ -136,10 +137,10 @@ public class FeedService {
                     return fetchFeed(feed.getId());
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
-                    return new FeedFetchResult(String.valueOf(feed.getId()), feed.getName(), 0, List.of(), OffsetDateTime.now(ZoneOffset.UTC));
+                    return new FeedFetchResult(feed.getId().toString(), feed.getName(), 0, List.of(), OffsetDateTime.now(ZoneOffset.UTC));
                 } catch (Exception ex) {
                     logger.error("Failed to fetch feed: {}", feed.getId(), ex);
-                    return new FeedFetchResult(String.valueOf(feed.getId()), feed.getName(), 0, List.of(), OffsetDateTime.now(ZoneOffset.UTC));
+                    return new FeedFetchResult(feed.getId().toString(), feed.getName(), 0, List.of(), OffsetDateTime.now(ZoneOffset.UTC));
                 } finally {
                     limiter.release();
                 }

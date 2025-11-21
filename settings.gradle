@@ -15,17 +15,17 @@ include 'osint-orchestrator-service'
 include 'osint-planning-service'
 include 'osint-source-service'
 
-// 기존 CodeJava 디렉토리 서비스들
+// 기존 CodeJava 디렉터리 서비스들
 project(':gateway').projectDir = file('CodeJava/gateway')
 project(':collector').projectDir = file('CodeJava/collector')
 project(':analysis').projectDir = file('CodeJava/analysis')
 
 // 새 서비스들
-project(':absa-service').projectDir = file('BACKEND-ABSA-SERVICE')
-project(':alert-service').projectDir = file('BACKEND-ALERT-SERVICE')
-project(':analysis-service').projectDir = file('BACKEND-ANALYSIS-SERVICE')
-project(':api-gateway').projectDir = file('BACKEND-API-GATEWAY')
-project(':collector-service').projectDir = file('BACKEND-COLLECTOR-SERVICE')
-project(':osint-orchestrator-service').projectDir = file('BACKEND-OSINT-ORCHESTRATOR-SERVICE')
-project(':osint-planning-service').projectDir = file('BACKEND-OSINT-PLANNING-SERVICE')
-project(':osint-source-service').projectDir = file('BACKEND-OSINT-SOURCE-SERVICE')
+project(':absa-service').projectDir = file('services/java/absa')
+project(':alert-service').projectDir = file('services/java/alert')
+project(':analysis-service').projectDir = file('services/java/analysis')
+project(':api-gateway').projectDir = file('services/java/gateway')
+project(':collector-service').projectDir = file('services/java/collector')
+project(':osint-orchestrator-service').projectDir = file('services/java/osint-orchestrator')
+project(':osint-planning-service').projectDir = file('services/java/osint-planning')
+project(':osint-source-service').projectDir = file('services/java/osint-source')

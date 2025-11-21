@@ -1,0 +1,133 @@
+version: "3.9"
+
+# Development overrides: local infra, exposed ports, debug settings.
+# Usage: docker compose -f infrastructure/docker/compose.yml -f infrastructure/docker/dev.yml up -d
+
+services:
+  # ===========================================
+  # Infrastructure Services
+  # ===========================================
+  
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-osint_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-osint_password}
+      POSTGRES_DB: ${POSTGRES_DB:-osint_db}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - capstone-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-osint_user} -d ${POSTGRES_DB:-osint_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - capstone-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ===========================================
+  # Application Services Overrides
+  # ===========================================
+
+  api-gateway:
+    container_name: api-gateway
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+
+  analysis-service:
+    container_name: analysis-service
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+
+  collector-service:
+    container_name: collector-service
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-osint_db}
+
+  absa-service:
+    container_name: absa-service
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+
+  alert-service:
+    container_name: alert-service
+    ports:
+      - "8004:8004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-osint_db}
+
+  frontend-dashboard:
+    container_name: frontend-dashboard
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      VITE_API_GATEWAY_URL: http://localhost:${GATEWAY_PORT:-8080}
+
+volumes:
+  postgres-data:
+  redis-data:

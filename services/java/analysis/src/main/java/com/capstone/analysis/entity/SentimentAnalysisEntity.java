@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "sentiment_analysis")
+@Table(name = "sentiment_analysis", schema = "analysis")
 public class SentimentAnalysisEntity {
     
     @Id
@@ -28,7 +28,28 @@ public class SentimentAnalysisEntity {
     
     @Column(name = "model_version", length = 50)
     private String modelVersion;
-    
+
+    @Column(name = "analysis_type", nullable = false, length = 50)
+    private String analysisType = "SENTIMENT";
+
+    @Column(name = "aspect", nullable = false, length = 100)
+    private String aspect = "GLOBAL";
+
+    @Column(name = "true_label", length = 50)
+    private String trueLabel;
+
+    @Column(name = "source", length = 100)
+    private String source;
+
+    @Column(name = "tags_json", columnDefinition = "jsonb")
+    private String tagsJson;
+
+    @Column(name = "model_type", length = 50)
+    private String modelType;
+
+    @Column(name = "training_job_id", length = 100)
+    private String trainingJobId;
+
     @Column(name = "analyzed_at", nullable = false)
     private OffsetDateTime analyzedAt;
     
@@ -120,9 +141,65 @@ public class SentimentAnalysisEntity {
     public String getModelVersion() {
         return modelVersion;
     }
-    
+
     public void setModelVersion(String modelVersion) {
         this.modelVersion = modelVersion;
+    }
+
+    public String getAnalysisType() {
+        return analysisType;
+    }
+
+    public void setAnalysisType(String analysisType) {
+        this.analysisType = analysisType;
+    }
+
+    public String getAspect() {
+        return aspect;
+    }
+
+    public void setAspect(String aspect) {
+        this.aspect = aspect;
+    }
+
+    public String getTrueLabel() {
+        return trueLabel;
+    }
+
+    public void setTrueLabel(String trueLabel) {
+        this.trueLabel = trueLabel;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
+    }
+
+    public String getModelType() {
+        return modelType;
+    }
+
+    public void setModelType(String modelType) {
+        this.modelType = modelType;
+    }
+
+    public String getTrainingJobId() {
+        return trainingJobId;
+    }
+
+    public void setTrainingJobId(String trainingJobId) {
+        this.trainingJobId = trainingJobId;
     }
     
     public OffsetDateTime getAnalyzedAt() {

@@ -2,81 +2,59 @@ package com.capstone.collector.entity;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(name = "collected_data", indexes = {
-        @Index(name = "idx_content_hash", columnList = "content_hash")
-})
+@Table(name = "collected_data", schema = "pension")
 public class CollectedDataEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Column(nullable = false, name = "source_id")
-    private Long sourceId;
+    @Column(name = "source_id")
+    private UUID sourceId;
 
     @Column(columnDefinition = "TEXT")
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 500)
     private String url;
 
-    @Column(name = "published_date")
-    private OffsetDateTime publishedDate;
+    @Column(length = 255)
+    private String author;
 
-    @Column(name = "collected_at", nullable = false)
+    @Column(name = "published_at")
+    private OffsetDateTime publishedAt;
+
+    @Column(name = "collected_at")
     private OffsetDateTime collectedAt;
+
+    @Column(columnDefinition = "jsonb")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    private String metadata;
 
     @Column(name = "content_hash", length = 64)
     private String contentHash;
 
-    @Column(name = "metadata_json", columnDefinition = "jsonb")
-    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
-    private String metadataJson;
+    @Column(name = "processed")
+    private Boolean processed;
 
-    @Column(nullable = false)
-    private Boolean processed = false;
-
-    @Column(name = "http_ok")
-    private Boolean httpOk;
-
-    @Column(name = "has_content")
-    private Boolean hasContent;
-
-    @Column(name = "duplicate")
-    private Boolean duplicate;
-
-    @Column(name = "normalized")
-    private Boolean normalized;
-
-    @Column(name = "quality_score")
-    private Double qualityScore;
-
-    @Column(name = "semantic_consistency")
-    private Double semanticConsistency;
-
-    @Column(name = "outlier_score")
-    private Double outlierScore;
-
-    @Column(name = "trust_score")
-    private Double trustScore;
-
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public Long getSourceId() {
+    public UUID getSourceId() {
         return sourceId;
     }
 
-    public void setSourceId(Long sourceId) {
+    public void setSourceId(UUID sourceId) {
         this.sourceId = sourceId;
     }
 
@@ -104,12 +82,20 @@ public class CollectedDataEntity {
         this.url = url;
     }
 
-    public OffsetDateTime getPublishedDate() {
-        return publishedDate;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setPublishedDate(OffsetDateTime publishedDate) {
-        this.publishedDate = publishedDate;
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public OffsetDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(OffsetDateTime publishedAt) {
+        this.publishedAt = publishedAt;
     }
 
     public OffsetDateTime getCollectedAt() {
@@ -120,6 +106,14 @@ public class CollectedDataEntity {
         this.collectedAt = collectedAt;
     }
 
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
+
     public String getContentHash() {
         return contentHash;
     }
@@ -128,83 +122,11 @@ public class CollectedDataEntity {
         this.contentHash = contentHash;
     }
 
-    public String getMetadataJson() {
-        return metadataJson;
-    }
-
-    public void setMetadataJson(String metadataJson) {
-        this.metadataJson = metadataJson;
-    }
-
     public Boolean getProcessed() {
         return processed;
     }
 
     public void setProcessed(Boolean processed) {
         this.processed = processed;
-    }
-
-    public Boolean getHttpOk() {
-        return httpOk;
-    }
-
-    public void setHttpOk(Boolean httpOk) {
-        this.httpOk = httpOk;
-    }
-
-    public Boolean getHasContent() {
-        return hasContent;
-    }
-
-    public void setHasContent(Boolean hasContent) {
-        this.hasContent = hasContent;
-    }
-
-    public Boolean getDuplicate() {
-        return duplicate;
-    }
-
-    public void setDuplicate(Boolean duplicate) {
-        this.duplicate = duplicate;
-    }
-
-    public Boolean getNormalized() {
-        return normalized;
-    }
-
-    public void setNormalized(Boolean normalized) {
-        this.normalized = normalized;
-    }
-
-    public Double getQualityScore() {
-        return qualityScore;
-    }
-
-    public void setQualityScore(Double qualityScore) {
-        this.qualityScore = qualityScore;
-    }
-
-    public Double getSemanticConsistency() {
-        return semanticConsistency;
-    }
-
-    public void setSemanticConsistency(Double semanticConsistency) {
-        this.semanticConsistency = semanticConsistency;
-    }
-
-    public Double getOutlierScore() {
-        return outlierScore;
-    }
-
-    public void setOutlierScore(Double outlierScore) {
-        this.outlierScore = outlierScore;
-    }
-
-    public Double getTrustScore() {
-        return trustScore;
-    }
-
-    public void setTrustScore(Double trustScore) {
-        this.trustScore = trustScore;
     }
 }

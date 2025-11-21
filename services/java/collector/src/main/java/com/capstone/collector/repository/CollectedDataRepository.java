@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface CollectedDataRepository extends JpaRepository<CollectedDataEntity, Long> {
-    List<CollectedDataEntity> findBySourceId(Long sourceId);
+public interface CollectedDataRepository extends JpaRepository<CollectedDataEntity, UUID> {
+    List<CollectedDataEntity> findBySourceId(UUID sourceId);
     List<CollectedDataEntity> findByProcessed(Boolean processed);
-    List<CollectedDataEntity> findBySourceIdAndProcessed(Long sourceId, Boolean processed);
+    List<CollectedDataEntity> findBySourceIdAndProcessed(UUID sourceId, Boolean processed);
 }

@@ -24,6 +24,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +54,7 @@ public class CollectionService {
 
     @Transactional
     public List<CollectionJob> startCollection(CollectionRequest request) {
-        List<Long> sourceIds = request.source_ids();
+        List<UUID> sourceIds = request.source_ids();
         if (sourceIds == null || sourceIds.isEmpty()) {
             sourceIds = sourceRepo.findAll().stream()
                     .filter(s -> Boolean.TRUE.equals(s.getIsActive()))
@@ -76,12 +77,12 @@ public class CollectionService {
     }
 
     @Async
-    protected void scheduleCollectionAsync(Long jobId, Long sourceId) {
+    protected void scheduleCollectionAsync(UUID jobId, UUID sourceId) {
         runCollection(jobId, sourceId);
     }
 
     @Transactional
-    public void runCollection(Long jobId, Long sourceId) {
+    public void runCollection(UUID jobId, UUID sourceId) {
         Optional<CollectionJobEntity> jobOpt = jobRepo.findById(jobId);
         if (jobOpt.isEmpty()) {
             logger.warn("Job not found: {}", jobId);
@@ -176,12 +177,12 @@ public class CollectionService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<CollectionJob> getJob(Long jobId) {
+    public Optional<CollectionJob> getJob(UUID jobId) {
         return jobRepo.findById(jobId).map(this::toJobDto);
     }
 
     @Transactional(readOnly = true)
-    public List<CollectedData> getCollectedData(int skip, int limit, Long sourceId, Boolean processed) {
+    public List<CollectedData> getCollectedData(int skip, int limit, UUID sourceId, Boolean processed) {
         List<CollectedDataEntity> data;
         if (sourceId != null && processed != null) {
             data = dataRepo.findBySourceIdAndProcessed(sourceId, processed);
@@ -196,7 +197,7 @@ public class CollectionService {
     }
 
     @Transactional
-    public boolean markProcessed(Long dataId) {
+    public boolean markProcessed(UUID dataId) {
         Optional<CollectedDataEntity> opt = dataRepo.findById(dataId);
         if (opt.isEmpty()) return false;
         CollectedDataEntity entity = opt.get();
@@ -214,12 +215,10 @@ public class CollectionService {
     }
 
     private CollectedData toDataDto(CollectedDataEntity e) {
-        Map<String, Object> metadata = readJson(e.getMetadataJson());
+        Map<String, Object> metadata = readJson(e.getMetadata());
         return new CollectedData(
                 e.getId(), e.getSourceId(), e.getTitle(), e.getContent(), e.getUrl(),
-                e.getPublishedDate(), e.getCollectedAt(), e.getContentHash(), metadata, e.getProcessed(),
-                e.getHttpOk(), e.getHasContent(), e.getDuplicate(), e.getNormalized(),
-                e.getQualityScore(), e.getSemanticConsistency(), e.getOutlierScore(), e.getTrustScore()
+                e.getPublishedAt(), e.getCollectedAt(), e.getContentHash(), metadata, e.getProcessed()
         );
     }
 

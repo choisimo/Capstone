@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/collections")
@@ -37,7 +38,7 @@ public class CollectionsController {
     }
 
     @GetMapping("/jobs/{job_id}")
-    public CollectionJob job(@PathVariable("job_id") Long jobId) {
+    public CollectionJob job(@PathVariable("job_id") UUID jobId) {
         return collectionService.getJob(jobId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection job not found"));
     }
@@ -45,13 +46,13 @@ public class CollectionsController {
     @GetMapping("/data")
     public List<CollectedData> data(@RequestParam(defaultValue = "0") int skip,
                                     @RequestParam(defaultValue = "100") int limit,
-                                    @RequestParam(name = "source_id", required = false) Long sourceId,
+                                    @RequestParam(name = "source_id", required = false) UUID sourceId,
                                     @RequestParam(required = false) Boolean processed) {
         return collectionService.getCollectedData(skip, limit, sourceId, processed);
     }
 
     @PostMapping("/data/{data_id}/process")
-    public CollectedData process(@PathVariable("data_id") Long dataId) {
+    public CollectedData process(@PathVariable("data_id") UUID dataId) {
         boolean success = collectionService.markProcessed(dataId);
         if (!success) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collected data not found");

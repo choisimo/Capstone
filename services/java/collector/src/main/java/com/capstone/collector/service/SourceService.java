@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class SourceService {
@@ -34,7 +35,7 @@ public class SourceService {
         e.setCreatedAt(OffsetDateTime.now());
         e.setUpdatedAt(OffsetDateTime.now());
         if (req.metadata_json() != null) {
-            e.setMetadataJson(writeJson(req.metadata_json()));
+            e.setMetadata(writeJson(req.metadata_json()));
         }
         DataSourceEntity saved = repo.save(e);
         return toDto(saved);
@@ -52,32 +53,32 @@ public class SourceService {
     }
 
     @Transactional(readOnly = true)
-    public DataSource get(Long id) {
+    public DataSource get(UUID id) {
         return repo.findById(id).map(this::toDto).orElse(null);
     }
 
     @Transactional
-    public DataSource update(Long id, DataSourceUpdate req) {
+    public DataSource update(UUID id, DataSourceUpdate req) {
         return repo.findById(id).map(e -> {
             if (req.name() != null) e.setName(req.name());
             if (req.url() != null) e.setUrl(req.url());
             if (req.is_active() != null) e.setIsActive(req.is_active());
             if (req.collection_frequency() != null) e.setCollectionFrequency(req.collection_frequency());
-            if (req.metadata_json() != null) e.setMetadataJson(writeJson(req.metadata_json()));
+            if (req.metadata_json() != null) e.setMetadata(writeJson(req.metadata_json()));
             e.setUpdatedAt(OffsetDateTime.now());
             return toDto(repo.save(e));
         }).orElse(null);
     }
 
     @Transactional
-    public boolean delete(Long id) {
+    public boolean delete(UUID id) {
         if (!repo.existsById(id)) return false;
         repo.deleteById(id);
         return true;
     }
 
     private DataSource toDto(DataSourceEntity e) {
-        Map<String, Object> metadata = readJson(e.getMetadataJson());
+        Map<String, Object> metadata = readJson(e.getMetadata());
         return new DataSource(
                 e.getId(), e.getName(), e.getUrl(), e.getSourceType(), e.getIsActive(),
                 e.getLastCollected(), e.getCollectionFrequency(), metadata, e.getCreatedAt(), e.getUpdatedAt()

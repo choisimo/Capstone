@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/sources")
@@ -31,14 +32,14 @@ public class SourcesController {
     }
 
     @GetMapping("/{source_id}")
-    public DataSource get(@PathVariable("source_id") Long id) {
+    public DataSource get(@PathVariable("source_id") UUID id) {
         DataSource res = service.get(id);
         if (res == null) throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Data source not found");
         return res;
     }
 
     @PutMapping("/{source_id}")
-    public DataSource update(@PathVariable("source_id") Long id, @Valid @RequestBody DataSourceUpdate req) {
+    public DataSource update(@PathVariable("source_id") UUID id, @Valid @RequestBody DataSourceUpdate req) {
         DataSource res = service.update(id, req);
         if (res == null) throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Data source not found");
         return res;
@@ -46,13 +47,13 @@ public class SourcesController {
 
     @DeleteMapping("/{source_id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("source_id") Long id) {
+    public void delete(@PathVariable("source_id") UUID id) {
         boolean ok = service.delete(id);
         if (!ok) throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Data source not found");
     }
 
     @PostMapping("/{source_id}/test")
-    public java.util.Map<String, Object> test(@PathVariable("source_id") Long id) {
+    public java.util.Map<String, Object> test(@PathVariable("source_id") UUID id) {
         // Placeholder to keep API parity
         DataSource ds = service.get(id);
         if (ds == null) throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Data source not found");

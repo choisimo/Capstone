@@ -1,8 +1,13 @@
 package com.capstone.analysis.service;
 
+import com.capstone.analysis.dto.AnalysisDtos.AnalysisType;
 import com.capstone.analysis.dto.SentimentDtos.*;
 import com.capstone.analysis.entity.SentimentAnalysisEntity;
+import com.capstone.analysis.infrastructure.ColabClient;
 import com.capstone.analysis.repository.SentimentAnalysisRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -12,34 +17,69 @@ import java.util.stream.Collectors;
 
 /**
  * 감성 분석 서비스
- * 
+ *
  * 텍스트의 감성을 분석하고 결과를 저장하는 비즈니스 로직을 담당합니다.
- * 실제 ML 모델 호출은 추후 구현 예정입니다.
+ * Colab ML 모델을 호출하며, 실패 시 Rule-based 로직으로 Fallback 처리합니다.
  */
 @Service
+@Slf4j
 public class SentimentService {
     
     private final SentimentAnalysisRepository sentimentAnalysisRepository;
+    private final ColabClient colabClient;
+    private final ObjectMapper objectMapper;
     
-    public SentimentService(SentimentAnalysisRepository sentimentAnalysisRepository) {
+    public SentimentService(SentimentAnalysisRepository sentimentAnalysisRepository,
+                           ColabClient colabClient,
+                           ObjectMapper objectMapper) {
         this.sentimentAnalysisRepository = sentimentAnalysisRepository;
+        this.colabClient = colabClient;
+        this.objectMapper = objectMapper;
     }
     
     /**
      * 단일 텍스트 감성 분석
-     * 
+     *
      * @param text 분석할 텍스트
      * @param contentId 컨텐츠 ID
      * @return SentimentAnalysisResponse 분석 결과
      */
     public SentimentAnalysisResponse analyzeSentiment(String text, String contentId) {
-        // TODO: Implement actual ML model inference
-        // For now, use simple rule-based logic
-        
+        try {
+            // 1. Try Colab ML Model
+            SentimentAnalysisRequest request = new SentimentAnalysisRequest(text, contentId);
+            SentimentAnalysisResponse response = colabClient.analyzeSentiment(request);
+            
+            // Save result to DB
+            saveAnalysisResult(
+                    text,
+                    contentId,
+                    response.sentiment_score(),
+                    response.sentiment_label(),
+                    response.confidence(),
+                    response.model_version(),
+                    AnalysisType.SENTIMENT,
+                    "GLOBAL",
+                    null,
+                    "colab:sentiment",
+                    "sentiment",
+                    null,
+                    null
+            );
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.warn("Colab analysis failed, falling back to rule-based logic: {}", e.getMessage());
+            return analyzeSentimentFallback(text, contentId);
+        }
+    }
+
+    private SentimentAnalysisResponse analyzeSentimentFallback(String text, String contentId) {
         double sentimentScore = 0.0; // -1 to 1
         String sentimentLabel = "neutral"; // positive, negative, neutral
-        double confidence = 0.85;
-        String modelVersion = "v1.0.0";
+        double confidence = 0.5; // Lower confidence for fallback
+        String modelVersion = "fallback-rule-based-v1";
         
         // Simple placeholder logic based on text content
         if (text != null && !text.isEmpty()) {
@@ -52,17 +92,21 @@ public class SentimentService {
             }
         }
         
-        // Save to database
-        SentimentAnalysisEntity entity = new SentimentAnalysisEntity();
-        entity.setContentId(contentId);
-        entity.setText(text);
-        entity.setSentimentScore(sentimentScore);
-        entity.setSentimentLabel(sentimentLabel);
-        entity.setConfidence(confidence);
-        entity.setModelVersion(modelVersion);
-        entity.setAnalyzedAt(OffsetDateTime.now());
-        
-        SentimentAnalysisEntity saved = sentimentAnalysisRepository.save(entity);
+        SentimentAnalysisEntity saved = saveAnalysisResult(
+                text,
+                contentId,
+                sentimentScore,
+                sentimentLabel,
+                confidence,
+                modelVersion,
+                AnalysisType.SENTIMENT,
+                "GLOBAL",
+                null,
+                "fallback:rule-based",
+                "sentiment",
+                null,
+                null
+        );
         
         return new SentimentAnalysisResponse(
                 contentId,
@@ -72,6 +116,52 @@ public class SentimentService {
                 modelVersion,
                 saved.getId()
         );
+    }
+
+    private SentimentAnalysisEntity saveAnalysisResult(
+            String text,
+            String contentId,
+            double score,
+            String label,
+            double confidence,
+            String version,
+            AnalysisType analysisType,
+            String aspect,
+            String trueLabel,
+            String source,
+            String modelType,
+            String trainingJobId,
+            List<String> tags
+    ) {
+        SentimentAnalysisEntity entity = new SentimentAnalysisEntity();
+        entity.setContentId(contentId);
+        entity.setText(text);
+        entity.setSentimentScore(score);
+        entity.setSentimentLabel(label);
+        entity.setConfidence(confidence);
+        entity.setModelVersion(version);
+        entity.setAnalyzedAt(OffsetDateTime.now());
+        entity.setAnalysisType(analysisType.name());
+        entity.setAspect(aspect);
+        entity.setTrueLabel(trueLabel);
+        entity.setSource(source);
+        entity.setModelType(modelType);
+        entity.setTrainingJobId(trainingJobId);
+        entity.setTagsJson(writeTagsJson(tags));
+        
+        return sentimentAnalysisRepository.save(entity);
+    }
+
+    private String writeTagsJson(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(tags);
+        } catch (JsonProcessingException e) {
+            log.warn("Failed to serialize tags to JSON: {}", e.getMessage());
+            return null;
+        }
     }
     
     /**

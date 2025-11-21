@@ -67,6 +67,49 @@ services:
       retries: 5
       start_period: 15s
 
+  consul-kv-init:
+    image: curlimages/curl:8.5.0
+    container_name: consul-kv-init
+    depends_on:
+      consul:
+        condition: service_healthy
+    environment:
+      CONSUL_HTTP_ADDR: http://consul:8500
+      CONSUL_HTTP_TOKEN: ${CONSUL_HTTP_TOKEN:-}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY:-}
+      CHANGEDETECTION_API_KEY: ${CHANGEDETECTION_API_KEY:-}
+    networks:
+      - spring-network
+    volumes:
+      - ./init-scripts/consul:/scripts:ro
+    restart: "no"
+    command:
+      - /bin/sh
+      - /scripts/seed-kv.sh
+
+  changedetection-seed:
+    image: alpine:latest
+    container_name: changedetection-seed
+    depends_on:
+      changedetection:
+        condition: service_started
+    environment:
+      CHANGEDETECTION_BASE_URL: ${CHANGEDETECTION_BASE_URL:-http://changedetection:5000}
+      CHANGEDETECTION_API_KEY: ${CHANGEDETECTION_API_KEY:-}
+      CHANGEDETECTION_DEFAULT_TAG: ${CHANGEDETECTION_DEFAULT_TAG:-news}
+    networks:
+      - spring-network
+    volumes:
+      - ./init-scripts/changedetection:/scripts:ro
+      - changedetection-data:/datastore:ro
+    restart: "no"
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache curl jq
+        /scripts/seed-watches.sh
+
   crawl4ai:
     image: capstone/crawl4ai:local
     build:
@@ -225,6 +268,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      consul-kv-init:
+        condition: service_completed_successfully
+      changedetection-seed:
+        condition: service_completed_successfully
     networks:
       - spring-network
     healthcheck:
@@ -340,14 +387,128 @@ services:
     container_name: swagger-ui
     restart: unless-stopped
     volumes:
-      - ./openapi-consolidated.yaml:/usr/share/nginx/html/openapi.yaml:ro
+      # Swagger UI 초기화 스크립트가 /usr/share/nginx/html/openapi.yaml로 사본을 만들도록,
+      # 호스트 스펙 파일은 별도의 경로(/openapi/openapi.yaml)에 마운트합니다.
+      - ./openapi-consolidated.yaml:/openapi/openapi.yaml:ro
     environment:
-      SWAGGER_JSON: /usr/share/nginx/html/openapi.yaml
+      # 컨테이너 내부의 스펙 위치를 원본(/openapi/openapi.yaml)로 지정
+      SWAGGER_JSON: /openapi/openapi.yaml
     ports:
       - "9000:8080"
     depends_on:
       api-gateway:
         condition: service_started
+    networks:
+      - spring-network
+
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io
+    container_name: changedetection
+    restart: unless-stopped
+    volumes:
+      - changedetection-data:/datastore
+    environment:
+      - PLAYWRIGHT_DRIVER_URL=ws://playwright:3000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - playwright
+    networks:
+      - spring-network
+
+  playwright:
+    image: browserless/chrome
+    container_name: playwright
+    restart: unless-stopped
+    expose:
+      - "3000"
+    networks:
+      - spring-network
+
+  chromadb:
+    image: chromadb/chroma
+    container_name: chromadb
+    restart: unless-stopped
+    volumes:
+      - chroma-data:/chroma/.chroma/index
+    expose:
+      - "8000"
+    networks:
+      - spring-network
+
+  embedding-server:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8
+    container_name: embedding-server
+    restart: unless-stopped
+    command: --model-id sentence-transformers/all-MiniLM-L6-v2
+    volumes:
+      - embedding-data:/data
+    expose:
+      - "80"
+    networks:
+      - spring-network
+
+  opencode:
+    build:
+      context: ./services/AI_agent_server
+      dockerfile: ai-serve.Dockerfile
+    image: opencode-serve:local
+    container_name: opencode
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      OPENCODE_HOST: 0.0.0.0
+      OPENCODE_PORT: 7012
+      VECTOR_DB_HOST: chromadb
+      VECTOR_DB_PORT: 8000
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GH_TOKEN: ${GH_TOKEN:-}
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - |
+        if [ -f /home/appuser/.config/opencode/secrets.sh ]; then
+          if [ -z "${GITHUB_TOKEN:-}" ] || [ -z "${GH_TOKEN:-}" ]; then
+            . /home/appuser/.config/opencode/secrets.sh
+          fi
+        fi
+        exec "$0" "$@"
+    command:
+      - /app/node_modules/.bin/opencode
+      - serve
+      - --hostname
+      - 0.0.0.0
+      - --port
+      - "7012"
+    volumes:
+      - opencode-data:/var/lib/opencode
+      - opencode-logs:/var/log/opencode
+      - opencode-config:/home/appuser/.config/opencode
+    depends_on:
+      chromadb:
+        condition: service_started
+      embedding-server:
+        condition: service_started
+    ports:
+      - "7015:7012"
+    networks:
+      - spring-network
+
+  auto-chat-proxy:
+    image: node:20-alpine
+    container_name: auto-chat-proxy
+    working_dir: /app
+    volumes:
+      - ./services/AI_agent_server:/app:ro
+    environment:
+      OPENCODE_BASE: http://opencode:7012
+      PROXY_PORT: 7016
+    command: ["node", "auto-chat-proxy.js"]
+    depends_on:
+      opencode:
+        condition: service_started
+    ports:
+      - "7016:7016"
     networks:
       - spring-network
 
@@ -361,3 +522,9 @@ volumes:
   redis-spring-data:
   consul-spring-data:
   consul-spring-config:
+  changedetection-data:
+  chroma-data:
+  embedding-data:
+  opencode-data:
+  opencode-logs:
+  opencode-config:

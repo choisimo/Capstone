@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "trend_data")
+@Table(name = "trend_data", schema = "analysis")
 public class TrendDataEntity {
     
     @Id

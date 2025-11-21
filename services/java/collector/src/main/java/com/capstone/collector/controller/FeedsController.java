@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/feeds")
@@ -24,7 +25,7 @@ public class FeedsController {
     }
 
     @PostMapping("/fetch/{feed_id}")
-    public FeedFetchResult fetch(@PathVariable("feed_id") Long feedId) {
+    public FeedFetchResult fetch(@PathVariable("feed_id") UUID feedId) {
         return feedService.fetchFeed(feedId);
     }
 

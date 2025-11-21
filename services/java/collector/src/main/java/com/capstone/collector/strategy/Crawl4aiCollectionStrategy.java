@@ -94,14 +94,11 @@ public class Crawl4aiCollectionStrategy implements CollectionStrategy {
             e.setTitle(null);
             e.setContent(trimmed);
             e.setUrl(source.getUrl());
-            e.setPublishedDate(null);
+            e.setPublishedAt(null);
             e.setCollectedAt(OffsetDateTime.now(ZoneOffset.UTC));
             e.setContentHash(sha256(trimmed));
-            e.setMetadataJson(null);
+            e.setMetadata(null);
             e.setProcessed(false);
-            e.setHttpOk(true);
-            e.setHasContent(true);
-            e.setDuplicate(false);
 
             dataRepo.save(e);
             return 1;
