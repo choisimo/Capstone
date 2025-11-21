@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 
 @Entity
-@Table(name = "ml_models")
+@Table(name = "ml_models", schema = "analysis")
 public class MLModelEntity {
     
     @Id

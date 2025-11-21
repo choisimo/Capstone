@@ -2,16 +2,17 @@ package com.capstone.collector.entity;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(name = "collection_jobs")
+@Table(name = "collection_jobs", schema = "pension")
 public class CollectionJobEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Column(nullable = false, name = "source_id")
-    private Long sourceId;
+    @Column(name = "source_id")
+    private UUID sourceId;
 
     @Column(length = 50, nullable = false)
     private String status = "pending";
@@ -31,19 +32,19 @@ public class CollectionJobEntity {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public Long getSourceId() {
+    public UUID getSourceId() {
         return sourceId;
     }
 
-    public void setSourceId(Long sourceId) {
+    public void setSourceId(UUID sourceId) {
         this.sourceId = sourceId;
     }
 

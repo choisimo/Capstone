@@ -24,7 +24,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
@@ -68,6 +68,8 @@ analysis:
     default-provider: ${AI_SERVE_DEFAULT_PROVIDER:openai}
     default-model: ${AI_SERVE_DEFAULT_MODEL:gpt-4.1}
     auth-token: ${AI_SERVE_AUTH_TOKEN:}
+  colab:
+    api-key: ${COLAB_API_KEY:capstone-secret-api-key}
 
 ---
 spring:
@@ -76,7 +78,7 @@ spring:
       on-profile: dev
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
 
 logging:
@@ -107,7 +109,7 @@ spring:
       on-profile: prod
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+      ddl-auto: validate
     show-sql: false
 
 logging:

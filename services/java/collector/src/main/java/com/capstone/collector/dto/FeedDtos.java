@@ -2,6 +2,7 @@ package com.capstone.collector.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public class FeedDtos {
     
@@ -41,7 +42,7 @@ public class FeedDtos {
     ) {}
     
     public record FeedSummary(
-            Long id,
+            UUID id,
             String name,
             String url,
             String type,

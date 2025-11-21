@@ -13,6 +13,7 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 -- =====================================================
 CREATE SCHEMA IF NOT EXISTS pension;
 CREATE SCHEMA IF NOT EXISTS osint;
+CREATE SCHEMA IF NOT EXISTS analysis;
 
 -- =====================================================
 -- PENSION SCHEMA (Domain Specific Data)
@@ -41,19 +42,6 @@ CREATE TABLE IF NOT EXISTS pension.collected_data (
     published_at TIMESTAMP WITH TIME ZONE,
     collected_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     metadata JSONB DEFAULT '{}'
-);
-
--- Sentiment Analysis Results
-CREATE TABLE IF NOT EXISTS pension.sentiment_analysis (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    data_id UUID REFERENCES pension.collected_data(id),
-    sentiment VARCHAR(20) NOT NULL, -- positive, negative, neutral
-    sentiment_score DECIMAL(3,2), -- -1.0 to 1.0
-    confidence FLOAT,
-    aspects JSONB DEFAULT '{}',
-    keywords TEXT[],
-    model_version VARCHAR(50),
-    analyzed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- User Personas
@@ -219,14 +207,66 @@ CREATE TABLE IF NOT EXISTS osint.worker_nodes (
 );
 
 -- =====================================================
+-- ANALYSIS SCHEMA
+-- =====================================================
+
+-- Unified sentiment/ABSA record storage
+CREATE TABLE IF NOT EXISTS analysis.sentiment_analysis (
+    id BIGSERIAL PRIMARY KEY,
+    content_id VARCHAR(255) NOT NULL,
+    text TEXT,
+    sentiment_score DOUBLE PRECISION NOT NULL,
+    sentiment_label VARCHAR(50) NOT NULL,
+    confidence DOUBLE PRECISION NOT NULL,
+    model_version VARCHAR(50),
+    analysis_type VARCHAR(50) NOT NULL DEFAULT 'SENTIMENT',
+    aspect VARCHAR(100) NOT NULL DEFAULT 'GLOBAL',
+    true_label VARCHAR(50),
+    source VARCHAR(100),
+    tags_json JSONB,
+    model_type VARCHAR(50),
+    training_job_id VARCHAR(100),
+    analyzed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE IF NOT EXISTS analysis.training_jobs (
+    job_id VARCHAR(100) PRIMARY KEY,
+    task_type VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    model_version VARCHAR(100),
+    model_path VARCHAR(500),
+    metrics_json TEXT,
+    error_message TEXT,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS analysis.ml_models (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    model_type VARCHAR(50) NOT NULL,
+    file_path VARCHAR(500),
+    is_active BOOLEAN NOT NULL DEFAULT FALSE,
+    metrics JSONB,
+    hyperparameters JSONB,
+    training_job_id VARCHAR(100),
+    training_status VARCHAR(20),
+    training_progress INTEGER,
+    trained_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE
+);
+
+-- =====================================================
 -- INDEXES
 -- =====================================================
 
 -- Pension Schema Indexes
 CREATE INDEX idx_collected_data_source ON pension.collected_data(source_id);
 CREATE INDEX idx_collected_data_published ON pension.collected_data(published_at DESC);
-CREATE INDEX idx_sentiment_data ON pension.sentiment_analysis(data_id);
-CREATE INDEX idx_sentiment_analyzed ON pension.sentiment_analysis(analyzed_at DESC);
 CREATE INDEX idx_persona_user ON pension.user_personas(user_identifier);
 CREATE INDEX idx_alert_rule ON pension.alert_logs(rule_id);
 CREATE INDEX idx_content_search ON pension.collected_data USING GIN(to_tsvector('korean', content));
@@ -242,6 +282,18 @@ CREATE INDEX idx_osint_tasks_type ON osint.tasks(task_type);
 CREATE INDEX idx_osint_tasks_status ON osint.tasks(status);
 CREATE INDEX idx_osint_tasks_plan ON osint.tasks(plan_id);
 CREATE INDEX idx_osint_tasks_created_at ON osint.tasks(created_at);
+
+-- Analysis Schema Indexes
+CREATE INDEX IF NOT EXISTS idx_sentiment_analysis_content ON analysis.sentiment_analysis(content_id);
+CREATE INDEX IF NOT EXISTS idx_sentiment_analysis_task ON analysis.sentiment_analysis(analysis_type, aspect);
+CREATE INDEX IF NOT EXISTS idx_sentiment_analysis_analyzed_at ON analysis.sentiment_analysis(analyzed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_training_jobs_status ON analysis.training_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_ml_models_type_active ON analysis.ml_models(model_type, is_active);
+
+-- Full text search on stored text (optional but useful)
+CREATE INDEX IF NOT EXISTS idx_sentiment_analysis_text_tsv
+    ON analysis.sentiment_analysis
+    USING GIN (to_tsvector('simple', COALESCE(text, '')));
 
 -- =====================================================
 -- TRIGGERS (Updated At)
@@ -262,6 +314,135 @@ CREATE TRIGGER update_osint_keywords_modtime BEFORE UPDATE ON osint.keywords FOR
 CREATE TRIGGER update_osint_sources_modtime BEFORE UPDATE ON osint.sources FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_osint_tasks_modtime BEFORE UPDATE ON osint.tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_osint_worker_nodes_modtime BEFORE UPDATE ON osint.worker_nodes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE OR REPLACE FUNCTION analysis.touch_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sentiment_analysis_updated
+    BEFORE UPDATE ON analysis.sentiment_analysis
+    FOR EACH ROW
+    EXECUTE FUNCTION analysis.touch_updated_at();
+
+CREATE TRIGGER trg_training_jobs_updated
+    BEFORE UPDATE ON analysis.training_jobs
+    FOR EACH ROW
+    EXECUTE FUNCTION analysis.touch_updated_at();
+
+CREATE TRIGGER trg_ml_models_updated
+    BEFORE UPDATE ON analysis.ml_models
+    FOR EACH ROW
+    EXECUTE FUNCTION analysis.touch_updated_at();
+
+-- ============================================================
+-- [ABSA & PERSONA SYSTEM] FULL SCHEMA DEFINITION
+-- ============================================================
+
+-- 1. 필수 확장 기능 (파일 상단에 이미 있다면 생략 가능)
+CREATE EXTENSION IF NOT EXISTS "vector";
+
+-- 2. Personas (Core Entity) - 완전한 정의
+CREATE TABLE IF NOT EXISTS personas (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255),
+    description TEXT,
+    
+    -- DPSP Extended Columns (Real Data Lineage)
+    external_id VARCHAR(255),
+    source_url TEXT,
+    summary TEXT,
+    psychology_traits JSONB,
+    communication_style JSONB,
+    last_profiled_at TIMESTAMP WITH TIME ZONE,
+    embedding_collection_id VARCHAR(255),
+    
+    -- Audit Fields
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 인덱스: 이름 조회 및 외부 ID 조회용
+CREATE INDEX IF NOT EXISTS idx_personas_name ON personas(name);
+CREATE INDEX IF NOT EXISTS idx_personas_external_id ON personas(external_id);
+
+
+-- 3. Persona Memories (RAG Storage - Real Data Only)
+CREATE TABLE IF NOT EXISTS persona_memories (
+    id BIGSERIAL PRIMARY KEY,
+    persona_id VARCHAR(255) NOT NULL,
+    content_text TEXT NOT NULL,             -- 실제 수집된 원문
+    embedding VECTOR(1536),                 -- text-embedding-3-small
+    metadata JSONB,                         -- { "date": "...", "likes": 0 }
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_persona_memories_persona 
+        FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE CASCADE
+);
+
+-- 벡터 검색 인덱스 (HNSW)
+CREATE INDEX IF NOT EXISTS persona_memories_embedding_idx 
+    ON persona_memories USING hnsw (embedding vector_cosine_ops);
+
+
+-- 4. Persona Simulations (Simulation Results)
+CREATE TABLE IF NOT EXISTS persona_simulations (
+    id BIGSERIAL PRIMARY KEY,
+    persona_id VARCHAR(255) NOT NULL,
+    scenario_description TEXT NOT NULL,
+    decision VARCHAR(50),
+    reasoning TEXT,
+    simulated_response TEXT,
+    model_used VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_persona_simulations_persona 
+        FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE CASCADE
+);
+
+
+-- 5. ABSA Analyses (기존 분석 결과 저장용)
+-- ABSAAnalysisEntity와 매핑 (content_id, aspects, aspect_sentiments 등)
+CREATE TABLE IF NOT EXISTS absa_analyses (
+    id VARCHAR(255) PRIMARY KEY,
+    content_id VARCHAR(255),
+    text TEXT,
+    aspects JSONB,
+    aspect_sentiments JSONB,
+    overall_sentiment DOUBLE PRECISION,
+    confidence_score DOUBLE PRECISION,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_absa_content_id
+    ON absa_analyses(content_id);
+
+CREATE INDEX IF NOT EXISTS idx_absa_created_at
+    ON absa_analyses(created_at);
+
+
+-- 6. Aspect Models (기존 모델 관리용)
+-- AspectModelEntity와 매핑 (description, keywords, model_version, is_active 등)
+CREATE TABLE IF NOT EXISTS aspect_models (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    keywords JSONB,
+    model_version VARCHAR(50),
+    is_active INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_aspect_model_name
+    ON aspect_models(name);
+
+CREATE INDEX IF NOT EXISTS idx_aspect_model_is_active
+    ON aspect_models(is_active);
 
 -- =====================================================
 -- SEED DATA

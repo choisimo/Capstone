@@ -2,6 +2,7 @@ package com.capstone.absa.service;
 
 import com.capstone.absa.dto.AnalysisDtos.*;
 import com.capstone.absa.entity.ABSAAnalysisEntity;
+import com.capstone.absa.infrastructure.ColabClient;
 import com.capstone.absa.repository.ABSAAnalysisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +16,9 @@ import java.util.*;
 
 /**
  * ABSA 분석 서비스
- * 
+ *
  * 속성 기반 감성 분석(ABSA)을 수행하는 비즈니스 로직을 처리합니다.
- * Reference: BACKEND-ABSA-SERVICE/app/routers/analysis.py
+ * Colab ML 모델을 호출하며, 실패 시 Rule-based 로직으로 Fallback 처리합니다.
  */
 @Service
 @RequiredArgsConstructor
@@ -26,18 +27,62 @@ import java.util.*;
 public class AnalysisService {
 
     private final ABSAAnalysisRepository analysisRepository;
+    private final ColabClient colabClient;
 
     /**
      * ABSA 분석 수행
-     * 
+     *
      * 텍스트와 속성 리스트를 받아 각 속성별 감성을 분석합니다.
-     * 
+     *
      * @param request 분석 요청
      * @return 분석 결과
      */
     @Transactional
     public AnalyzeResponse analyzeABSA(AnalyzeRequest request) {
-        log.info("Analyzing ABSA for text: {}", request.text().substring(0, Math.min(100, request.text().length())));
+        try {
+            // 1. Try Colab ML Model
+            AnalyzeResponse response = colabClient.analyzeABSA(request);
+            
+            // Save result to DB (ColabClient doesn't save to DB, so we do it here if needed,
+            // but usually we might want to save the response from Colab directly if it contains everything)
+            // However, the current ColabClient returns AnalyzeResponse which is a DTO.
+            // We should probably save the result to our DB for history tracking.
+            
+            saveAnalysisResult(response, request.text());
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.warn("Colab analysis failed, falling back to rule-based logic: {}", e.getMessage());
+            return analyzeABSAFallback(request);
+        }
+    }
+
+    private void saveAnalysisResult(AnalyzeResponse response, String fullText) {
+        Map<String, Map<String, Object>> aspectSentimentsMap = new HashMap<>();
+        response.aspectSentiments().forEach((key, value) -> {
+            Map<String, Object> sentimentMap = new HashMap<>();
+            sentimentMap.put("sentiment_score", value.sentimentScore());
+            sentimentMap.put("sentiment_label", value.sentimentLabel());
+            sentimentMap.put("confidence", value.confidence());
+            aspectSentimentsMap.put(key, sentimentMap);
+        });
+
+        ABSAAnalysisEntity analysis = ABSAAnalysisEntity.builder()
+            .id(UUID.randomUUID().toString()) // Or use response.analysisId() if compatible
+            .contentId(response.contentId())
+            .text(fullText.substring(0, Math.min(1000, fullText.length())))
+            .aspects(response.aspectsAnalyzed())
+            .aspectSentiments(aspectSentimentsMap)
+            .overallSentiment(response.overallSentiment().score())
+            .confidenceScore(response.confidence())
+            .build();
+        
+        analysisRepository.save(analysis);
+    }
+
+    private AnalyzeResponse analyzeABSAFallback(AnalyzeRequest request) {
+        log.info("Analyzing ABSA (Fallback) for text: {}", request.text().substring(0, Math.min(100, request.text().length())));
         
         String text = request.text();
         String contentId = request.contentId() != null ? request.contentId() : UUID.randomUUID().toString();

@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 
 @Entity
-@Table(name = "reports")
+@Table(name = "reports", schema = "analysis")
 public class ReportEntity {
     
     @Id
